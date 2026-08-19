@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,7 +16,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data } = await api.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData);
+      // Usamos directamente la ruta relativa gracias a la baseURL del interceptor
+      const { data } = await api.post('/auth/login', formData);
 
       // Guardar información del usuario y token en localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
@@ -80,16 +81,28 @@ export default function Login() {
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
                 <Lock size={18} />
               </div>
+              
+              {/* Input con tipo dinámico según el estado showPassword */}
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={formData.password}
                 placeholder="••••••••"
-                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
+                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
+
+              {/* Botón interactivo para alternar la visibilidad */}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
+
           <div className="flex justify-end mt-1">
             <Link to="/forgot-password" className="text-xs text-gray-400 hover:text-brandOrange transition-colors">
               ¿Olvidaste tu contraseña?
