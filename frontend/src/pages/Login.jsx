@@ -20,7 +20,7 @@ export default function Login() {
 
       // Guardar información del usuario y token en localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
-      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('token', data.token);
 
       // Redireccionar según el rol
       if (data.role === 'admin') {
