@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const api = require('../api/axios'); // O puedes usar axios directamente
+const axios = require('axios'); // Usamos el paquete estándar de Node
 
 // Obtener todos los usuarios (excepto el propio admin)
 exports.getUsers = async (req, res) => {
@@ -70,15 +70,14 @@ exports.approveUser = async (req, res) => {
       </div>
     `;
 
-    // Petición HTTP POST a la API de Brevo (evita bloqueos de puertos en Render)
+    // Petición HTTP POST a la API de Brevo
     try {
-      const axios = require('axios');
       await axios.post(
         'https://api.brevo.com/v3/smtp/email',
         {
           sender: { 
             name: "El Rincón del Trading", 
-            email: process.env.SENDER_EMAIL // El correo verificado que usas en Brevo
+            email: process.env.SENDER_EMAIL 
           },
           to: [{ email: user.email, name: user.name || 'Trader' }],
           subject: '¡Tu acceso ha sido aprobado! - El Rincón del Trading',
@@ -110,7 +109,7 @@ exports.deleteUser = async (req, res) => {
       await user.deleteOne();
       res.json({ message: 'Usuario eliminado' });
     } else {
-      res.status(404).json({ message: 'Usuario non encontrado' });
+      res.status(404).json({ message: 'Usuario no encontrado' });
     }
   } catch (error) {
     res.status(500).json({ message: 'Error eliminando usuario' });
