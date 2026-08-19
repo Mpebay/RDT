@@ -56,7 +56,8 @@ exports.registerUser = async (req, res, next) => {
   try {
     const validation = registerSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMessage = validation.error.errors.map(e => e.message).join(', ');
+      // Usamos encadenamiento opcional (?.) para evitar que falle si errors no existe
+      const errorMessage = validation.error?.errors?.map(e => e.message).join(', ') || 'Datos de registro inválidos';
       const error = new Error(errorMessage);
       error.statusCode = 400;
       return next(error);
@@ -104,7 +105,7 @@ exports.loginUser = async (req, res, next) => {
   try {
     const validation = loginSchema.safeParse(req.body);
     if (!validation.success) {
-      const errorMessage = validation.error.errors.map(e => e.message).join(', ');
+      const errorMessage = validation.error?.errors?.map(e => e.message).join(', ') || 'Credenciales inválidas';
       const error = new Error(errorMessage);
       error.statusCode = 400;
       return next(error);
