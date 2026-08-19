@@ -2,10 +2,12 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const { Resend } = require('resend');
+const SibApiV3Sdk = require('@getbrevo/brevo');
 
-// Inicializar Resend con tu clave de API
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Configurar Brevo con tu API Key
+let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+let apiKey = apiInstance.authentications['apiKey'];
+apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -25,15 +27,20 @@ exports.registerUser = async (req, res) => {
 
     if (!isAdmin) {
       try {
-        await resend.emails.send({
-          from: 'Academia <onboarding@resend.dev>',
-          to: process.env.ADMIN_EMAIL,
-          subject: 'Nuevo Registro - El Rincón del Trading',
-          html: `<h3>Nuevo usuario registrado</h3>
-                 <p><strong>Nombre:</strong> ${user.name}</p>
-                 <p><strong>Email:</strong> ${user.email}</p>
-                 <p>Ingresa al panel de administración para autorizarlo.</p>`
-        });
+        let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        sendSmtpEmail.subject = 'Nuevo Registro - El Rincón del Trading';
+        sendSmtpEmail.htmlContent = `
+          <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+            <h3>Nuevo usuario registrado</h3>
+            <p><strong>Nombre:</strong> ${user.name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p>Ingresa al panel de administración para autorizarlo.</p>
+          </div>
+        `;
+        sendSmtpEmail.sender = { name: "Academia", email: process.env.SENDER_EMAIL };
+        sendSmtpEmail.to = [{ email: process.env.ADMIN_EMAIL }];
+
+        await apiInstance.sendTransacEmail(sendSmtpEmail);
       } catch (err) {
         console.error('⚠️ No se pudo enviar el correo al administrador:', err.message);
       }
@@ -95,29 +102,26 @@ exports.forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    const { error } = await resend.emails.send({
-      from: 'Academia <onboarding@resend.dev>',
-      to: user.email,
-      subject: 'Recuperación de Contraseña - El Rincón del Trading',
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
-          <h2 style="color: #ff5a00;">Solicitud de restablecimiento</h2>
-          <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente botón para continuar:</p>
-          <a href="${resetUrl}" style="background-color: #ff5a00; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 15px;">Restablecer Contraseña</a>
-          <p style="margin-top: 20px; font-size: 12px; color: #777;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
-        </div>
-      `
-    });
+    let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.subject = 'Recuperación de Contraseña - El Rincón del Trading';
+    sendSmtpEmail.htmlContent = `
+      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+        <h2 style="color: #ff5a00;">Solicitud de restablecimiento</h2>
+        <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente botón para continuar:</p>
+        <a href="${resetUrl}" style="background-color: #ff5a00; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 15px;">Restablecer Contraseña</a>
+        <p style="margin-top: 20px; font-size: 12px; color: #777;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
+      </div>
+    `;
+    sendSmtpEmail.sender = { name: "Academia", email: process.env.SENDER_EMAIL };
+    sendSmtpEmail.to = [{ email: user.email }];
 
-    if (error) {
-      console.error('⚠️ No se pudo enviar el correo de recuperación:', error);
-      return res.status(500).json({ message: 'Error al enviar el correo electrónico' });
-    }
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
 
     res.json({ message: 'Se ha enviado un correo con las instrucciones.' });
 
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    console.error('⚠️ Error enviando correo con Brevo:', error);
+    res.status(500).json({ message: 'Error al enviar el correo electrónico' });
   }
 };
 
