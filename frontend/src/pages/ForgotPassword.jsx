@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
+import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -16,7 +17,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
+      const { data } = await api.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
       setMessage(data.message);
     } catch (err) {
       setError(err.response?.data?.message || 'Ocurrió un error al enviar el correo');

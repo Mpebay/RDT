@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Lock } from 'lucide-react';
+import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -24,7 +25,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`, { password });
+      const { data } = await api.post(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`, { password });
       setMessage(data.message);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {

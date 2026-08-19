@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, XCircle, Trash2, Users, Video, Plus } from 'lucide-react';
+import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
@@ -27,21 +28,21 @@ export default function AdminDashboard() {
   // -- LOGICA DE ALUMNOS --
   const fetchUsers = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/admin/users`, config);
+      const { data } = await api.get(`${import.meta.env.VITE_API_URL}/admin/users`);
       setUsers(data);
     } catch (error) { console.error('Error fetching users', error); }
   };
 
   const approveHandler = async (id) => {
     if (window.confirm('¿Aprobar a este usuario?')) {
-      await axios.put(`${import.meta.env.VITE_API_URL}/admin/users/${id}/approve`, {}, config);
+      await api.put(`${import.meta.env.VITE_API_URL}/admin/users/${id}/approve`, {}, config);
       fetchUsers();
     }
   };
 
   const deleteUserHandler = async (id) => {
     if (window.confirm('¿Eliminar usuario?')) {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/admin/users/${id}`, config);
+      await api.delete(`${import.meta.env.VITE_API_URL}/admin/users/${id}`, config);
       fetchUsers();
     }
   };
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
   // -- LOGICA DE MODULOS --
   const fetchModules = async () => {
     try {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/courses/modules`, config);
+      const { data } = await api.get(`${import.meta.env.VITE_API_URL}/courses/modules`, config);
       setModules(data);
     } catch (error) { console.error('Error fetching modules', error); }
   };
@@ -57,7 +58,7 @@ export default function AdminDashboard() {
   const createModuleHandler = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${import.meta.env.VITE_API_URL}/courses/modules`, newModule, config);
+      await api.post(`${import.meta.env.VITE_API_URL}/courses/modules`, newModule, config);
       setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante' });
       fetchModules();
       alert('Módulo creado con éxito');
@@ -66,7 +67,7 @@ export default function AdminDashboard() {
 
   const deleteModuleHandler = async (id) => {
     if (window.confirm('¿Eliminar módulo?')) {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/courses/modules/${id}`, config);
+      await api.delete(`${import.meta.env.VITE_API_URL}/courses/modules/${id}`, config);
       fetchModules();
     }
   };

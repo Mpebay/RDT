@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
+import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -15,10 +16,11 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData);
+      const { data } = await api.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData);
 
       // Guardar información del usuario y token en localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
+      localStorage.setItem('token', res.data.token);
 
       // Redireccionar según el rol
       if (data.role === 'admin') {

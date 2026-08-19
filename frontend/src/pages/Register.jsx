@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -10,7 +11,7 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData);
+      const res = await api.post(`${import.meta.env.VITE_API_URL}/auth/register`, formData);
       localStorage.setItem('userInfo', JSON.stringify(res.data));
       setMessage('¡Registro exitoso! Un administrador revisará tu solicitud para darte acceso.');
       setTimeout(() => navigate('/'), 3000);

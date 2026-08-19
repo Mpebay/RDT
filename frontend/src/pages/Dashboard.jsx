@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Clock, PlayCircle, Lock } from 'lucide-react';
+import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function Dashboard() {
   const [userInfo, setUserInfo] = useState(JSON.parse(localStorage.getItem('userInfo')));
@@ -13,7 +14,7 @@ export default function Dashboard() {
     const checkApprovalStatus = async () => {
       try {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/auth/profile`, config);
+        const { data } = await api.get(`${import.meta.env.VITE_API_URL}/auth/profile`, config);
         
         if (data.isApproved !== userInfo.isApproved) {
           const updatedUser = { ...data, token: userInfo.token };
@@ -40,7 +41,7 @@ export default function Dashboard() {
       const fetchModules = async () => {
         try {
           const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-          const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/courses/modules`, config);
+          const { data } = await api.get(`${import.meta.env.VITE_API_URL}/courses/modules`, config);
           setModules(data);
         } catch (error) {
           console.error("Error cargando módulos", error);
