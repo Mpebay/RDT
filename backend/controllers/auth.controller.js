@@ -52,15 +52,23 @@ const loginSchema = z.object({
   password: z.string().min(1, 'La contraseña es obligatoria')
 });
 
+// Función robusta para extraer el mensaje exacto de Zod
+const parseZodError = (error) => {
+  console.log('🔍 Estructura del error Zod:', JSON.stringify(error, null, 2));
+  const issuesList = error.errors || error.issues;
+  if (Array.isArray(issuesList) && issuesList.length > 0) {
+    return issuesList.map(err => err.message).join('. ');
+  }
+  return error.message || 'Datos de registro inválidos';
+};
+
 exports.registerUser = async (req, res, next) => {
   try {
     const validation = registerSchema.safeParse(req.body);
     
     if (!validation.success) {
-      // Usamos encadenamiento opcional (?.) para evitar cualquier fallo de lectura
-      const specificMessage = validation.error?.errors?.map(err => err.message).join('. ') || 'Datos de registro inválidos';
-      
-      const error = new Error(specificMessage);
+      const errorMessage = parseZodError(validation.error);
+      const error = new Error(errorMessage);
       error.statusCode = 400;
       return next(error);
     }
@@ -108,8 +116,8 @@ exports.loginUser = async (req, res, next) => {
     const validation = loginSchema.safeParse(req.body);
     
     if (!validation.success) {
-      const specificMessage = validation.error?.errors?.map(err => err.message).join('. ') || 'Credenciales inválidas';
-      const error = new Error(specificMessage);
+      const errorMessage = parseZodError(validation.error);
+      const error = new Error(errorMessage);
       error.statusCode = 400;
       return next(error);
     }
