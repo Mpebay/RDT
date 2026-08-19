@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Award } from 'lucide-react';
+import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown } from 'lucide-react';
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -12,7 +12,7 @@ export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 relative overflow-hidden py-16">
       
-      {/* Glow de fondo cenital (Efecto de luz moderno) */}
+      {/* Glow de fondo cenital */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-brandOrange/10 blur-[140px] pointer-events-none rounded-full" />
 
       {/* Hero Section */}
@@ -25,6 +25,7 @@ export default function Home() {
         </h1>
         <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
           Únete a la academia exclusiva donde la teoría se convierte en rentabilidad. 
+          Regístrate y espera la aprobación para acceder a nuestro contenido premium.
         </p>
         <Link 
           to="/register" 
@@ -34,12 +35,47 @@ export default function Home() {
         </Link>
       </div>
 
-      {/* Barra de Métricas / Social Proof */}
+      {/* Barra de Métricas */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-5xl w-full z-10 border-y border-white/5 py-8 bg-darkCard/40 backdrop-blur-sm rounded-2xl px-6">
         <MetricItem number="+500" label="Traders Activos" />
         <MetricItem number="99%" label="Análisis Institucional" />
         <MetricItem number="24/7" label="Comunidad Privada" />
-        <MetricItem number="100%" label="Estrategia Verificada" />
+        <MetricItem number="100%" label="Estrategias Verificadas" />
+      </div>
+
+      {/* Sección de Brókers / Aliados Estratégicos con Logos Locales */}
+      <div className="mt-24 max-w-3xl w-full z-10 text-center">
+        <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-8">
+          Brókers y Aliados Estratégicos Asociados
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
+          
+          {/* Bróker 1: Libertex */}
+          <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
+            <div className="h-12 flex items-center justify-center mb-3">
+              <img 
+                src="/src/assets/Captura de pantalla 2026-08-19 195730.png" 
+                alt="Vantage Markets" 
+                className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
+              />
+            </div>
+            <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Vantage Markets</span>
+          </div>
+
+          {/* Bróker 2: Vantage */}
+          <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
+            <div className="h-12 flex items-center justify-center mb-3">
+              <img 
+                src="/src/assets/Captura de pantalla 2026-08-19 200242.png" 
+                alt="Libertex" 
+                className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
+              />
+            </div>
+            <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Libertex</span>
+            
+          </div>
+
+        </div>
       </div>
 
       {/* Características Principales */}
