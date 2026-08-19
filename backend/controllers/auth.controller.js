@@ -57,10 +57,10 @@ exports.registerUser = async (req, res, next) => {
     const validation = registerSchema.safeParse(req.body);
     
     if (!validation.success) {
-      // Extraemos el mensaje exacto de Zod (ej: "La contraseña debe tener al menos 6 caracteres")
-      const specificMessage = validation.error.errors.map(err => err.message).join('. ');
+      // Usamos encadenamiento opcional (?.) para evitar cualquier fallo de lectura
+      const specificMessage = validation.error?.errors?.map(err => err.message).join('. ') || 'Datos de registro inválidos';
       
-      const error = new Error(specificMessage || 'Datos de registro inválidos');
+      const error = new Error(specificMessage);
       error.statusCode = 400;
       return next(error);
     }
@@ -108,8 +108,8 @@ exports.loginUser = async (req, res, next) => {
     const validation = loginSchema.safeParse(req.body);
     
     if (!validation.success) {
-      const specificMessage = validation.error.errors.map(err => err.message).join('. ');
-      const error = new Error(specificMessage || 'Credenciales inválidas');
+      const specificMessage = validation.error?.errors?.map(err => err.message).join('. ') || 'Credenciales inválidas';
+      const error = new Error(specificMessage);
       error.statusCode = 400;
       return next(error);
     }
