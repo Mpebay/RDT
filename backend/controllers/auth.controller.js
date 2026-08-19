@@ -55,10 +55,12 @@ const loginSchema = z.object({
 exports.registerUser = async (req, res, next) => {
   try {
     const validation = registerSchema.safeParse(req.body);
+    
     if (!validation.success) {
-      // Usamos encadenamiento opcional (?.) para evitar que falle si errors no existe
-      const errorMessage = validation.error?.errors?.map(e => e.message).join(', ') || 'Datos de registro inválidos';
-      const error = new Error(errorMessage);
+      // Extraemos el mensaje exacto de Zod (ej: "La contraseña debe tener al menos 6 caracteres")
+      const specificMessage = validation.error.errors.map(err => err.message).join('. ');
+      
+      const error = new Error(specificMessage || 'Datos de registro inválidos');
       error.statusCode = 400;
       return next(error);
     }
@@ -104,9 +106,10 @@ exports.registerUser = async (req, res, next) => {
 exports.loginUser = async (req, res, next) => {
   try {
     const validation = loginSchema.safeParse(req.body);
+    
     if (!validation.success) {
-      const errorMessage = validation.error?.errors?.map(e => e.message).join(', ') || 'Credenciales inválidas';
-      const error = new Error(errorMessage);
+      const specificMessage = validation.error.errors.map(err => err.message).join('. ');
+      const error = new Error(specificMessage || 'Credenciales inválidas');
       error.statusCode = 400;
       return next(error);
     }
