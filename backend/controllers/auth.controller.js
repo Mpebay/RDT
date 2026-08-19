@@ -2,23 +2,19 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { z } = require('zod');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// Función auxiliar con control de depuración para la API de Brevo
+// Función auxiliar para enviar correos mediante la API HTTP de Brevo
 const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SENDER_EMAIL;
 
-  // Esto aparecerá en los Logs de Render para ayudarte a detectar el problema
-  console.log('--- DEBUG CORREO ---');
-  console.log('¿Existe BREVO_API_KEY?:', apiKey ? 'Sí (Primeros 6 chars: ' + apiKey.substring(0, 6) + '...)' : '❌ NO DEFINIDA');
-  console.log('¿Existe SENDER_EMAIL?:', senderEmail ? senderEmail : '❌ NO DEFINIDO');
-
   if (!apiKey) {
-    throw new Error('La variable de entorno BREVO_API_KEY no está configurada en Render.');
+    throw new Error('La variable de entorno BREVO_API_KEY no está configurada.');
   }
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -44,11 +40,36 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   return await response.json();
 };
 
-exports.registerUser = async (req, res) => {
-  const { name, email, password } = req.body;
+// Esquemas de validación con Zod
+const registerSchema = z.object({
+  name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres')
+});
+
+const loginSchema = z.object({
+  email: z.string().email('Correo electrónico inválido'),
+  password: z.string().min(1, 'La contraseña es obligatoria')
+});
+
+exports.registerUser = async (req, res, next) => {
   try {
+    const validation = registerSchema.safeParse(req.body);
+    if (!validation.success) {
+      const errorMessage = validation.error.errors.map(e => e.message).join(', ');
+      const error = new Error(errorMessage);
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const { name, email, password } = validation.data;
+
     const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ message: 'El usuario ya existe' });
+    if (userExists) {
+      const error = new Error('El usuario ya existe');
+      error.statusCode = 400;
+      return next(error);
+    }
 
     const isAdmin = email === process.env.ADMIN_EMAIL;
     const role = isAdmin ? 'admin' : 'user';
@@ -75,27 +96,38 @@ exports.registerUser = async (req, res) => {
       _id: user._id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved, token: generateToken(user._id)
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    next(error);
   }
 };
 
-exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
+exports.loginUser = async (req, res, next) => {
   try {
+    const validation = loginSchema.safeParse(req.body);
+    if (!validation.success) {
+      const errorMessage = validation.error.errors.map(e => e.message).join(', ');
+      const error = new Error(errorMessage);
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const { email, password } = validation.data;
+
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
         _id: user._id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved, token: generateToken(user._id)
       });
     } else {
-      res.status(401).json({ message: 'Credenciales inválidas' });
+      const error = new Error('Credenciales inválidas');
+      error.statusCode = 401;
+      return next(error);
     }
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    next(error);
   }
 };
 
-exports.getUserProfile = async (req, res) => {
+exports.getUserProfile = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
     if (user) {
@@ -103,20 +135,30 @@ exports.getUserProfile = async (req, res) => {
         _id: user._id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved
       });
     } else {
-      res.status(404).json({ message: 'Usuario no encontrado' });
+      const error = new Error('Usuario no encontrado');
+      error.statusCode = 404;
+      return next(error);
     }
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor' });
+    next(error);
   }
 };
 
 // Solicitar enlace de recuperación de contraseña
-exports.forgotPassword = async (req, res) => {
-  const { email } = req.body;
+exports.forgotPassword = async (req, res, next) => {
   try {
+    const { email } = req.body;
+    if (!email) {
+      const error = new Error('El correo es obligatorio');
+      error.statusCode = 400;
+      return next(error);
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'No existe una cuenta registrada con este correo' });
+      const error = new Error('No existe una cuenta registrada con este correo');
+      error.statusCode = 404;
+      return next(error);
     }
 
     // Generar token único de recuperación
@@ -144,22 +186,31 @@ exports.forgotPassword = async (req, res) => {
 
   } catch (error) {
     console.error('⚠️ Error enviando correo con Brevo:', error);
-    res.status(500).json({ message: error.message || 'Error al enviar el correo electrónico' });
+    next(error);
   }
 };
 
 // Ejecutar el cambio de contraseña con el token
-exports.resetPassword = async (req, res) => {
-  const { token } = req.params;
-  const { password } = req.body;
+exports.resetPassword = async (req, res, next) => {
   try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      const error = new Error('La nueva contraseña debe tener al menos 6 caracteres');
+      error.statusCode = 400;
+      return next(error);
+    }
+
     const user = await User.findOne({
       resetPasswordToken: token,
       resetPasswordExpires: { $gt: Date.now() }
     });
 
     if (!user) {
-      return res.status(400).json({ message: 'El enlace es inválido o ha expirado' });
+      const error = new Error('El enlace es inválido o ha expirado');
+      error.statusCode = 400;
+      return next(error);
     }
 
     user.password = password;
@@ -169,6 +220,6 @@ exports.resetPassword = async (req, res) => {
 
     res.json({ message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' });
   } catch (error) {
-    res.status(500).json({ message: 'Error en el servidor', error: error.message });
+    next(error);
   }
 };
