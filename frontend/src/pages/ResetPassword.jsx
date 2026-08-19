@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Lock, Eye, EyeOff } from 'lucide-react';
 import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function ResetPassword() {
   const { token } = useParams();
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,10 +24,16 @@ export default function ResetPassword() {
       return;
     }
 
+    if (password !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { data } = await api.post(`${import.meta.env.VITE_API_URL}/auth/reset-password/${token}`, { password });
+      // Usamos la ruta relativa gracias a la baseURL del interceptor
+      const { data } = await api.post(`/auth/reset-password/${token}`, { password });
       setMessage(data.message);
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
@@ -56,6 +64,7 @@ export default function ResetPassword() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Nueva Contraseña */}
           <div>
             <label className="block text-sm text-gray-300 mb-1.5 font-medium">Nueva Contraseña</label>
             <div className="relative">
@@ -63,13 +72,45 @@ export default function ResetPassword() {
                 <Lock size={18} />
               </div>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 placeholder="••••••••"
-                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
+                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
                 onChange={(e) => setPassword(e.target.value)}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirmar Nueva Contraseña */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5 font-medium">Confirmar Nueva Contraseña</label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                <Lock size={18} />
+              </div>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                placeholder="••••••••"
+                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-10 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
