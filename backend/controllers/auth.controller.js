@@ -2,10 +2,13 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const SibApiV3Sdk = require('@getbrevo/brevo');
+const brevo = require('@getbrevo/brevo');
+
+// Detección segura para evitar errores de módulos en Render
+const brevoModule = brevo.default || brevo;
 
 // Configurar Brevo con tu API Key
-let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+let apiInstance = new brevoModule.TransactionalEmailsApi();
 let apiKey = apiInstance.authentications['apiKey'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 
@@ -27,7 +30,7 @@ exports.registerUser = async (req, res) => {
 
     if (!isAdmin) {
       try {
-        let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        let sendSmtpEmail = new brevoModule.SendSmtpEmail();
         sendSmtpEmail.subject = 'Nuevo Registro - El Rincón del Trading';
         sendSmtpEmail.htmlContent = `
           <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
@@ -102,7 +105,7 @@ exports.forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    let sendSmtpEmail = new brevoModule.SendSmtpEmail();
     sendSmtpEmail.subject = 'Recuperación de Contraseña - El Rincón del Trading';
     sendSmtpEmail.htmlContent = `
       <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
