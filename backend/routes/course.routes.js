@@ -2,8 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { 
   getModules, 
-  createModule, 
-  updateModule, // Opcional: agrégala si tu controlador la tiene 
+  createModule,
   deleteModule 
 } = require('../controllers/course.controller');
 const { protect, admin } = require('../middleware/auth.middleware');
