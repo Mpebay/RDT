@@ -12,7 +12,6 @@ router.get('/modules', protect, getModules);
 
 // Rutas exclusivas para administradores
 router.post('/modules', protect, admin, createModule);
-router.put('/modules/:id', protect, admin, updateModule); // Descomenta si usas actualización
 router.delete('/modules/:id', protect, admin, deleteModule);
 
 module.exports = router;
