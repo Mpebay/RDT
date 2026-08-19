@@ -75,7 +75,7 @@ export default function Register() {
           <div className={`p-3 rounded-lg mb-6 text-sm text-center border ${
             isError 
               ? 'bg-red-500/10 border-red-500/50 text-red-400' 
-              : 'bg-brandOrange/20 border-brandOrange text-brandOrange'
+              : 'bg-green-500/10 border-green-500/50 text-green-400'
           }`}>
             {message}
           </div>
