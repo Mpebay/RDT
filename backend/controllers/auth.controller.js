@@ -1,23 +1,15 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const { Resend } = require('resend');
+
+// Inicializar Resend con tu clave de API
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  family: 4
-});
 
 exports.registerUser = async (req, res) => {
   const { name, email, password } = req.body;
@@ -32,18 +24,19 @@ exports.registerUser = async (req, res) => {
     const user = await User.create({ name, email, password, role, isApproved });
 
     if (!isAdmin) {
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: process.env.ADMIN_EMAIL,
-        subject: 'Nuevo Registro - El Rincón del Trading',
-        html: `<h3>Nuevo usuario registrado</h3>
-               <p><strong>Nombre:</strong> ${user.name}</p>
-               <p><strong>Email:</strong> ${user.email}</p>
-               <p>Ingresa al panel de administración para autorizarlo.</p>`
-      };
-      transporter.sendMail(mailOptions, (err) => {
-        if (err) console.error('⚠️ No se pudo enviar el correo:', err.message);
-      });
+      try {
+        await resend.emails.send({
+          from: 'Academia <onboarding@resend.dev>',
+          to: process.env.ADMIN_EMAIL,
+          subject: 'Nuevo Registro - El Rincón del Trading',
+          html: `<h3>Nuevo usuario registrado</h3>
+                 <p><strong>Nombre:</strong> ${user.name}</p>
+                 <p><strong>Email:</strong> ${user.email}</p>
+                 <p>Ingresa al panel de administración para autorizarlo.</p>`
+        });
+      } catch (err) {
+        console.error('⚠️ No se pudo enviar el correo al administrador:', err.message);
+      }
     }
 
     res.status(201).json({
@@ -85,7 +78,7 @@ exports.getUserProfile = async (req, res) => {
   }
 };
 
-// NUEVA FUNCIÓN: Solicitar enlace de recuperación de contraseña
+// Solicitar enlace de recuperación de contraseña
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
@@ -102,8 +95,8 @@ exports.forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
+    const { error } = await resend.emails.send({
+      from: 'Academia <onboarding@resend.dev>',
       to: user.email,
       subject: 'Recuperación de Contraseña - El Rincón del Trading',
       html: `
@@ -114,22 +107,21 @@ exports.forgotPassword = async (req, res) => {
           <p style="margin-top: 20px; font-size: 12px; color: #777;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
         </div>
       `
-    };
-
-    transporter.sendMail(mailOptions, (err) => {
-      if (err) {
-        console.error('⚠️ No se pudo enviar el correo de recuperación:', err.message);
-        return res.status(500).json({ message: 'Error al enviar el correo electrónico' });
-      }
-      res.json({ message: 'Se ha enviado un correo con las instrucciones.' });
     });
+
+    if (error) {
+      console.error('⚠️ No se pudo enviar el correo de recuperación:', error);
+      return res.status(500).json({ message: 'Error al enviar el correo electrónico' });
+    }
+
+    res.json({ message: 'Se ha enviado un correo con las instrucciones.' });
 
   } catch (error) {
     res.status(500).json({ message: 'Error en el servidor', error: error.message });
   }
 };
 
-// NUEVA FUNCIÓN: Ejecutar el cambio de contraseña con el token
+// Ejecutar el cambio de contraseña con el token
 exports.resetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
@@ -143,7 +135,6 @@ exports.resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'El enlace es inválido o ha expirado' });
     }
 
-    // Actualizar contraseña (asumiendo que tu modelo User ya tiene el hook pre('save') que hace el hash con bcrypt)
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
