@@ -15,7 +15,7 @@ function WhatsAppButton() {
 
   return (
     <a
-      href="https://wa.me/+5492494475552?text=Hola,%20me%20quiero%20inscribir%20en%20la%20academia%20El%20Rincón%20del%20Trading"
+      href="https://wa.me/+5492494475552?text=Hola,%20me%20quiero%20inscribir%20en%20la%20academia%20"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-3.5 rounded-full shadow-[0_4px_20px_rgba(34,197,94,0.4)] transition-all duration-300 flex items-center justify-center hover:scale-110"
