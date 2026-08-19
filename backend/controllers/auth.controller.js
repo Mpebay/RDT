@@ -7,17 +7,29 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// Función auxiliar ultra segura usando la API HTTP de Brevo y fetch nativo
+// Función auxiliar con control de depuración para la API de Brevo
 const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
+  const apiKey = process.env.BREVO_API_KEY;
+  const senderEmail = process.env.SENDER_EMAIL;
+
+  // Esto aparecerá en los Logs de Render para ayudarte a detectar el problema
+  console.log('--- DEBUG CORREO ---');
+  console.log('¿Existe BREVO_API_KEY?:', apiKey ? 'Sí (Primeros 6 chars: ' + apiKey.substring(0, 6) + '...)' : '❌ NO DEFINIDA');
+  console.log('¿Existe SENDER_EMAIL?:', senderEmail ? senderEmail : '❌ NO DEFINIDO');
+
+  if (!apiKey) {
+    throw new Error('La variable de entorno BREVO_API_KEY no está configurada en Render.');
+  }
+
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
     headers: {
       'accept': 'application/json',
-      'api-key': process.env.BREVO_API_KEY,
+      'api-key': apiKey,
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: "Academia", email: process.env.SENDER_EMAIL },
+      sender: { name: "Academia", email: senderEmail },
       to: [{ email: toEmail }],
       subject: subject,
       htmlContent: htmlContent
@@ -26,6 +38,7 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
 
   if (!response.ok) {
     const errorData = await response.json();
+    console.error('Respuesta de error de Brevo:', errorData);
     throw new Error(errorData.message || 'Error al enviar correo con Brevo');
   }
   return await response.json();
@@ -131,7 +144,7 @@ exports.forgotPassword = async (req, res) => {
 
   } catch (error) {
     console.error('⚠️ Error enviando correo con Brevo:', error);
-    res.status(500).json({ message: 'Error al enviar el correo electrónico' });
+    res.status(500).json({ message: error.message || 'Error al enviar el correo electrónico' });
   }
 };
 
