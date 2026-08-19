@@ -5,7 +5,7 @@ import api from '../api/axios'; // Importa la instancia de Axios con interceptor
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar contraseña
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -16,18 +16,17 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Usamos directamente la ruta relativa gracias a la baseURL del interceptor
       const { data } = await api.post('/auth/login', formData);
 
       // Guardar información del usuario y token en localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('token', data.token);
 
-      // Redireccionar según el rol
+      // Redireccionar según el rol usando { replace: true }
       if (data.role === 'admin') {
-        navigate('/admin');
+        navigate('/admin', { replace: true });
       } else {
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
 
       // Recargar la ventana para actualizar el estado del Navbar
@@ -82,7 +81,6 @@ export default function Login() {
                 <Lock size={18} />
               </div>
               
-              {/* Input con tipo dinámico según el estado showPassword */}
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
@@ -92,7 +90,6 @@ export default function Login() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
 
-              {/* Botón interactivo para alternar la visibilidad */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
