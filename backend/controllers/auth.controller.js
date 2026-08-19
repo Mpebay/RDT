@@ -2,18 +2,33 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
-const brevo = require('@getbrevo/brevo');
-
-// Detección segura para evitar errores de módulos en Render
-const brevoModule = brevo.default || brevo;
-
-// Configurar Brevo con tu API Key
-let apiInstance = new brevoModule.TransactionalEmailsApi();
-let apiKey = apiInstance.authentications['apiKey'];
-apiKey.apiKey = process.env.BREVO_API_KEY;
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+};
+
+// Función auxiliar ultra segura usando la API HTTP de Brevo y fetch nativo
+const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { name: "Academia", email: process.env.SENDER_EMAIL },
+      to: [{ email: toEmail }],
+      subject: subject,
+      htmlContent: htmlContent
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Error al enviar correo con Brevo');
+  }
+  return await response.json();
 };
 
 exports.registerUser = async (req, res) => {
@@ -30,20 +45,14 @@ exports.registerUser = async (req, res) => {
 
     if (!isAdmin) {
       try {
-        let sendSmtpEmail = new brevoModule.SendSmtpEmail();
-        sendSmtpEmail.subject = 'Nuevo Registro - El Rincón del Trading';
-        sendSmtpEmail.htmlContent = `
-          <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-            <h3>Nuevo usuario registrado</h3>
-            <p><strong>Nombre:</strong> ${user.name}</p>
-            <p><strong>Email:</strong> ${user.email}</p>
-            <p>Ingresa al panel de administración para autorizarlo.</p>
-          </div>
-        `;
-        sendSmtpEmail.sender = { name: "Academia", email: process.env.SENDER_EMAIL };
-        sendSmtpEmail.to = [{ email: process.env.ADMIN_EMAIL }];
-
-        await apiInstance.sendTransacEmail(sendSmtpEmail);
+        await sendBrevoEmail(
+          process.env.ADMIN_EMAIL,
+          'Nuevo Registro - El Rincón del Trading',
+          `<h3>Nuevo usuario registrado</h3>
+           <p><strong>Nombre:</strong> ${user.name}</p>
+           <p><strong>Email:</strong> ${user.email}</p>
+           <p>Ingresa al panel de administración para autorizarlo.</p>`
+        );
       } catch (err) {
         console.error('⚠️ No se pudo enviar el correo al administrador:', err.message);
       }
@@ -105,20 +114,18 @@ exports.forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-    let sendSmtpEmail = new brevoModule.SendSmtpEmail();
-    sendSmtpEmail.subject = 'Recuperación de Contraseña - El Rincón del Trading';
-    sendSmtpEmail.htmlContent = `
-      <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
-        <h2 style="color: #ff5a00;">Solicitud de restablecimiento</h2>
-        <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente botón para continuar:</p>
-        <a href="${resetUrl}" style="background-color: #ff5a00; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 15px;">Restablecer Contraseña</a>
-        <p style="margin-top: 20px; font-size: 12px; color: #777;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
-      </div>
-    `;
-    sendSmtpEmail.sender = { name: "Academia", email: process.env.SENDER_EMAIL };
-    sendSmtpEmail.to = [{ email: user.email }];
-
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    await sendBrevoEmail(
+      user.email,
+      'Recuperación de Contraseña - El Rincón del Trading',
+      `
+        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9; border-radius: 10px;">
+          <h2 style="color: #ff5a00;">Solicitud de restablecimiento</h2>
+          <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente botón para continuar:</p>
+          <a href="${resetUrl}" style="background-color: #ff5a00; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 15px;">Restablecer Contraseña</a>
+          <p style="margin-top: 20px; font-size: 12px; color: #777;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
+        </div>
+      `
+    );
 
     res.json({ message: 'Se ha enviado un correo con las instrucciones.' });
 
