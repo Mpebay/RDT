@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   isApproved: { type: Boolean, default: false },
-  role: { type: String, default: 'user' }
+  role: { type: String, default: 'user' },
+  resetPasswordToken: { type: String },
+  resetPasswordExpires: { type: Date }
 }, { timestamps: true });
 
 // Middleware pre-save asíncrono (sin parámetro next)
@@ -15,5 +17,7 @@ userSchema.pre('save', async function() {
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
+
+
 
 module.exports = mongoose.model('User', userSchema);

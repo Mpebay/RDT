@@ -16,7 +16,7 @@ export default function Login() {
 
     try {
       const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, formData);
-      
+
       // Guardar información del usuario y token en localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
 
@@ -26,7 +26,7 @@ export default function Login() {
       } else {
         navigate('/dashboard');
       }
-      
+
       // Recargar la ventana para actualizar el estado del Navbar
       window.location.reload();
     } catch (err) {
@@ -87,6 +87,11 @@ export default function Login() {
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
             </div>
+          </div>
+          <div className="flex justify-end mt-1">
+            <Link to="/forgot-password" className="text-xs text-gray-400 hover:text-brandOrange transition-colors">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
           <button
