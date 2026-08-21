@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown } from 'lucide-react';
+import vantageLogo from '../assets/vantage-logo.png';
+import libertexLogo from '../assets/libertex-logo.png';
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState(null);
@@ -54,7 +56,7 @@ export default function Home() {
           <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
-                src="./public/Captura de pantalla 2026-08-19 195730.png" 
+                src={vantageLogo}
                 alt="Vantage Markets" 
                 className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
               />
@@ -66,7 +68,7 @@ export default function Home() {
           <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
-                src="./public/Captura de pantalla 2026-08-19 200242.png" 
+                src={libertexLogo}
                 alt="Libertex" 
                 className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
               />
