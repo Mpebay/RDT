@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown } from 'lucide-react';
-import vantageLogo from '../assets/vantage_logo.png';
-import libertexLogo from '../assets/libertex_logo.png';
+import vantageLogo from '../assets/logo_vantage.png';
+import libertexLogo from '../assets/logo_libertex.png';
 
 export default function Home() {
   const [openFaq, setOpenFaq] = useState(null);
