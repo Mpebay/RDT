@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown } from 'lucide-react';
+import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Users, Video, MessageCircle, Headphones, Activity } from 'lucide-react';
 import vantageLogo from '../assets/logo_vantage.png';
 import libertexLogo from '../assets/logo_libertex.png';
 
@@ -45,8 +45,64 @@ export default function Home() {
         <MetricItem number="100%" label="Estrategias Verificadas" />
       </div>
 
+      {/* Características Principales */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-5xl w-full z-10">
+        <FeatureCard 
+          icon={<TrendingUp size={32}/>} 
+          title="Análisis Institucional" 
+          desc="Aprende a leer el mercado como los grandes fondos de inversión." 
+        />
+        <FeatureCard 
+          icon={<Zap size={32}/>} 
+          title="Acceso Exclusivo" 
+          desc="Contenido reservado únicamente para miembros verificados y aprobados." 
+        />
+        <FeatureCard 
+          icon={<Shield size={32}/>} 
+          title="Gestión de Riesgo" 
+          desc="Protege tu capital con metodologías profesionales comprobadas." 
+        />
+      </div>
+
+      {/* --- NUEVA SECCIÓN: EL FACTOR COMUNIDAD Y EN VIVO --- */}
+      <div className="mt-28 max-w-5xl w-full z-10">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-brandOrange text-sm font-bold uppercase tracking-widest bg-brandOrange/10 px-4 py-1.5 rounded-full border border-brandOrange/20">
+            Acompañamiento Real
+          </span>
+          <h2 className="text-3xl md:text-4xl font-extrabold mt-4 mb-4">Nunca operes a solas</h2>
+          <p className="text-gray-400">
+            El trading en solitario genera dudas y frustración. Por eso formamos un ecosistema conectado a través de WhatsApp con diferentes grupos especializados para cada momento de tu formación.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <CommunityCard 
+            icon={<Activity className="text-brandOrange" size={28} />}
+            title="Señales y Alertas"
+            desc="Canales de WhatsApp dedicados con proyecciones y oportunidades detectadas en tiempo real."
+          />
+          <CommunityCard 
+            icon={<Video className="text-brandOrange" size={28} />}
+            title="Clases en Vivo"
+            desc="Recepción directa de los links de acceso a las transmisiones diarias."
+          />
+          <CommunityCard 
+            icon={<Headphones className="text-brandOrange" size={28} />}
+            title="Psicotrading"
+            desc="Acompañamiento mental especializado para aprender a dominar las emociones y la presión."
+          />
+          <CommunityCard 
+            icon={<MessageCircle className="text-brandOrange" size={28} />}
+            title="Comunidad & Networking"
+            desc="Un espacio dinámico para debatir análisis, compartir experiencias y crecer junto a otros traders."
+          />
+        </div>
+      </div>
+      {/* -------------------------------------------------- */}
+
       {/* Sección de Brókers / Aliados Estratégicos con Logos Locales */}
-      <div className="mt-24 max-w-3xl w-full z-10 text-center">
+      <div className="mt-28 max-w-3xl w-full z-10 text-center">
         <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-8">
           Brókers y Aliados Estratégicos Asociados
         </p>
@@ -74,29 +130,9 @@ export default function Home() {
               />
             </div>
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Libertex</span>
-            
           </div>
 
         </div>
-      </div>
-
-      {/* Características Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-5xl w-full z-10">
-        <FeatureCard 
-          icon={<TrendingUp size={32}/>} 
-          title="Análisis Institucional" 
-          desc="Aprende a leer el mercado como los grandes fondos de inversión." 
-        />
-        <FeatureCard 
-          icon={<Zap size={32}/>} 
-          title="Acceso Exclusivo" 
-          desc="Contenido reservado únicamente para miembros verificados y aprobados." 
-        />
-        <FeatureCard 
-          icon={<Shield size={32}/>} 
-          title="Gestión de Riesgo" 
-          desc="Protege tu capital con metodologías profesionales comprobadas." 
-        />
       </div>
 
       {/* Sección Cómo Funciona */}
@@ -145,8 +181,8 @@ export default function Home() {
             onClick={() => toggleFaq(1)}
           />
           <FaqItem 
-            question="¿Qué incluye el acceso a la plataforma?" 
-            answer="Tendrás acceso completo a los módulos de estudio privados, análisis institucionales y herramientas exclusivas de gestión de riesgo."
+            question="¿Qué incluye el acceso a la plataforma y comunidad?" 
+            answer="Tendrás acceso completo a los módulos de estudio privados, análisis institucionales, sesiones en vivo y los grupos exclusivos de WhatsApp para acompañamiento constante."
             isOpen={openFaq === 2}
             onClick={() => toggleFaq(2)}
           />
@@ -172,6 +208,20 @@ function FeatureCard({ icon, title, desc }) {
       <div className="text-brandOrange mb-4">{icon}</div>
       <h3 className="text-xl font-bold mb-2">{title}</h3>
       <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
+    </div>
+  );
+}
+
+function CommunityCard({ icon, title, desc }) {
+  return (
+    <div className="bg-darkCard p-6 rounded-2xl border border-white/5 hover:border-brandOrange/40 transition-all duration-300 flex flex-col justify-between group">
+      <div>
+        <div className="p-3 bg-brandOrange/10 w-fit rounded-xl mb-4 group-hover:scale-110 transition-transform">
+          {icon}
+        </div>
+        <h3 className="text-lg font-bold mb-2 text-white">{title}</h3>
+        <p className="text-gray-400 text-sm leading-relaxed">{desc}</p>
+      </div>
     </div>
   );
 }
