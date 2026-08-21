@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Trash2, Users, Video, Plus } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search } from 'lucide-react';
 import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [modules, setModules] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
+  
+  // -- ESTADOS PARA EL BUSCADOR Y FILTROS --
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all'); // 'all', 'approved', 'pending'
   
   // Estado para el formulario de nuevo módulo
   const [newModule, setNewModule] = useState({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante' });
@@ -46,6 +50,22 @@ export default function AdminDashboard() {
       fetchUsers();
     }
   };
+
+  // -- LÓGICA DE FILTRADO DE USUARIOS (FRONTEND) --
+  const filteredUsers = users.filter((user) => {
+    // 1. Filtro por búsqueda (Nombre o Email)
+    const matchesSearch = 
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // 2. Filtro por estado
+    const matchesStatus = 
+      filterStatus === 'all' || 
+      (filterStatus === 'approved' && user.isApproved) || 
+      (filterStatus === 'pending' && !user.isApproved);
+
+    return matchesSearch && matchesStatus;
+  });
 
   // -- LOGICA DE MODULOS --
   const fetchModules = async () => {
@@ -94,35 +114,100 @@ export default function AdminDashboard() {
 
       {/* CONTENIDO TAB 1: ALUMNOS */}
       {activeTab === 'users' && (
-        <div className="bg-darkCard rounded-xl border border-white/10 overflow-hidden">
-          <table className="w-full text-left text-sm text-gray-400">
-            <thead className="bg-white/5 text-gray-200 uppercase font-semibold">
-              <tr>
-                <th className="px-6 py-4">Nombre</th>
-                <th className="px-6 py-4">Email</th>
-                <th className="px-6 py-4">Estado</th>
-                <th className="px-6 py-4 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {users.map((user) => (
-                <tr key={user._id} className="hover:bg-white/5 transition-colors">
-                  <td className="px-6 py-4 text-white font-medium">{user.name}</td>
-                  <td className="px-6 py-4">{user.email}</td>
-                  <td className="px-6 py-4">
-                    {user.isApproved ? <span className="flex items-center text-green-500"><CheckCircle size={16} className="mr-2" /> Aprobado</span>
-                                     : <span className="flex items-center text-yellow-500"><XCircle size={16} className="mr-2" /> Pendiente</span>}
-                  </td>
-                  <td className="px-6 py-4 flex justify-center space-x-3">
-                    {!user.isApproved && <button onClick={() => approveHandler(user._id)} className="bg-brandOrange hover:bg-brandOrangeHover text-white px-3 py-1.5 rounded-md text-xs font-bold">Aprobar</button>}
-                    <button onClick={() => deleteUserHandler(user._id)} className="text-red-500 hover:text-red-400 p-1"><Trash2 size={20} /></button>
-                  </td>
-                </tr>
-              ))}
-              {users.length === 0 && <tr><td colSpan="4" className="px-6 py-8 text-center">No hay alumnos registrados.</td></tr>}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* BARRA DE BÚSQUEDA Y FILTROS */}
+          <div className="mb-6 bg-darkCard p-4 rounded-xl border border-white/10 flex flex-col md:flex-row gap-4 justify-between items-center shadow-lg">
+            
+            {/* Buscador de Texto */}
+            <div className="relative w-full md:w-96">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search size={18} className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Buscar por nombre o email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-white focus:border-brandOrange outline-none transition-colors placeholder-gray-500"
+              />
+            </div>
+
+            {/* Contadores y Filtro de Estado */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
+              
+              {/* Contadores Estadísticos */}
+              <div className="flex gap-2 text-sm font-medium">
+                <div className="bg-white/5 text-gray-300 px-3 py-1.5 rounded-lg border border-white/10 text-center">
+                  Total: {filteredUsers.length}
+                </div>
+                <div className="bg-green-500/10 text-green-500 px-3 py-1.5 rounded-lg border border-green-500/20 text-center">
+                  Aprobados: {filteredUsers.filter(u => u.isApproved).length}
+                </div>
+                <div className="bg-yellow-500/10 text-yellow-500 px-3 py-1.5 rounded-lg border border-yellow-500/20 text-center">
+                  Pendientes: {filteredUsers.filter(u => !u.isApproved).length}
+                </div>
+              </div>
+
+              {/* Selector de Estado */}
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="bg-darkBg border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-brandOrange outline-none cursor-pointer w-full sm:w-auto"
+              >
+                <option value="all">Todos los estados</option>
+                <option value="approved">Solo Aprobados</option>
+                <option value="pending">Solo Pendientes</option>
+              </select>
+            </div>
+          </div>
+
+          {/* TABLA DE USUARIOS */}
+          <div className="bg-darkCard rounded-xl border border-white/10 overflow-hidden shadow-lg">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-400 min-w-[600px]">
+                <thead className="bg-white/5 text-gray-200 uppercase font-semibold">
+                  <tr>
+                    <th className="px-6 py-4">Nombre</th>
+                    <th className="px-6 py-4">Email</th>
+                    <th className="px-6 py-4">Estado</th>
+                    <th className="px-6 py-4 text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {filteredUsers.map((user) => (
+                    <tr key={user._id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-6 py-4 text-white font-medium">{user.name}</td>
+                      <td className="px-6 py-4">{user.email}</td>
+                      <td className="px-6 py-4">
+                        {user.isApproved 
+                          ? <span className="flex items-center text-green-500"><CheckCircle size={16} className="mr-2" /> Aprobado</span>
+                          : <span className="flex items-center text-yellow-500"><XCircle size={16} className="mr-2" /> Pendiente</span>}
+                      </td>
+                      <td className="px-6 py-4 flex justify-center space-x-3">
+                        {!user.isApproved && (
+                          <button onClick={() => approveHandler(user._id)} className="bg-brandOrange hover:bg-brandOrangeHover text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                            Aprobar
+                          </button>
+                        )}
+                        <button onClick={() => deleteUserHandler(user._id)} className="text-red-500 hover:text-red-400 p-1 transition-colors" title="Eliminar usuario">
+                          <Trash2 size={20} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  
+                  {/* Mensajes de estado vacío */}
+                  {users.length === 0 && (
+                    <tr><td colSpan="4" className="px-6 py-10 text-center text-gray-500">No hay alumnos registrados en la base de datos.</td></tr>
+                  )}
+                  {users.length > 0 && filteredUsers.length === 0 && (
+                    <tr><td colSpan="4" className="px-6 py-10 text-center text-gray-500">No se encontraron usuarios que coincidan con la búsqueda.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* CONTENIDO TAB 2: MODULOS */}
