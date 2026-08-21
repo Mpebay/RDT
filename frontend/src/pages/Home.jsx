@@ -136,7 +136,7 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
           
           {/* Bróker 1 */}
-          <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
+          <a href="https://latam.vantagemarkets.com/es/" target="_blank" rel="noopener noreferrer" className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
                 src={vantageLogo}
@@ -145,10 +145,10 @@ export default function Home() {
               />
             </div>
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Vantage Markets</span>
-          </div>
+          </a>
 
           {/* Bróker 2 */}
-          <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
+          <a href="https://libertex.org/es" target="_blank" rel="noopener noreferrer" className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
                 src={libertexLogo}
@@ -157,7 +157,7 @@ export default function Home() {
               />
             </div>
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Libertex</span>
-          </div>
+          </a>
 
         </div>
       </div>
