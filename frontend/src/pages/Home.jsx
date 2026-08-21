@@ -50,11 +50,11 @@ export default function Home() {
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
           
-          {/* Bróker 1: Libertex */}
+          {/* Bróker 1 */}
           <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
-                src="/src/assets/Captura de pantalla 2026-08-19 195730.png" 
+                src="src/assets/Captura de pantalla 2026-08-19 195730.png" 
                 alt="Vantage Markets" 
                 className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
               />
@@ -62,11 +62,11 @@ export default function Home() {
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Vantage Markets</span>
           </div>
 
-          {/* Bróker 2: Vantage */}
+          {/* Bróker 2 */}
           <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
-                src="/src/assets/Captura de pantalla 2026-08-19 200242.png" 
+                src="src/assets/Captura de pantalla 2026-08-19 200242.png" 
                 alt="Libertex" 
                 className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
               />
