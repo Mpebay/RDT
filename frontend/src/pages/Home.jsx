@@ -54,7 +54,7 @@ export default function Home() {
           <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
-                src="src/assets/Captura de pantalla 2026-08-19 195730.png" 
+                src="public/Captura de pantalla 2026-08-19 195730.png" 
                 alt="Vantage Markets" 
                 className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
               />
@@ -66,7 +66,7 @@ export default function Home() {
           <div className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
-                src="src/assets/Captura de pantalla 2026-08-19 200242.png" 
+                src="public/Captura de pantalla 2026-08-19 200242.png" 
                 alt="Libertex" 
                 className="max-h-10 max-w-full object-contain filter brightness-95 group-hover:brightness-100 transition-all" 
               />
