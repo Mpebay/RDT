@@ -101,6 +101,33 @@ export default function Home() {
       </div>
       {/* -------------------------------------------------- */}
 
+
+      {/* Sección Cómo Funciona */}
+      <div className="mt-28 max-w-4xl w-full z-10 text-center">
+        <h2 className="text-3xl font-bold mb-4">¿Cómo funciona el acceso?</h2>
+        <p className="text-gray-400 mb-12">Mantenemos un entorno controlado y seguro para todos nuestros estudiantes.</p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          <StepCard 
+            step="01" 
+            icon={<UserPlus className="text-brandOrange" size={24} />}
+            title="Regístrate" 
+            desc="Crea tu cuenta con tu correo electrónico y contraseña de forma segura." 
+          />
+          <StepCard 
+            step="02" 
+            icon={<Clock className="text-brandOrange" size={24} />}
+            title="Espera Aprobación" 
+            desc="Nuestro equipo revisa cada perfil para mantener la exclusividad de la academia." 
+          />
+          <StepCard 
+            step="03" 
+            icon={<CheckCircle2 className="text-brandOrange" size={24} />}
+            title="Acceso Total" 
+            desc="Una vez aprobado, desbloquea todo el contenido premium y módulos de estudio." 
+          />
+        </div>
+      </div>
       {/* Sección de Brókers / Aliados Estratégicos con Logos Locales */}
       <div className="mt-28 max-w-3xl w-full z-10 text-center">
         <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-8">
@@ -132,33 +159,6 @@ export default function Home() {
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Libertex</span>
           </div>
 
-        </div>
-      </div>
-
-      {/* Sección Cómo Funciona */}
-      <div className="mt-28 max-w-4xl w-full z-10 text-center">
-        <h2 className="text-3xl font-bold mb-4">¿Cómo funciona el acceso?</h2>
-        <p className="text-gray-400 mb-12">Mantenemos un entorno controlado y seguro para todos nuestros estudiantes.</p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <StepCard 
-            step="01" 
-            icon={<UserPlus className="text-brandOrange" size={24} />}
-            title="Regístrate" 
-            desc="Crea tu cuenta con tu correo electrónico y contraseña de forma segura." 
-          />
-          <StepCard 
-            step="02" 
-            icon={<Clock className="text-brandOrange" size={24} />}
-            title="Espera Aprobación" 
-            desc="Nuestro equipo revisa cada perfil para mantener la exclusividad de la academia." 
-          />
-          <StepCard 
-            step="03" 
-            icon={<CheckCircle2 className="text-brandOrange" size={24} />}
-            title="Acceso Total" 
-            desc="Una vez aprobado, desbloquea todo el contenido premium y módulos de estudio." 
-          />
         </div>
       </div>
 
