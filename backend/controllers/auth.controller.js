@@ -235,3 +235,46 @@ exports.resetPassword = async (req, res, next) => {
     next(error);
   }
 };
+
+// NUEVA: Cambiar contraseña desde el perfil del usuario logueado
+exports.updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      const error = new Error('Por favor, ingresa tu contraseña actual y la nueva contraseña');
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    if (newPassword.length < 6) {
+      const error = new Error('La nueva contraseña debe tener al menos 6 caracteres');
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    // Buscamos al usuario trayendo explícitamente el campo password
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      const error = new Error('Usuario no encontrado');
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    // Comparamos la contraseña actual con la de la base de datos
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      const error = new Error('La contraseña actual es incorrecta');
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    // Asignamos la nueva clave (el middleware pre-save del modelo se encargará de hashearla)
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Contraseña actualizada exitosamente' });
+  } catch (error) {
+    next(error);
+  }
+};

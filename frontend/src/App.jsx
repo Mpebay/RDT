@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Profile from './pages/Profile'; // Importamos el componente Profile
 
 // Componente para el botón flotante de WhatsApp (Solo visible si NO está logueado)
 function WhatsAppButton() {
@@ -89,6 +90,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>
         <WhatsAppButton />
