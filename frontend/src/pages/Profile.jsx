@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import ChangePassword from '../components/ChangePassword'; // O la ruta donde lo hayas guardado
+import ChangePassword from '../pages/ChangePassword'; // O la ruta donde lo hayas guardado
 import api from '../api/axios';
 
 export default function Profile() {
