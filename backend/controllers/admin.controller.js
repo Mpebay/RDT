@@ -1,10 +1,11 @@
 const User = require('../models/User');
 const axios = require('axios'); // Usamos el paquete estándar de Node
 
-// Obtener todos los usuarios (excepto el propio admin)
+// Obtener todos los usuarios (excepto el propio admin que hace la petición)
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find({ role: 'user' }).select('-password').sort({ createdAt: -1 });
+    // MEJORA: Buscar todos excepto el usuario actual para no auto-modificarnos
+    const users = await User.find({ _id: { $ne: req.user._id } }).select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: 'Error obteniendo usuarios' });
@@ -105,13 +106,51 @@ exports.approveUser = async (req, res) => {
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    if (user) {
-      await user.deleteOne();
-      res.json({ message: 'Usuario eliminado' });
-    } else {
-      res.status(404).json({ message: 'Usuario no encontrado' });
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
     }
+
+    // PROTECCIÓN: Evita que el administrador se borre a sí mismo
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: 'No puedes eliminar tu propia cuenta' });
+    }
+
+    await user.deleteOne();
+    res.json({ message: 'Usuario eliminado' });
   } catch (error) {
     res.status(500).json({ message: 'Error eliminando usuario' });
+  }
+};
+
+// NUEVA FUNCIÓN: Asignar o quitar el rol de administrador de forma segura
+exports.assignRole = async (req, res) => {
+  try {
+    const { role } = req.body; 
+    
+    if (!['admin', 'user'].includes(role)) {
+      return res.status(400).json({ message: 'Rol no válido' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    // PROTECCIÓN: Evita que el administrador se quite el rol a sí mismo
+    if (user._id.toString() === req.user._id.toString()) {
+      return res.status(400).json({ message: 'No puedes cambiar tu propio rol por seguridad' });
+    }
+
+    user.role = role;
+    
+    // Si asciende a administrador, se aprueba su cuenta automáticamente
+    if (role === 'admin') {
+      user.isApproved = true;
+    }
+
+    const updatedUser = await user.save();
+    res.json({ message: `Rol actualizado exitosamente a ${role}`, user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Error actualizando el rol' });
   }
 };

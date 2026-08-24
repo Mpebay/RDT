@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search } from 'lucide-react';
+// 1. Agregamos el icono 'Shield' para representar al administrador
+import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search, Shield } from 'lucide-react';
 import api from '../api/axios'; // Importa la instancia de Axios con interceptores
 
 export default function AdminDashboard() {
@@ -48,6 +49,24 @@ export default function AdminDashboard() {
     if (window.confirm('¿Eliminar usuario?')) {
       await api.delete(`${import.meta.env.VITE_API_URL}/admin/users/${id}`, config);
       fetchUsers();
+    }
+  };
+
+  // 2. NUEVA FUNCIÓN: Cambiar rol del usuario
+  const toggleRoleHandler = async (id, currentRole) => {
+    const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    const confirmMessage = newRole === 'admin' 
+      ? '¿Estás seguro de hacer a este usuario ADMINISTRADOR? Tendrá control total sobre el panel.'
+      : '¿Quitar permisos de administrador a este usuario?';
+
+    if (window.confirm(confirmMessage)) {
+      try {
+        await api.put(`${import.meta.env.VITE_API_URL}/admin/users/${id}/role`, { role: newRole }, config);
+        fetchUsers();
+      } catch (error) {
+        console.error('Error actualizando rol', error);
+        alert(error.response?.data?.message || 'Hubo un error al actualizar el rol');
+      }
     }
   };
 
@@ -169,6 +188,8 @@ export default function AdminDashboard() {
                   <tr>
                     <th className="px-6 py-4">Nombre</th>
                     <th className="px-6 py-4">Email</th>
+                    {/* Nueva Columna */}
+                    <th className="px-6 py-4">Rol</th>
                     <th className="px-6 py-4">Estado</th>
                     <th className="px-6 py-4 text-center">Acciones</th>
                   </tr>
@@ -178,17 +199,41 @@ export default function AdminDashboard() {
                     <tr key={user._id} className="hover:bg-white/5 transition-colors">
                       <td className="px-6 py-4 text-white font-medium">{user.name}</td>
                       <td className="px-6 py-4">{user.email}</td>
+                      
+                      {/* Indicador Visual de Rol */}
+                      <td className="px-6 py-4">
+                        {user.role === 'admin' ? (
+                          <span className="bg-purple-500/10 text-purple-400 px-2 py-1 rounded text-xs font-bold border border-purple-500/20">
+                            Admin
+                          </span>
+                        ) : (
+                          <span className="bg-gray-500/10 text-gray-400 px-2 py-1 rounded text-xs border border-gray-500/20">
+                            Usuario
+                          </span>
+                        )}
+                      </td>
+
                       <td className="px-6 py-4">
                         {user.isApproved 
                           ? <span className="flex items-center text-green-500"><CheckCircle size={16} className="mr-2" /> Aprobado</span>
                           : <span className="flex items-center text-yellow-500"><XCircle size={16} className="mr-2" /> Pendiente</span>}
                       </td>
-                      <td className="px-6 py-4 flex justify-center space-x-3">
+                      <td className="px-6 py-4 flex justify-center space-x-3 items-center">
                         {!user.isApproved && (
                           <button onClick={() => approveHandler(user._id)} className="bg-brandOrange hover:bg-brandOrangeHover text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
                             Aprobar
                           </button>
                         )}
+                        
+                        {/* Botón para cambiar a Admin/User */}
+                        <button 
+                          onClick={() => toggleRoleHandler(user._id, user.role)} 
+                          className={`p-1 transition-colors ${user.role === 'admin' ? 'text-purple-400 hover:text-purple-300' : 'text-gray-500 hover:text-purple-400'}`}
+                          title={user.role === 'admin' ? 'Quitar rol de Administrador' : 'Hacer Administrador'}
+                        >
+                          <Shield size={20} />
+                        </button>
+
                         <button onClick={() => deleteUserHandler(user._id)} className="text-red-500 hover:text-red-400 p-1 transition-colors" title="Eliminar usuario">
                           <Trash2 size={20} />
                         </button>
@@ -198,10 +243,10 @@ export default function AdminDashboard() {
                   
                   {/* Mensajes de estado vacío */}
                   {users.length === 0 && (
-                    <tr><td colSpan="4" className="px-6 py-10 text-center text-gray-500">No hay alumnos registrados en la base de datos.</td></tr>
+                    <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-500">No hay alumnos registrados en la base de datos.</td></tr>
                   )}
                   {users.length > 0 && filteredUsers.length === 0 && (
-                    <tr><td colSpan="4" className="px-6 py-10 text-center text-gray-500">No se encontraron usuarios que coincidan con la búsqueda.</td></tr>
+                    <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-500">No se encontraron usuarios que coincidan con la búsqueda.</td></tr>
                   )}
                 </tbody>
               </table>
