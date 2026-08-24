@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Clock, PlayCircle, Lock, UserCog } from 'lucide-react';
-import api from '../api/axios'; // Importa la instancia de Axios con interceptores
+import { Clock, PlayCircle, Lock } from 'lucide-react';
+import api from '../api/axios';
 
 export default function Dashboard() {
   const [userInfo, setUserInfo] = useState(JSON.parse(localStorage.getItem('userInfo')));
   const [modules, setModules] = useState([]);
 
-  // Opción C: Sincronización automática
   useEffect(() => {
     if (!userInfo) return;
 
@@ -26,7 +25,6 @@ export default function Dashboard() {
       }
     };
 
-    // Si no está aprobado, preguntar al servidor cada 10 segundos
     let interval;
     if (!userInfo.isApproved && userInfo.role !== 'admin') {
       interval = setInterval(checkApprovalStatus, 10000);
@@ -35,7 +33,6 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [userInfo]);
 
-  // Opción B: Cargar Módulos si está aprobado
   useEffect(() => {
     if (userInfo?.isApproved || userInfo?.role === 'admin') {
       const fetchModules = async () => {
@@ -55,7 +52,6 @@ export default function Dashboard() {
     return <div className="flex justify-center items-center h-[calc(100vh-64px)] text-gray-400">Inicia sesión para acceder.</div>;
   }
 
-  // Vista de Espera
   if (!userInfo.isApproved && userInfo.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center">
@@ -77,22 +73,11 @@ export default function Dashboard() {
     );
   }
 
-  // Vista de Academia (Aprobado)
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      {/* Cabecera con título y botón de Acceso al Perfil/Contraseña */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 border-b border-white/10 pb-6 gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Aulas & Módulos Exclusivos</h1>
-          <p className="text-gray-400 mt-1">Selecciona un módulo para comenzar tu formación.</p>
-        </div>
-        <a 
-          href="/profile" 
-          className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-brandOrange/50 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition shadow-lg"
-        >
-          <UserCog size={18} className="text-[#ff5a00]" />
-          <span>Mi Perfil & Seguridad</span>
-        </a>
+      <div className="mb-8 border-b border-white/10 pb-6">
+        <h1 className="text-3xl font-bold text-white">Aulas & Módulos Exclusivos</h1>
+        <p className="text-gray-400 mt-1">Selecciona un módulo para comenzar tu formación.</p>
       </div>
 
       {modules.length === 0 ? (

@@ -1,4 +1,6 @@
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { UserCog } from 'lucide-react';
 import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
@@ -6,7 +8,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import Profile from './pages/Profile'; // Importamos el componente Profile
+import Profile from './pages/Profile';
 
 // Componente para el botón flotante de WhatsApp (Solo visible si NO está logueado)
 function WhatsAppButton() {
@@ -36,7 +38,6 @@ function Navbar() {
   const logoutHandler = () => {
     localStorage.removeItem('userInfo');
     localStorage.removeItem('token'); 
-    // Usamos { replace: true } para que el usuario al salir no pueda volver al dashboard con el botón "Atrás"
     navigate('/', { replace: true });
     window.location.reload(); 
   };
@@ -45,19 +46,36 @@ function Navbar() {
     <nav className="border-b border-white/10 bg-darkBg/80 backdrop-blur-md fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-black italic tracking-tighter">
+          <Link to={userInfo ? (userInfo.role === 'admin' ? '/admin' : '/dashboard') : "/"} className="flex items-center space-x-2">
+            <span className="text-2xl font-black italic tracking-tighter text-white">
               EL RINCÓN <span className="text-brandOrange text-sm uppercase tracking-widest font-bold">del trading</span>
             </span>
           </Link>
-          <div className="flex space-x-4 items-center">
+          
+          <div className="flex space-x-3 items-center">
             {userInfo ? (
               <>
                 {userInfo.role === 'admin' && (
                   <Link to="/admin" className="text-gray-300 hover:text-brandOrange px-3 py-2 text-sm font-medium transition-colors">Panel Admin</Link>
                 )}
-                <span className="text-gray-400 text-sm mr-4 hidden md:block">Hola, {userInfo.name}</span>
-                <button onClick={logoutHandler} className="border border-white/20 hover:bg-white/10 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                
+                {userInfo.role !== 'admin' && (
+                  <Link to="/dashboard" className="text-gray-300 hover:text-brandOrange px-3 py-2 text-sm font-medium transition-colors">Mis Aulas</Link>
+                )}
+
+                {/* Enlace directo a Perfil / Seguridad */}
+                <Link 
+                  to="/profile" 
+                  className="flex items-center space-x-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition"
+                  title="Mi Perfil y Seguridad"
+                >
+                  <UserCog size={16} className="text-brandOrange" />
+                  <span className="hidden sm:inline">Perfil</span>
+                </Link>
+
+                <span className="text-gray-400 text-sm ml-2 mr-2 hidden md:block">| Hola, {userInfo.name}</span>
+                
+                <button onClick={logoutHandler} className="border border-white/20 hover:bg-white/10 text-white px-3.5 py-1.5 rounded-md text-sm font-medium transition-colors">
                   Salir
                 </button>
               </>
