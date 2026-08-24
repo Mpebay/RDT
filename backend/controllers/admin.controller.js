@@ -4,7 +4,6 @@ const axios = require('axios'); // Usamos el paquete estándar de Node
 // Obtener todos los usuarios (excepto el propio admin que hace la petición)
 exports.getUsers = async (req, res) => {
   try {
-    // MEJORA: Buscar todos excepto el usuario actual para no auto-modificarnos
     const users = await User.find({ _id: { $ne: req.user._id } }).select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
@@ -110,9 +109,14 @@ exports.deleteUser = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    // PROTECCIÓN: Evita que el administrador se borre a sí mismo
+    // PROTECCIÓN 1: Evita que el administrador se borre a sí mismo
     if (user._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: 'No puedes eliminar tu propia cuenta' });
+    }
+
+    // PROTECCIÓN 2: Blindaje del Super Admin configurado en el .env
+    if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {
+      return res.status(403).json({ message: 'Acción denegada: No puedes eliminar al Administrador Principal del sistema.' });
     }
 
     await user.deleteOne();
@@ -122,7 +126,7 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// NUEVA FUNCIÓN: Asignar o quitar el rol de administrador de forma segura
+// Asignar o quitar el rol de administrador de forma segura
 exports.assignRole = async (req, res) => {
   try {
     const { role } = req.body; 
@@ -136,9 +140,14 @@ exports.assignRole = async (req, res) => {
       return res.status(404).json({ message: 'Usuario no encontrado' });
     }
 
-    // PROTECCIÓN: Evita que el administrador se quite el rol a sí mismo
+    // PROTECCIÓN 1: Evita que el administrador se quite el rol a sí mismo
     if (user._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: 'No puedes cambiar tu propio rol por seguridad' });
+    }
+
+    // PROTECCIÓN 2: Blindaje del Super Admin configurado en el .env
+    if (process.env.ADMIN_EMAIL && user.email === process.env.ADMIN_EMAIL) {
+      return res.status(403).json({ message: 'Acción denegada: No puedes modificar los permisos del Administrador Principal.' });
     }
 
     user.role = role;
