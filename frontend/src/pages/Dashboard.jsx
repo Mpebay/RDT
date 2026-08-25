@@ -103,7 +103,7 @@ function ModuleCard({ data }) {
       <div className="p-5">
         <div className="flex justify-between items-start mb-3">
           <span className="text-xs font-bold text-brandOrange bg-brandOrange/10 border border-brandOrange/20 px-2.5 py-1 rounded-full uppercase tracking-wider">{data.level}</span>
-          <span className="text-xs text-gray-400">{data.duration}</span>
+          <span className="text-xs text-gray-400">{data.duration} min.</span>
         </div>
         <h3 className="text-lg font-bold mb-2 text-white group-hover:text-brandOrange transition-colors">{data.title}</h3>
         <p className="text-sm text-gray-400 line-clamp-2">{data.description}</p>
