@@ -105,13 +105,6 @@ export default function Profile() {
               </span>
             )}
           </div>
-
-          <div className="w-full border-t border-white/10 pt-4 text-left space-y-3">
-            <div>
-              <p className="text-xs text-gray-400">Rol en la Academia:</p>
-              <p className="text-sm font-medium uppercase tracking-wider text-gray-200">{profile.role}</p>
-            </div>
-          </div>
         </div>
 
         {/* Formulario de Cambio de Contraseña */}
