@@ -6,7 +6,7 @@ const {
   updateUserPlan, 
   deleteUser, 
   assignRole 
-} = require('../controllers/adminController');
+} = require('../controllers/admin.controller');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 router.get('/users', protect, admin, getUsers);
