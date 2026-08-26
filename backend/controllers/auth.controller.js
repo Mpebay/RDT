@@ -40,9 +40,11 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   return await response.json();
 };
 
-// Esquemas de validación con Zod
+// Esquemas de validación con Zod actualizados
 const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+  lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
+  phone: z.string().min(6, 'El número de teléfono no es válido'),
   email: z.string().email('Correo electrónico inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres')
 });
@@ -73,11 +75,11 @@ exports.registerUser = async (req, res, next) => {
       return next(error);
     }
 
-    const { name, email, password } = validation.data;
+    const { name, lastName, phone, email, password } = validation.data;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
-      const error = new Error('El usuario ya existe');
+      const error = new Error('El usuario ya existe con ese correo');
       error.statusCode = 400;
       return next(error);
     }
@@ -86,25 +88,34 @@ exports.registerUser = async (req, res, next) => {
     const role = isAdmin ? 'admin' : 'user';
     const isApproved = isAdmin; 
 
-    const user = await User.create({ name, email, password, role, isApproved });
+    // Guardar usuario con los nuevos campos
+    const user = await User.create({ name, lastName, phone, email, password, role, isApproved });
 
-    if (!isAdmin) {
-      try {
-        await sendBrevoEmail(
-          process.env.ADMIN_EMAIL,
-          'Nuevo Registro - El Rincón del Trading',
-          `<h3>Nuevo usuario registrado</h3>
-           <p><strong>Nombre:</strong> ${user.name}</p>
-           <p><strong>Email:</strong> ${user.email}</p>
-           <p>Ingresa al panel de administración para autorizarlo.</p>`
-        );
-      } catch (err) {
-        console.error('⚠️ No se pudo enviar el correo al administrador:', err.message);
-      }
+    // Enviar SIEMPRE correo al administrador con TODOS los datos
+    try {
+      await sendBrevoEmail(
+        process.env.ADMIN_EMAIL,
+        'Nuevo Registro - El Rincón del Trading',
+        `<h3>Nuevo usuario registrado en la plataforma</h3>
+         <p><strong>Nombre:</strong> ${user.name}</p>
+         <p><strong>Apellido:</strong> ${user.lastName}</p>
+         <p><strong>Email:</strong> ${user.email}</p>
+         <p><strong>Teléfono:</strong> ${user.phone}</p>
+         <br>
+         <p>Ingresa al panel de administración para autorizarlo o gestionar su cuenta.</p>`
+      );
+    } catch (err) {
+      console.error('⚠️ No se pudo enviar el correo al administrador:', err.message);
     }
 
     res.status(201).json({
-      _id: user._id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved, token: generateToken(user._id)
+      _id: user._id, 
+      name: user.name, 
+      lastName: user.lastName,
+      email: user.email, 
+      role: user.role, 
+      isApproved: user.isApproved, 
+      token: generateToken(user._id)
     });
   } catch (error) {
     next(error);
@@ -144,7 +155,7 @@ exports.getUserProfile = async (req, res, next) => {
     const user = await User.findById(req.user._id).select('-password');
     if (user) {
       res.json({
-        _id: user._id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved
+        _id: user._id, name: user.name, lastName: user.lastName, email: user.email, role: user.role, isApproved: user.isApproved
       });
     } else {
       const error = new Error('Usuario no encontrado');
@@ -156,7 +167,6 @@ exports.getUserProfile = async (req, res, next) => {
   }
 };
 
-// Solicitar enlace de recuperación de contraseña
 exports.forgotPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -173,10 +183,9 @@ exports.forgotPassword = async (req, res, next) => {
       return next(error);
     }
 
-    // Generar token único de recuperación
     const resetToken = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 3600000; // Expira en 1 hora
+    user.resetPasswordExpires = Date.now() + 3600000; 
     await user.save();
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
@@ -202,7 +211,6 @@ exports.forgotPassword = async (req, res, next) => {
   }
 };
 
-// Ejecutar el cambio de contraseña con el token
 exports.resetPassword = async (req, res, next) => {
   try {
     const { token } = req.params;
@@ -236,7 +244,6 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
-// NUEVA: Cambiar contraseña desde el perfil del usuario logueado
 exports.updatePassword = async (req, res, next) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -253,7 +260,6 @@ exports.updatePassword = async (req, res, next) => {
       return next(error);
     }
 
-    // Buscamos al usuario trayendo explícitamente el campo password
     const user = await User.findById(req.user._id);
     if (!user) {
       const error = new Error('Usuario no encontrado');
@@ -261,7 +267,6 @@ exports.updatePassword = async (req, res, next) => {
       return next(error);
     }
 
-    // Comparamos la contraseña actual con la de la base de datos
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       const error = new Error('La contraseña actual es incorrecta');
@@ -269,7 +274,6 @@ exports.updatePassword = async (req, res, next) => {
       return next(error);
     }
 
-    // Asignamos la nueva clave (el middleware pre-save del modelo se encargará de hashearla)
     user.password = newPassword;
     await user.save();
 

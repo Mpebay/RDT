@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const courseRoutes = require('./routes/course.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -23,6 +24,7 @@ const authLimiter = rateLimit({
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Middleware Global de Manejo de Errores (Centraliza todos los errores del backend)
 app.use((err, req, res, next) => {

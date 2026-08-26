@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Users, Video, MessageCircle, Headphones, Activity } from 'lucide-react';
+import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Users, Video, MessageCircle, Headphones, Activity, Check } from 'lucide-react';
 import vantageLogo from '../assets/logo_vantage.png';
 import libertexLogo from '../assets/logo_libertex.png';
 
@@ -102,6 +102,146 @@ export default function Home() {
       {/* -------------------------------------------------- */}
 
 
+      {/* --- SECCIÓN: PLANES Y MEMBRESÍAS --- */}
+      <div className="mt-28 max-w-6xl w-full z-10">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="text-brandOrange text-sm font-bold uppercase tracking-widest bg-brandOrange/10 px-4 py-1.5 rounded-full border border-brandOrange/20">
+            Inversión en tu Futuro
+          </span>
+          <h2 className="text-3xl md:text-4xl font-extrabold mt-4 mb-4">Elige tu Plan de Membresía</h2>
+          <p className="text-gray-400">
+            Selecciona el nivel de formación que mejor se adapte a tus metas financieras y accede a la academia.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+          
+          {/* Plan Bronce */}
+          <div className="bg-darkCard p-8 rounded-3xl border border-white/10 flex flex-col justify-between relative hover:border-[#cd7f32]/50 transition-all duration-300">
+            <div>
+              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#cd7f32]/20 text-[#cd7f32] border border-[#cd7f32]/30 mb-4">
+                Plan Bronce
+              </div>
+              <h3 className="text-2xl font-bold mb-2 text-white">Iniciación</h3>
+              <p className="text-gray-400 text-sm mb-6">Ideal para dar tus primeros pasos firmes en los mercados financieros.</p>
+              
+              <div className="mb-6">
+                <span className="text-4xl font-black text-white">$49</span>
+                <span className="text-gray-400 text-sm"> / único pago</span>
+              </div>
+
+              <ul className="space-y-3 mb-8 text-sm text-gray-300">
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#cd7f32]" /> Módulos de estudio básicos
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#cd7f32]" /> Acceso a comunidad general
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#cd7f32]" /> Gestión de riesgo fundamental
+                </li>
+              </ul>
+            </div>
+
+            <Link 
+              to="/register" 
+              className="w-full py-3 px-4 rounded-xl font-bold text-center bg-white/5 hover:bg-[#cd7f32] hover:text-white transition-colors border border-white/10"
+            >
+              Elegir Plan
+            </Link>
+          </div>
+
+          {/* Plan Plata */}
+          <div className="bg-darkCard p-8 rounded-3xl border border-white/10 flex flex-col justify-between relative hover:border-[#94a3b8]/50 transition-all duration-300">
+            <div>
+              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#94a3b8]/20 text-[#94a3b8] border border-[#94a3b8]/30 mb-4">
+                Plan Plata
+              </div>
+              <h3 className="text-2xl font-bold mb-2 text-white">Intermedio</h3>
+              <p className="text-gray-400 text-sm mb-6">Para traders que buscan operativa en vivo y alertas constantes.</p>
+              
+              <div className="mb-6">
+                <span className="text-4xl font-black text-white">$99</span>
+                <span className="text-gray-400 text-sm"> / único pago</span>
+              </div>
+
+              <ul className="space-y-3 mb-8 text-sm text-gray-300">
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#94a3b8]" /> Todo lo incluido en Bronce
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#94a3b8]" /> Clases y análisis en vivo
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#94a3b8]" /> Canal de señales y alertas
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#94a3b8]" /> Soporte prioritario
+                </li>
+              </ul>
+            </div>
+
+            <Link 
+              to="/register" 
+              className="w-full py-3 px-4 rounded-xl font-bold text-center bg-white/5 hover:bg-[#94a3b8] hover:text-black transition-colors border border-white/10"
+            >
+              Elegir Plan
+            </Link>
+          </div>
+
+          {/* Plan Oro (Destacado) */}
+          <div className="bg-darkCard p-8 rounded-3xl border-2 border-brandOrange flex flex-col justify-between relative shadow-[0_0_30px_rgba(255,90,0,0.2)] transform md:-translate-y-2">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brandOrange text-white text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
+              Más Popular / VIP
+            </div>
+
+            <div>
+              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/30 mb-4 mt-2">
+                Plan Oro
+              </div>
+              <h3 className="text-2xl font-bold mb-2 text-white">Profesional</h3>
+              <p className="text-gray-400 text-sm mb-6">Acompañamiento total, psicotrading y acceso ilimitado a la academia.</p>
+              
+              <div className="mb-6">
+                <span className="text-4xl font-black text-white">$199</span>
+                <span className="text-gray-400 text-sm"> / único pago</span>
+              </div>
+
+              <ul className="space-y-3 mb-8 text-sm text-gray-300">
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Todo lo incluido en Plata
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Módulos institucionales avanzados
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Sesiones de Psicotrading
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Networking exclusivo VIP
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Acceso directo con mentores
+                </li>
+              </ul>
+            </div>
+
+            <Link 
+              to="/register" 
+              className="w-full py-3 px-4 rounded-xl font-bold text-center bg-brandOrange hover:bg-brandOrangeHover text-white transition-colors shadow-[0_0_15px_rgba(255,90,0,0.4)]"
+            >
+              Elegir Plan
+            </Link>
+          </div>
+
+        </div>
+        <p className="text-gray-400">
+          * Al elegir un plan, aceptas nuestros términos y condiciones. Por otros medios de pago, contáctanos directamente a través de WhatsApp.
+        </p>
+      </div>
+      {/* -------------------------------------- */}
+
+
       {/* Sección Cómo Funciona */}
       <div className="mt-28 max-w-4xl w-full z-10 text-center">
         <h2 className="text-3xl font-bold mb-4">¿Cómo funciona el acceso?</h2>
@@ -128,6 +268,7 @@ export default function Home() {
           />
         </div>
       </div>
+
       {/* Sección de Brókers / Aliados Estratégicos con Logos Locales */}
       <div className="mt-28 max-w-3xl w-full z-10 text-center">
         <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-8">

@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import api from '../api/axios'; // Importa la instancia de Axios con interceptores
+import api from '../api/axios'; 
+
+// Importación y parche de compatibilidad para Vite
+import PhoneInputRaw from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+const PhoneInput = PhoneInputRaw?.default || PhoneInputRaw;
 
 export default function Register() {
   const [formData, setFormData] = useState({
     name: '',
+    lastName: '',
+    phone: '', 
     email: '',
     confirmEmail: '',
     password: '',
@@ -24,26 +31,31 @@ export default function Register() {
     setMessage('');
     setIsError(false);
 
-    // Validar que los correos coincidan
     if (formData.email !== formData.confirmEmail) {
       setIsError(true);
       setMessage('Los correos electrónicos no coinciden.');
       return;
     }
 
-    // Validar que las contraseñas coincidan
     if (formData.password !== formData.confirmPassword) {
       setIsError(true);
       setMessage('Las contraseñas no coinciden.');
       return;
     }
 
+    if (!formData.phone || formData.phone.length < 8) {
+      setIsError(true);
+      setMessage('El número de teléfono es obligatorio y debe ser válido.');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Enviamos solo los datos que el backend necesita (sin los campos de confirmación)
       const payload = {
         name: formData.name,
+        lastName: formData.lastName,
+        phone: `+${formData.phone}`, 
         email: formData.email,
         password: formData.password
       };
@@ -82,22 +94,66 @@ export default function Register() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nombre Completo */}
-          <div>
-            <label className="block text-sm text-gray-300 mb-1.5 font-medium">Nombre Completo</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                <User size={18} />
+          <div className="flex gap-4">
+            {/* Nombre */}
+            <div className="w-1/2">
+              <label className="block text-sm text-gray-300 mb-1.5 font-medium">Nombre</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                  <User size={18} />
+                </div>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="Nombre"
+                  value={formData.name}
+                  className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
+                  onChange={(e) => setFormData({...formData, name: e.target.value})} 
+                />
               </div>
-              <input 
-                type="text" 
-                required 
-                placeholder="Tu nombre"
-                value={formData.name}
-                className="w-full bg-darkBg border border-white/10 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
-                onChange={(e) => setFormData({...formData, name: e.target.value})} 
-              />
             </div>
+
+            {/* Apellido */}
+            <div className="w-1/2">
+              <label className="block text-sm text-gray-300 mb-1.5 font-medium">Apellido</label>
+              <div className="relative">
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="Apellido"
+                  value={formData.lastName}
+                  className="w-full bg-darkBg border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-brandOrange transition-colors"
+                  onChange={(e) => setFormData({...formData, lastName: e.target.value})} 
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Teléfono Inteligente con Banderas */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-1.5 font-medium">Teléfono (WhatsApp)</label>
+            <PhoneInput
+              country={'ar'} 
+              value={formData.phone}
+              onChange={phone => setFormData({...formData, phone})}
+              enableSearch={true} 
+              searchPlaceholder="Buscar país..."
+              searchNotFound="País no encontrado"
+              containerClass="!w-full"
+              inputClass="!w-full !bg-darkBg !border !border-white/10 !text-white !h-[46px] !rounded-lg focus:!border-brandOrange !pl-[50px] !transition-colors"
+              buttonClass="!bg-transparent !border-0 !border-r !border-white/10 !rounded-l-lg hover:!bg-white/5"
+              dropdownClass="!bg-[#1a1a2e] !text-white !border !border-white/10 custom-phone-dropdown" 
+              searchClass="!bg-darkBg !text-white !border-b !border-white/10 !p-2"
+            />
+            <style>{`
+              .custom-phone-dropdown .search-box {
+                background-color: #1a1a2e !important;
+                color: white !important;
+              }
+              .custom-phone-dropdown li:hover {
+                background-color: rgba(255, 90, 0, 0.2) !important;
+              }
+            `}</style>
           </div>
 
           {/* Correo Electrónico */}
