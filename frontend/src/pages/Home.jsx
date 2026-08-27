@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Users, Video, MessageCircle, Headphones, Activity, Check } from 'lucide-react';
+import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Users, Video, MessageCircle, Headphones, Activity, Check, CircleX } from 'lucide-react';
 import vantageLogo from '../assets/logo_vantage.png';
 import libertexLogo from '../assets/logo_libertex.png';
 
@@ -114,42 +114,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-          
-          {/* Plan Bronce */}
-          <div className="bg-darkCard p-8 rounded-3xl border border-white/10 flex flex-col justify-between relative hover:border-[#cd7f32]/50 transition-all duration-300">
-            <div>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#cd7f32]/20 text-[#cd7f32] border border-[#cd7f32]/30 mb-4">
-                Plan Bronce
-              </div>
-              <h3 className="text-2xl font-bold mb-2 text-white">Iniciación</h3>
-              <p className="text-gray-400 text-sm mb-6">Ideal para dar tus primeros pasos firmes en los mercados financieros.</p>
-              
-              <div className="mb-6">
-                <span className="text-4xl font-black text-white">$49</span>
-                <span className="text-gray-400 text-sm"> / único pago</span>
-              </div>
-
-              <ul className="space-y-3 mb-8 text-sm text-gray-300">
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#cd7f32]" /> Módulos de estudio básicos
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#cd7f32]" /> Acceso a comunidad general
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#cd7f32]" /> Gestión de riesgo fundamental
-                </li>
-              </ul>
-            </div>
-
-            <Link 
-              to="/register" 
-              className="w-full py-3 px-4 rounded-xl font-bold text-center bg-white/5 hover:bg-[#cd7f32] hover:text-white transition-colors border border-white/10"
-            >
-              Elegir Plan
-            </Link>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
 
           {/* Plan Plata */}
           <div className="bg-darkCard p-8 rounded-3xl border border-white/10 flex flex-col justify-between relative hover:border-[#94a3b8]/50 transition-all duration-300">
@@ -157,8 +122,7 @@ export default function Home() {
               <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#94a3b8]/20 text-[#94a3b8] border border-[#94a3b8]/30 mb-4">
                 Plan Plata
               </div>
-              <h3 className="text-2xl font-bold mb-2 text-white">Intermedio</h3>
-              <p className="text-gray-400 text-sm mb-6">Para traders que buscan operativa en vivo y alertas constantes.</p>
+              <h3 className="text-gray-300 text-md mb-6">Aprendé. Practicá. <strong className="text-gray">Evolucioná.</strong></h3>
               
               <div className="mb-6">
                 <span className="text-4xl font-black text-white">$99</span>
@@ -167,16 +131,31 @@ export default function Home() {
 
               <ul className="space-y-3 mb-8 text-sm text-gray-300">
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Todo lo incluido en Bronce
+                  <Check size={16} className="text-[#94a3b8]" /> Estrategia grabada.
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Clases y análisis en vivo
+                  <Check size={16} className="text-[#94a3b8]" /> Trading en vivo.
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Canal de señales y alertas
+                  <Check size={16} className="text-[#94a3b8]" /> Señales.
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Soporte prioritario
+                  <Check size={16} className="text-[#94a3b8]" /> Clases de mentalidad.
+                </li>
+                 <li className="flex items-center gap-2">
+                  <CircleX size={16} className="text-red-500" /> Bono en broker (+$150 USD).
+                </li>
+                <li className="flex items-center gap-2">
+                  <CircleX size={16} className="text-red-500" /> Acompañamiento personalizado.
+                </li>
+                <li className="flex items-center gap-2">
+                  <CircleX size={16} className="text-red-500" /> Profundidad de mercado.
+                </li>
+                <li className="flex items-center gap-2">
+                  <CircleX size={16} className="text-red-500" /> Clases tematicas personalizadas.
+                </li>
+                <li className="flex items-center gap-2">
+                  <CircleX size={16} className="text-red-500" /> Sorteos.
                 </li>
               </ul>
             </div>
@@ -199,8 +178,7 @@ export default function Home() {
               <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/30 mb-4 mt-2">
                 Plan Oro
               </div>
-              <h3 className="text-2xl font-bold mb-2 text-white">Profesional</h3>
-              <p className="text-gray-400 text-sm mb-6">Acompañamiento total, psicotrading y acceso ilimitado a la academia.</p>
+              <h3 className="text-gray-300 text-md mb-6">Formación. Acción. <strong className="text-[#eab308]">Resultados.</strong></h3>
               
               <div className="mb-6">
                 <span className="text-4xl font-black text-white">$199</span>
@@ -209,19 +187,31 @@ export default function Home() {
 
               <ul className="space-y-3 mb-8 text-sm text-gray-300">
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Todo lo incluido en Plata
+                  <Check size={16} className="text-[#eab308]" /> Estrategia grabada.
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Módulos institucionales avanzados
+                  <Check size={16} className="text-[#eab308]" /> Trading en vivo.
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Sesiones de Psicotrading
+                  <Check size={16} className="text-[#eab308]" /> Señales.
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Networking exclusivo VIP
+                  <Check size={16} className="text-[#eab308]" /> Clases de mentalidad.
+                </li>
+                 <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Bono en broker (+$150 USD).
                 </li>
                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Acceso directo con mentores
+                  <Check size={16} className="text-[#eab308]" /> Acompañamiento personalizado.
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Profundidad de mercado.
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Clases tematicas personalizadas.
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check size={16} className="text-[#eab308]" /> Sorteos.
                 </li>
               </ul>
             </div>
