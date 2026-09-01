@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { Lock, Mail, Eye, EyeOff } from 'lucide-react';
-import api from '../api/axios'; // Importa la instancia de Axios con interceptores
+import api from '../api/axios';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Capturamos el estado del pago cuando el usuario es redirigido desde Mercado Pago
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      setSuccessMessage('¡Pago exitoso! Tu cuenta ya ha sido activada. Por favor, inicia sesión.');
+    } else if (paymentStatus === 'failure') {
+      setError('El pago no pudo completarse o fue cancelado. Inténtalo de nuevo.');
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,18 +30,15 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/login', formData);
 
-      // Guardar información del usuario y token en localStorage
       localStorage.setItem('userInfo', JSON.stringify(data));
       localStorage.setItem('token', data.token);
 
-      // Redireccionar según el rol usando { replace: true }
       if (data.role === 'admin') {
         navigate('/admin', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
 
-      // Recargar la ventana para actualizar el estado del Navbar
       window.location.reload();
     } catch (err) {
       setError(err.response?.data?.message || 'Credenciales inválidas o error en el servidor');
@@ -45,6 +54,12 @@ export default function Login() {
         <p className="text-gray-400 text-sm text-center mb-6">
           Ingresa tus credenciales para acceder a la plataforma
         </p>
+
+        {successMessage && (
+          <div className="bg-green-500/10 border border-green-500/50 text-green-400 p-3 rounded-lg mb-6 text-sm text-center">
+            {successMessage}
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 text-sm text-center">

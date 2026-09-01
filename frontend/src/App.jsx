@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
+import LandingPromo from './pages/LandingPromo'; // Importa el componente LandingPromo
 
 // Componente para el botón flotante de WhatsApp (Solo visible si NO está logueado)
 function WhatsAppButton() {
@@ -102,6 +103,7 @@ function App() {
         <main className="pt-16">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/promo" element={<LandingPromo />} /> {/* Ruta para LandingPromo */}
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<AdminDashboard />} />

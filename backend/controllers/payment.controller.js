@@ -12,7 +12,6 @@ const PLAN_PRICES = {
   Oro: 199
 };
 
-// 1. Crear la preferencia de pago para redirigir al usuario a Mercado Pago
 exports.createPreference = async (req, res) => {
   try {
     const { plan, email, name } = req.body;
@@ -22,6 +21,10 @@ exports.createPreference = async (req, res) => {
     }
 
     const price = PLAN_PRICES[plan];
+
+    // Tomamos las URLs reales desde las variables de entorno configuradas en Render
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
 
     const preference = new Preference(client);
     const result = await preference.create({
@@ -39,19 +42,20 @@ exports.createPreference = async (req, res) => {
           name: name || 'Trader'
         },
         back_urls: {
-          success: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/login?payment=success`,
-          failure: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?payment=failure`,
-          pending: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/?payment=pending`,
+          success: `${frontendUrl}/login?payment=success`,
+          failure: `${frontendUrl}/?payment=failure`,
+          pending: `${frontendUrl}/?payment=pending`,
         },
         auto_return: 'approved',
-        notification_url: `${process.env.BACKEND_URL || 'https://tu-dominio.com'}/api/payments/webhook`,
+        // ¡Ahora sí habilitamos el Webhook de Render para que procese el pago solo!
+        notification_url: `${backendUrl}/api/payments/webhook`,
       }
     });
 
     res.json({ init_point: result.init_point });
   } catch (error) {
     console.error('Error creando preferencia de MP:', error);
-    res.status(500).json({ message: 'Error al procesar el pago con Mercado Pago' });
+    res.status(500).json({ message: error.message || 'Error al procesar el pago con Mercado Pago' });
   }
 };
 

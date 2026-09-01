@@ -8,13 +8,20 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
-// Función auxiliar para enviar correos mediante la API HTTP de Brevo
 const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SENDER_EMAIL;
 
+  // 🛡️ Red de seguridad: si toEmail viene vacío o undefined, 
+  // usamos por defecto el correo del admin o el senderEmail del .env
+  const targetEmail = toEmail || process.env.ADMIN_EMAIL || senderEmail;
+
   if (!apiKey) {
     throw new Error('La variable de entorno BREVO_API_KEY no está configurada.');
+  }
+
+  if (!targetEmail) {
+    throw new Error('No hay un destinatario válido para enviar el correo de Brevo.');
   }
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -26,7 +33,7 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
     },
     body: JSON.stringify({
       sender: { name: "Academia", email: senderEmail },
-      to: [{ email: toEmail }],
+      to: [{ email: targetEmail }], // Usamos la variable segura
       subject: subject,
       htmlContent: htmlContent
     })

@@ -1,18 +1,61 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Users, Video, MessageCircle, Headphones, Activity, Check, CircleX } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Video, MessageCircle, Headphones, Activity, Check, Info } from 'lucide-react';
 import vantageLogo from '../assets/logo_vantage.png';
 import libertexLogo from '../assets/logo_libertex.png';
 
 export default function Home() {
+  const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
+  
+  // Estado para la modalidad / bróker (igual que en LandingPromo)
+  const [brokerChoice, setBrokerChoice] = useState('vantage');
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  // Definición de planes con precios diferenciados por bróker
+  const plans = [
+    {
+      name: 'Plan Plata',
+      priceReferral: 99,       // Precio con bróker asociado
+      priceIndependent: 199,   // Precio independiente
+      features: [
+        'Estrategia grabada',
+        'Trading en vivo',
+        'Señales y alertas',
+        'Clases de mentalidad'
+      ]
+    },
+    {
+      name: 'Plan Oro',
+      priceReferral: 199,      // Precio con bróker asociado (Más popular / VIP)
+      priceIndependent: 349,   // Precio independiente
+      features: [
+        'Todo lo incluido en Plan Plata',
+        'Bono en broker (+$150 USD)',
+        'Acompañamiento personalizado',
+        'Profundidad de mercado',
+        'Clases temáticas personalizadas',
+        'Sorteos exclusivos'
+      ]
+    }
+  ];
+
+  // Función de compra que guarda el estado y redirige al registro
+  const handlePurchase = (planName, price) => {
+    const checkoutData = {
+      plan: planName,
+      broker: brokerChoice,
+      price: price
+    };
+    localStorage.setItem('checkout_pending', JSON.stringify(checkoutData));
+    navigate('/register');
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 relative overflow-hidden py-16">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 relative overflow-hidden py-16 text-white">
       
       {/* Glow de fondo cenital */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-brandOrange/10 blur-[140px] pointer-events-none rounded-full" />
@@ -64,7 +107,7 @@ export default function Home() {
         />
       </div>
 
-      {/* --- NUEVA SECCIÓN: EL FACTOR COMUNIDAD Y EN VIVO --- */}
+      {/* SECCIÓN: EL FACTOR COMUNIDAD Y EN VIVO */}
       <div className="mt-28 max-w-5xl w-full z-10">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-brandOrange text-sm font-bold uppercase tracking-widest bg-brandOrange/10 px-4 py-1.5 rounded-full border border-brandOrange/20">
@@ -99,138 +142,141 @@ export default function Home() {
           />
         </div>
       </div>
-      {/* -------------------------------------------------- */}
 
-
-      {/* --- SECCIÓN: PLANES Y MEMBRESÍAS --- */}
+      {/* --- SECCIÓN: PLANES Y MEMBRESÍAS (FLUJO UNIFICADO CON LANDING PROMO) --- */}
       <div className="mt-28 max-w-6xl w-full z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="text-brandOrange text-sm font-bold uppercase tracking-widest bg-brandOrange/10 px-4 py-1.5 rounded-full border border-brandOrange/20">
-            Inversión en tu Futuro
-          </span>
-          <h2 className="text-3xl md:text-4xl font-extrabold mt-4 mb-4">Elige tu Plan de Membresía</h2>
-          <p className="text-gray-400">
-            Selecciona el nivel de formación que mejor se adapte a tus metas financieras y accede a la academia.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
-
-          {/* Plan Plata */}
-          <div className="bg-darkCard p-8 rounded-3xl border border-white/10 flex flex-col justify-between relative hover:border-[#94a3b8]/50 transition-all duration-300">
-            <div>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#94a3b8]/20 text-[#94a3b8] border border-[#94a3b8]/30 mb-4">
-                Plan Plata
-              </div>
-              <h3 className="text-gray-300 text-md mb-6">Aprendé. Practicá. <strong className="text-gray">Evolucioná.</strong></h3>
-              
-              <div className="mb-6">
-                <span className="text-4xl font-black text-white">$99</span>
-                <span className="text-gray-400 text-sm"> / único pago</span>
-              </div>
-
-              <ul className="space-y-3 mb-8 text-sm text-gray-300">
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Estrategia grabada.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Trading en vivo.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Señales.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#94a3b8]" /> Clases de mentalidad.
-                </li>
-                 <li className="flex items-center gap-2">
-                  <CircleX size={16} className="text-red-500" /> Bono en broker (+$150 USD).
-                </li>
-                <li className="flex items-center gap-2">
-                  <CircleX size={16} className="text-red-500" /> Acompañamiento personalizado.
-                </li>
-                <li className="flex items-center gap-2">
-                  <CircleX size={16} className="text-red-500" /> Profundidad de mercado.
-                </li>
-                <li className="flex items-center gap-2">
-                  <CircleX size={16} className="text-red-500" /> Clases tematicas personalizadas.
-                </li>
-                <li className="flex items-center gap-2">
-                  <CircleX size={16} className="text-red-500" /> Sorteos.
-                </li>
-              </ul>
-            </div>
-
-            <Link 
-              to="/register" 
-              className="w-full py-3 px-4 rounded-xl font-bold text-center bg-white/5 hover:bg-[#94a3b8] hover:text-black transition-colors border border-white/10"
-            >
-              Elegir Plan
-            </Link>
+        {/* Sección de Selección de Modalidad / Bróker */}
+        <div className="mb-12">
+          <div className="text-center mb-6">
+            <h3 className="text-3xl font-bold mb-2">Elige tu modalidad de ingreso</h3>
+            <p className="text-gray-400 text-sm">Podés obtener un descuento importante en tu inscripción si utilizás nuestros brókers asociados.</p>
           </div>
 
-          {/* Plan Oro (Destacado) */}
-          <div className="bg-darkCard p-8 rounded-3xl border-2 border-brandOrange flex flex-col justify-between relative shadow-[0_0_30px_rgba(255,90,0,0.2)] transform md:-translate-y-2">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brandOrange text-white text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
-              Más Popular / VIP
-            </div>
-
-            <div>
-              <div className="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#eab308]/20 text-[#eab308] border border-[#eab308]/30 mb-4 mt-2">
-                Plan Oro
-              </div>
-              <h3 className="text-gray-300 text-md mb-6">Formación. Acción. <strong className="text-[#eab308]">Resultados.</strong></h3>
-              
-              <div className="mb-6">
-                <span className="text-4xl font-black text-white">$199</span>
-                <span className="text-gray-400 text-sm"> / único pago</span>
-              </div>
-
-              <ul className="space-y-3 mb-8 text-sm text-gray-300">
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Estrategia grabada.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Trading en vivo.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Señales.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Clases de mentalidad.
-                </li>
-                 <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Bono en broker (+$150 USD).
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Acompañamiento personalizado.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Profundidad de mercado.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Clases tematicas personalizadas.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Check size={16} className="text-[#eab308]" /> Sorteos.
-                </li>
-              </ul>
-            </div>
-
-            <Link 
-              to="/register" 
-              className="w-full py-3 px-4 rounded-xl font-bold text-center bg-brandOrange hover:bg-brandOrangeHover text-white transition-colors shadow-[0_0_15px_rgba(255,90,0,0.4)]"
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {/* Opción Vantage */}
+            <button 
+              onClick={() => setBrokerChoice('vantage')}
+              className={`p-6 rounded-2xl border-2 text-left transition-all ${
+                brokerChoice === 'vantage' 
+                ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_20px_rgba(255,90,0,0.2)]' 
+                : 'border-white/10 bg-darkCard hover:border-white/30'
+              }`}
             >
-              Elegir Plan
-            </Link>
-          </div>
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-bold text-lg">Broker Vantage</h4>
+                {brokerChoice === 'vantage' && <Check className="text-brandOrange" size={20} />}
+              </div>
+              <span className="inline-block bg-green-500/20 text-green-400 text-xs font-bold px-2 py-1 rounded mb-3">
+                + Bono de 200 USD
+              </span>
+              <p className="text-sm text-gray-400">Inscripción a precio reducido + bono al fondear tu cuenta.</p>
+            </button>
 
+            {/* Opción Libertex */}
+            <button 
+              onClick={() => setBrokerChoice('libertex')}
+              className={`p-6 rounded-2xl border-2 text-left transition-all ${
+                brokerChoice === 'libertex' 
+                ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_20px_rgba(255,90,0,0.2)]' 
+                : 'border-white/10 bg-darkCard hover:border-white/30'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-bold text-lg">Broker Libertex</h4>
+                {brokerChoice === 'libertex' && <Check className="text-brandOrange" size={20} />}
+              </div>
+              <span className="inline-block bg-blue-500/20 text-blue-400 text-xs font-bold px-2 py-1 rounded mb-3">
+                Sin Bono
+              </span>
+              <p className="text-sm text-gray-400">Inscripción a precio reducido operando con Libertex.</p>
+            </button>
+
+            {/* Opción Independiente */}
+            <button 
+              onClick={() => setBrokerChoice('independent')}
+              className={`p-6 rounded-2xl border-2 text-left transition-all ${
+                brokerChoice === 'independent' 
+                ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_20px_rgba(255,90,0,0.2)]' 
+                : 'border-white/10 bg-darkCard hover:border-white/30'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-bold text-lg">Independiente</h4>
+                {brokerChoice === 'independent' && <Check className="text-brandOrange" size={20} />}
+              </div>
+              <span className="inline-block bg-gray-500/20 text-gray-400 text-xs font-bold px-2 py-1 rounded mb-3">
+                Tu propio broker
+              </span>
+              <p className="text-sm text-gray-400">Abonás el valor completo sin restricciones de bróker.</p>
+            </button>
+          </div>
         </div>
-        <p className="text-gray-400">
+
+        {/* Tarjetas de Planes Dinámicas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
+          {plans.map((plan, index) => {
+            const currentPrice = brokerChoice === 'independent' ? plan.priceIndependent : plan.priceReferral;
+            const isOro = index === 1;
+
+            return (
+              <div 
+                key={index} 
+                className={`bg-darkCard p-8 rounded-3xl border flex flex-col justify-between relative ${
+                  isOro 
+                  ? 'border-2 border-brandOrange shadow-[0_0_30px_rgba(255,90,0,0.2)] transform md:-translate-y-2' 
+                  : 'border-white/10'
+                }`}
+              >
+                {isOro && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brandOrange text-white text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
+                    Más Popular / VIP
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                  
+                  <div className="mb-6">
+                    <span className="text-4xl font-black text-white">${currentPrice}</span>
+                    <span className="text-gray-400 text-sm"> / pago único</span>
+                  </div>
+
+                  {brokerChoice !== 'independent' && (
+                    <div className="flex items-center gap-2 mb-6 bg-green-500/10 text-green-400 p-3 rounded-lg text-sm border border-green-500/20">
+                      <Info size={16} />
+                      <span>Incluye descuento por bróker asociado</span>
+                    </div>
+                  )}
+
+                  <ul className="space-y-3 mb-8 text-sm text-gray-300">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check size={16} className={isOro ? 'text-brandOrange' : 'text-gray-400'} /> 
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <button 
+                  onClick={() => handlePurchase(plan.name, currentPrice)}
+                  className={`w-full py-3 px-4 rounded-xl font-bold text-center transition-all ${
+                    isOro
+                    ? 'bg-brandOrange hover:bg-brandOrangeHover text-white shadow-[0_0_15px_rgba(255,90,0,0.4)]'
+                    : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
+                  }`}
+                >
+                  Comenzar con {plan.name}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-gray-400 text-center mt-8 text-sm">
           * Al elegir un plan, aceptas nuestros términos y condiciones. Por otros medios de pago, contáctanos directamente a través de WhatsApp.
         </p>
       </div>
-      {/* -------------------------------------- */}
-
 
       {/* Sección Cómo Funciona */}
       <div className="mt-28 max-w-4xl w-full z-10 text-center">
@@ -259,14 +305,12 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sección de Brókers / Aliados Estratégicos con Logos Locales */}
+      {/* Sección de Brókers / Aliados Estratégicos */}
       <div className="mt-28 max-w-3xl w-full z-10 text-center">
         <p className="text-sm uppercase tracking-widest text-gray-500 font-semibold mb-8">
           Brókers y Aliados Estratégicos Asociados
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center">
-          
-          {/* Bróker 1 */}
           <a href="https://latam.vantagemarkets.com/es/" target="_blank" rel="noopener noreferrer" className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
@@ -278,7 +322,6 @@ export default function Home() {
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Vantage Markets</span>
           </a>
 
-          {/* Bróker 2 */}
           <a href="https://libertex.org/es" target="_blank" rel="noopener noreferrer" className="bg-darkCard/60 border border-white/5 p-6 rounded-2xl flex flex-col items-center justify-center text-center hover:border-brandOrange/40 transition-all duration-300 group">
             <div className="h-12 flex items-center justify-center mb-3">
               <img 
@@ -289,7 +332,6 @@ export default function Home() {
             </div>
             <span className="font-bold text-white text-base group-hover:text-brandOrange transition-colors">Libertex</span>
           </a>
-
         </div>
       </div>
 
