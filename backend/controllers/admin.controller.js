@@ -18,7 +18,7 @@ exports.approveUser = async (req, res) => {
     }
 
     const { plan } = req.body;
-    if (plan && ['Bronce', 'Plata', 'Oro'].includes(plan)) {
+    if (plan && ['Plata', 'Oro'].includes(plan)) {
       user.plan = plan;
     }
 
@@ -53,7 +53,7 @@ exports.approveUser = async (req, res) => {
 
           <div style="text-align: center; margin-bottom: 25px;">
             <span style="background-color: ${planBadgeColor}20; color: ${planBadgeColor}; border: 1px solid ${planBadgeColor}50; padding: 8px 20px; border-radius: 9999px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">
-              Plan ${user.plan || 'Bronce'}
+              Plan ${user.plan || 'Plata'}
             </span>
           </div>
 
@@ -104,7 +104,7 @@ exports.approveUser = async (req, res) => {
 exports.updateUserPlan = async (req, res) => {
   try {
     const { plan } = req.body;
-    if (!['Bronce', 'Plata', 'Oro'].includes(plan)) {
+    if (!['Plata', 'Oro'].includes(plan)) {
       return res.status(400).json({ message: 'Plan no válido' });
     }
 

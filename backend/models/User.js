@@ -2,14 +2,17 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true }, // Se usará para el Nombre
-  lastName: { type: String, required: true }, // Nuevo: Apellido
-  phone: { type: String, required: true }, // Nuevo: Teléfono
+  name: { type: String, required: true }, 
+  lastName: { type: String, required: true }, 
+  phone: { type: String, required: true }, 
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  isApproved: { type: Boolean, default: false },
+  isApproved: { type: Boolean, default: false }, // Acceso a la plataforma
+  isPaid: { type: Boolean, default: false }, // NUEVO: Si completó el pago en MP
   role: { type: String, default: 'user' },
-  plan: { type: String, enum: ['Bronce', 'Plata', 'Oro'], default: 'Bronce' },
+  plan: { type: String, enum: ['Plata', 'Oro'], default: 'Plata' },
+  broker: { type: String, enum: ['vantage', 'libertex', 'independent'], default: 'independent' }, // NUEVO
+  checkoutPrice: { type: Number, default: 0 }, 
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date }
 }, { timestamps: true });

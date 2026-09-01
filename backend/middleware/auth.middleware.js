@@ -3,34 +3,32 @@ const User = require('../models/User');
 
 const protect = async (req, res, next) => {
   let token;
-  
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
       req.user = await User.findById(decoded.id).select('-password');
       
       if (!req.user) {
         return res.status(401).json({ message: 'No autorizado, usuario no encontrado' });
       }
-
-      // NUEVO: Verificar si el usuario fue aprobado por el administrador (excepto si él mismo es admin)
-      if (!req.user.isApproved && req.user.role !== 'admin') {
-        return res.status(403).json({ 
-          message: 'Tu cuenta está pendiente de aprobación por el administrador. Por favor, espera a ser autorizado.' 
-        });
-      }
-
+      // ELIMINAMOS EL BLOQUEO DE isApproved AQUÍ
       return next();
     } catch (error) {
       return res.status(401).json({ message: 'No autorizado, token falló o expiró' });
     }
   }
-
   if (!token) {
     return res.status(401).json({ message: 'No autorizado, no hay token' });
   }
+};
+
+// NUEVO: Middleware específico para bloquear aulas a usuarios no aprobados
+const approvedOnly = (req, res, next) => {
+  if (!req.user.isApproved && req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Tu cuenta está pendiente de aprobación.' });
+  }
+  next();
 };
 
 const admin = (req, res, next) => {
@@ -41,4 +39,4 @@ const admin = (req, res, next) => {
   }
 };
 
-module.exports = { protect, admin };
+module.exports = { protect, approvedOnly, admin };

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -33,11 +33,7 @@ export default function ChangePassword() {
         }
       };
 
-      const { data } = await axios.put(
-        `${import.meta.env.VITE_API_URL}/auth/update-password`,
-        { currentPassword, newPassword },
-        config
-      );
+      const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
 
       setMessage({ text: data.message || 'Contraseña actualizada con éxito', type: 'success' });
       setCurrentPassword('');

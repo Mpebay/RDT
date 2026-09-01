@@ -11,18 +11,18 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   
+  // Estado inicial limpio del Plan Bronce
   const [newModule, setNewModule] = useState({ 
     title: '', 
     description: '', 
     videoUrl: '', 
     duration: '', 
     level: 'Principiante', 
-    planRequired: 'Bronce' 
+    planRequired: 'Plata' // Cambiado a Plata
   });
 
   const navigate = useNavigate();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-  const config = { headers: { Authorization: `Bearer ${userInfo?.token}` } };
 
   useEffect(() => {
     if (!userInfo || userInfo.role !== 'admin') {
@@ -36,44 +36,82 @@ export default function AdminDashboard() {
   // -- GESTIÓN DE ALUMNOS --
   const fetchUsers = async () => {
     try {
-      const { data } = await api.get(`${import.meta.env.VITE_API_URL}/admin/users`, config);
+      const { data } = await api.get('/admin/users');
       setUsers(data);
     } catch (error) { console.error('Error fetching users', error); }
   };
 
   const approveHandler = async (user) => {
-    const chosenPlan = user.plan || 'Bronce';
+    const chosenPlan = user.plan || 'Plata';
     if (window.confirm(`¿Aprobar a ${user.name} en el Plan ${chosenPlan}?`)) {
-      await api.put(`${import.meta.env.VITE_API_URL}/admin/users/${user._id}/approve`, { plan: chosenPlan }, config);
+      await api.put(`/admin/users/${user._id}/approve`, { plan: chosenPlan });
       fetchUsers();
     }
   };
 
   const changePlanHandler = async (userId, newPlan) => {
     try {
-      await api.put(`${import.meta.env.VITE_API_URL}/admin/users/${userId}/plan`, { plan: newPlan }, config);
+      await api.put(`/admin/users/${userId}/plan`, { plan: newPlan });
       fetchUsers();
-    } catch (error) {
-      alert('Error al cambiar el plan del usuario');
-    }
+    } catch (error) { alert('Error al cambiar el plan'); }
   };
 
   const deleteUserHandler = async (id) => {
     if (window.confirm('¿Eliminar usuario?')) {
-      await api.delete(`${import.meta.env.VITE_API_URL}/admin/users/${id}`, config);
+      await api.delete(`/admin/users/${id}`);
       fetchUsers();
     }
   };
 
   const toggleRoleHandler = async (id, currentRole) => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
-    if (window.confirm(newRole === 'admin' ? '¿Hacer ADMINISTRADOR a este usuario?' : '¿Quitar permisos de administrador?')) {
+    if (window.confirm(newRole === 'admin' ? '¿Hacer ADMINISTRADOR a este usuario?' : '¿Quitar permisos?')) {
       try {
-        await api.put(`${import.meta.env.VITE_API_URL}/admin/users/${id}/role`, { role: newRole }, config);
+        await api.put(`/admin/users/${id}/role`, { role: newRole });
         fetchUsers();
-      } catch (error) {
-        alert(error.response?.data?.message || 'Error al actualizar rol');
-      }
+      } catch (error) { alert(error.response?.data?.message || 'Error al actualizar rol'); }
+    }
+  };
+
+  // -- GESTIÓN DE MÓDULOS --
+  const fetchModules = async () => {
+    try {
+      const { data } = await api.get('/courses/modules');
+      setModules(data);
+    } catch (error) { console.error('Error fetching modules', error); }
+  };
+
+  const createModuleHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/courses/modules', newModule);
+      setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', planRequired: 'Plata' });
+      fetchModules();
+      alert('Módulo creado con éxito');
+    } catch (error) { console.error('Error creando módulo', error); }
+  };
+
+  const changeModulePlanHandler = async (moduleId, newPlan) => {
+    try {
+      await api.put(`/courses/modules/${moduleId}/plan`, { planRequired: newPlan });
+      fetchModules();
+    } catch (error) { alert('Error actualizando el plan'); }
+  };
+
+  const deleteModuleHandler = async (id) => {
+    if (window.confirm('¿Eliminar módulo?')) {
+      await api.delete(`/courses/modules/${id}`);
+      fetchModules();
+    }
+  };
+
+  const getPlanBadgeStyle = (planName) => {
+    switch (planName) {
+      case 'Oro':
+        return 'border-yellow-500/50 text-yellow-400 bg-yellow-500/10';
+      case 'Plata':
+      default:
+        return 'border-slate-400/50 text-slate-300 bg-slate-500/10';
     }
   };
 
@@ -87,52 +125,6 @@ export default function AdminDashboard() {
       (filterStatus === 'pending' && !user.isApproved);
     return matchesSearch && matchesStatus;
   });
-
-  // -- GESTIÓN DE MÓDULOS --
-  const fetchModules = async () => {
-    try {
-      const { data } = await api.get(`${import.meta.env.VITE_API_URL}/courses/modules`, config);
-      setModules(data);
-    } catch (error) { console.error('Error fetching modules', error); }
-  };
-
-  const createModuleHandler = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post(`${import.meta.env.VITE_API_URL}/courses/modules`, newModule, config);
-      setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', planRequired: 'Bronce' });
-      fetchModules();
-      alert('Módulo creado con éxito');
-    } catch (error) { console.error('Error creando módulo', error); }
-  };
-
-  const changeModulePlanHandler = async (moduleId, newPlan) => {
-    try {
-      await api.put(`${import.meta.env.VITE_API_URL}/courses/modules/${moduleId}/plan`, { planRequired: newPlan }, config);
-      fetchModules();
-    } catch (error) {
-      alert('Error actualizando el plan del módulo');
-    }
-  };
-
-  const deleteModuleHandler = async (id) => {
-    if (window.confirm('¿Eliminar módulo?')) {
-      await api.delete(`${import.meta.env.VITE_API_URL}/courses/modules/${id}`, config);
-      fetchModules();
-    }
-  };
-
-  const getPlanBadgeStyle = (planName) => {
-    switch (planName) {
-      case 'Oro':
-        return 'border-yellow-500/50 text-yellow-400 bg-yellow-500/10';
-      case 'Plata':
-        return 'border-slate-400/50 text-slate-300 bg-slate-500/10';
-      case 'Bronce':
-      default:
-        return 'border-amber-700/50 text-amber-500 bg-amber-700/10';
-    }
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -192,47 +184,72 @@ export default function AdminDashboard() {
           <div className="bg-darkCard rounded-xl border border-white/10 overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm text-gray-400 min-w-[700px]">
-                <thead className="bg-white/5 text-gray-200 uppercase font-semibold">
+                <thead className="bg-white/5 text-gray-200 uppercase font-semibold text-xs">
                   <tr>
-                    <th className="px-6 py-4">Nombre</th>
-                    <th className="px-6 py-4">Email</th>
-                    <th className="px-6 py-4">Rol</th>
-                    <th className="px-6 py-4">Plan (Acceso)</th>
-                    <th className="px-6 py-4">Estado</th>
-                    <th className="px-6 py-4 text-center">Acciones</th>
+                    <th className="px-4 py-4">Nombre</th>
+                    <th className="px-4 py-4">Email</th>
+                    <th className="px-4 py-4">Rol</th>
+                    <th className="px-4 py-4 text-center">Bróker</th>
+                    <th className="px-4 py-4 text-center">Pago (MP)</th>
+                    <th className="px-4 py-4">Plan (Acceso)</th>
+                    <th className="px-4 py-4 text-center">Estado</th>
+                    <th className="px-4 py-4 text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredUsers.map((user) => (
                     <tr key={user._id} className="hover:bg-white/5 transition-colors">
-                      <td className="px-6 py-4 text-white font-medium">{user.name}</td>
-                      <td className="px-6 py-4">{user.email}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-4 text-white font-medium">{user.name} {user.lastName}</td>
+                      <td className="px-4 py-4 text-xs">{user.email}</td>
+                      <td className="px-4 py-4">
                         {user.role === 'admin' ? (
                           <span className="bg-purple-500/10 text-purple-400 px-2 py-1 rounded text-xs font-bold border border-purple-500/20">Admin</span>
                         ) : (
                           <span className="bg-gray-500/10 text-gray-400 px-2 py-1 rounded text-xs border border-gray-500/20">Usuario</span>
                         )}
                       </td>
-                      <td className="px-6 py-4">
+                      
+                      {/* BRÓKER */}
+                      <td className="px-4 py-4 text-center">
+                        {user.broker === 'vantage' && <span className="text-green-400 font-bold uppercase tracking-wider text-[10px]">Vantage</span>}
+                        {user.broker === 'libertex' && <span className="text-blue-400 font-bold uppercase tracking-wider text-[10px]">Libertex</span>}
+                        {(!user.broker || user.broker === 'independent') && <span className="text-gray-400 uppercase tracking-wider text-[10px]">Independ.</span>}
+                      </td>
+
+                      {/* PAGO */}
+                      <td className="px-4 py-4 text-center">
+                        {user.isPaid 
+                          ? <span className="bg-green-500/10 text-green-500 px-2 py-1 rounded text-xs border border-green-500/20 font-bold">Pagado</span>
+                          : <span className="bg-red-500/10 text-red-400 px-2 py-1 rounded text-xs border border-red-500/20">Debe</span>
+                        }
+                      </td>
+
+                      <td className="px-4 py-4">
                         <select
-                          value={user.plan || 'Bronce'}
+                          value={user.plan || 'Plata'}
                           onChange={(e) => changePlanHandler(user._id, e.target.value)}
-                          className={`bg-darkBg border rounded px-2.5 py-1 text-xs font-bold outline-none cursor-pointer ${getPlanBadgeStyle(user.plan || 'Bronce')}`}
+                          className={`bg-darkBg border rounded px-2.5 py-1 text-xs font-bold outline-none cursor-pointer ${getPlanBadgeStyle(user.plan || 'Plata')}`}
                         >
-                          <option value="Bronce" className="bg-darkBg text-white">Plan Bronce</option>
                           <option value="Plata" className="bg-darkBg text-white">Plan Plata</option>
                           <option value="Oro" className="bg-darkBg text-white">Plan Oro 👑</option>
                         </select>
                       </td>
-                      <td className="px-6 py-4">
+                      
+                      {/* ESTADO APROBACIÓN */}
+                      <td className="px-4 py-4 text-center">
                         {user.isApproved 
-                          ? <span className="flex items-center text-green-500"><CheckCircle size={16} className="mr-2" /> Aprobado</span>
-                          : <span className="flex items-center text-yellow-500"><XCircle size={16} className="mr-2" /> Pendiente</span>}
+                          ? <span className="text-green-500 font-bold text-xs flex items-center justify-center"><CheckCircle size={14} className="mr-1" /> Aprobado</span>
+                          : <span className="text-yellow-500 font-bold text-xs flex items-center justify-center"><XCircle size={14} className="mr-1" /> Pendiente</span>}
                       </td>
-                      <td className="px-6 py-4 flex justify-center space-x-3 items-center">
+
+                      {/* ACCIONES */}
+                      <td className="px-4 py-4 flex justify-center space-x-2 items-center">
                         {!user.isApproved && (
-                          <button onClick={() => approveHandler(user)} className="bg-brandOrange hover:bg-brandOrangeHover text-white px-3 py-1.5 rounded-md text-xs font-bold transition-colors">
+                          <button 
+                            onClick={() => approveHandler(user)} 
+                            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${user.isPaid ? 'bg-green-600 hover:bg-green-500 animate-pulse text-white' : 'bg-brandOrange hover:bg-brandOrangeHover text-white'}`}
+                            title={user.isPaid ? "Ya pagó en MP. Aprobar acceso" : "Aprobar (Aún no paga)"}
+                          >
                             Aprobar
                           </button>
                         )}
@@ -246,7 +263,7 @@ export default function AdminDashboard() {
                     </tr>
                   ))}
                   {filteredUsers.length === 0 && (
-                    <tr><td colSpan="6" className="px-6 py-10 text-center text-gray-500">No hay usuarios disponibles.</td></tr>
+                    <tr><td colSpan="8" className="px-6 py-10 text-center text-gray-500">No hay usuarios disponibles.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -296,7 +313,6 @@ export default function AdminDashboard() {
                   onChange={e => setNewModule({...newModule, planRequired: e.target.value})} 
                   className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none font-semibold"
                 >
-                  <option value="Bronce">Plan Bronce (Disponible para todos)</option>
                   <option value="Plata">Plan Plata (Disponible para Plata y Oro)</option>
                   <option value="Oro">Plan Oro 👑 (Exclusivo usuarios Oro)</option>
                 </select>
@@ -314,11 +330,10 @@ export default function AdminDashboard() {
                     <h3 className="text-lg font-bold text-white">{mod.title}</h3>
 
                     <select
-                      value={mod.planRequired || 'Bronce'}
+                      value={mod.planRequired || 'Plata'}
                       onChange={(e) => changeModulePlanHandler(mod._id, e.target.value)}
-                      className={`border rounded px-2.5 py-1 text-xs font-bold outline-none cursor-pointer ${getPlanBadgeStyle(mod.planRequired || 'Bronce')}`}
+                      className={`border rounded px-2.5 py-1 text-xs font-bold outline-none cursor-pointer ${getPlanBadgeStyle(mod.planRequired || 'Plata')}`}
                     >
-                      <option value="Bronce" className="bg-darkBg text-white">Plan Bronce</option>
                       <option value="Plata" className="bg-darkBg text-white">Plan Plata</option>
                       <option value="Oro" className="bg-darkBg text-white">Plan Oro 👑</option>
                     </select>

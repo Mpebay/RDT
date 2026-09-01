@@ -38,52 +38,43 @@ export default function Register() {
     try {
       setLoading(true);
       
-      const config = {
-        headers: { 'Content-Type': 'application/json' },
-      };
+      const registerPayload = { name, lastName, phone, email, password };
       
-      // 1. Registramos al usuario
-      const response = await api.post(
-        '/auth/register',
-        { name, lastName, phone, email, password },
-        config
-      );
+      if (checkoutData) {
+        registerPayload.plan = checkoutData.plan.replace('Plan ', '').trim();
+        registerPayload.checkoutPrice = checkoutData.price;
+        registerPayload.broker = checkoutData.broker; // <-- NUEVO: Enviamos el broker a la BD
+      } else {
+        registerPayload.plan = 'Plata';
+        registerPayload.checkoutPrice = 199; 
+        registerPayload.broker = 'independent';
+      }
 
-      console.log("Respuesta completa del registro:", response.data);
+      // 1. Registramos al usuario guardando su precio permanentemente
+      const response = await api.post('/auth/register', registerPayload);
 
-      // Soportamos ambos formatos (que devuelva el usuario directo o dentro de .user)
       const userData = response.data.user || response.data;
       const userId = userData._id || userData.id;
       const userEmail = userData.email;
 
       localStorage.setItem('userInfo', JSON.stringify(response.data));
 
-     // 2. Verificamos si hay que cobrarle
+      // 2. Verificamos si hay que cobrarle
       if (checkoutData) {
-        console.log("Generando preferencia de pago para:", checkoutData);
-        
-        // Limpiamos el texto del plan por si viene como "Plan Oro" para dejarlo exactamente como "Oro"
-        const cleanPlan = checkoutData.plan.replace('Plan ', '').trim();
-
-        const paymentRes = await api.post(
-          '/payments/create-preference', 
-          {
-            plan: cleanPlan,       // <-- Esto faltaba y es lo que validaba el backend
-            email: userEmail,      // <-- Email del usuario registrado
-            name: name,            // <-- Nombre del usuario
-            userId: userId         // <-- ID de MongoDB
-          },
-          config
-        );
-
-        console.log("Respuesta de Mercado Pago:", paymentRes.data);
+        const paymentRes = await api.post('/payments/create-preference', {
+            plan: registerPayload.plan,
+            email: userEmail,
+            name: name,
+            userId: userId,
+            price: registerPayload.checkoutPrice // Enviamos el precio!
+        });
 
         localStorage.removeItem('checkout_pending');
         
         if (paymentRes.data.init_point) {
           window.location.href = paymentRes.data.init_point;
         } else {
-          throw new Error("No se recibió el link de pago de Mercado Pago");
+          throw new Error("No se recibió el link de pago");
         }
       } else {
         setSuccess(true);
@@ -91,17 +82,14 @@ export default function Register() {
       }
 
     } catch (error) {
-      console.error("Error atrapado en el submit:", error);
-      setError(
-        error.response && error.response.data.message
-          ? error.response.data.message
-          : error.message || 'Ocurrió un error al registrarse'
-      );
+      setError(error.response?.data?.message || error.message || 'Ocurrió un error al registrarse');
       setLoading(false);
     }
   };
 
   return (
+    // ... Pega aquí exactamente el mismo return (HTML) que tienes actualmente en Register.jsx
+    // No hay cambios visuales, solo lógicos.
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-12">
       <div className="max-w-md w-full">
         <div className="bg-darkCard p-8 rounded-2xl border border-white/10 shadow-2xl">
@@ -177,7 +165,7 @@ export default function Register() {
               </div>
               <input
                 type="tel"
-                placeholder="Teléfono / WhatsApp (ej: 2494475552)"
+                placeholder="Teléfono / WhatsApp"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:ring-2 focus:ring-brandOrange focus:border-transparent transition-all outline-none text-white placeholder-gray-500 text-sm"

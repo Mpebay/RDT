@@ -12,17 +12,10 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SENDER_EMAIL;
 
-  // 🛡️ Red de seguridad: si toEmail viene vacío o undefined, 
-  // usamos por defecto el correo del admin o el senderEmail del .env
   const targetEmail = toEmail || process.env.ADMIN_EMAIL || senderEmail;
 
-  if (!apiKey) {
-    throw new Error('La variable de entorno BREVO_API_KEY no está configurada.');
-  }
-
-  if (!targetEmail) {
-    throw new Error('No hay un destinatario válido para enviar el correo de Brevo.');
-  }
+  if (!apiKey) throw new Error('La variable de entorno BREVO_API_KEY no está configurada.');
+  if (!targetEmail) throw new Error('No hay un destinatario válido para enviar el correo.');
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
     method: 'POST',
@@ -33,7 +26,7 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
     },
     body: JSON.stringify({
       sender: { name: "Academia", email: senderEmail },
-      to: [{ email: targetEmail }], // Usamos la variable segura
+      to: [{ email: targetEmail }],
       subject: subject,
       htmlContent: htmlContent
     })
@@ -41,19 +34,20 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
 
   if (!response.ok) {
     const errorData = await response.json();
-    console.error('Respuesta de error de Brevo:', errorData);
     throw new Error(errorData.message || 'Error al enviar correo con Brevo');
   }
   return await response.json();
 };
 
-// Esquemas de validación con Zod actualizados
 const registerSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
   lastName: z.string().min(2, 'El apellido debe tener al menos 2 caracteres'),
   phone: z.string().min(6, 'El número de teléfono no es válido'),
   email: z.string().email('Correo electrónico inválido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres')
+  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  plan: z.string().optional(),          // NUEVO
+  checkoutPrice: z.number().optional(),  // NUEVO
+  broker: z.string().optional()
 });
 
 const loginSchema = z.object({
@@ -61,9 +55,7 @@ const loginSchema = z.object({
   password: z.string().min(1, 'La contraseña es obligatoria')
 });
 
-// Función robusta para extraer el mensaje exacto de Zod
 const parseZodError = (error) => {
-  console.log('🔍 Estructura del error Zod:', JSON.stringify(error, null, 2));
   const issuesList = error.errors || error.issues;
   if (Array.isArray(issuesList) && issuesList.length > 0) {
     return issuesList.map(err => err.message).join('. ');
@@ -82,7 +74,7 @@ exports.registerUser = async (req, res, next) => {
       return next(error);
     }
 
-    const { name, lastName, phone, email, password } = validation.data;
+    const { name, lastName, phone, email, password, plan, checkoutPrice, broker } = validation.data;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -96,9 +88,8 @@ exports.registerUser = async (req, res, next) => {
     const isApproved = isAdmin; 
 
     // Guardar usuario con los nuevos campos
-    const user = await User.create({ name, lastName, phone, email, password, role, isApproved });
+    const user = await User.create({ name, lastName, phone, email, password, role, isApproved, plan, checkoutPrice, broker: broker || 'independent' });
 
-    // Enviar SIEMPRE correo al administrador con TODOS los datos
     try {
       await sendBrevoEmail(
         process.env.ADMIN_EMAIL,
@@ -108,6 +99,8 @@ exports.registerUser = async (req, res, next) => {
          <p><strong>Apellido:</strong> ${user.lastName}</p>
          <p><strong>Email:</strong> ${user.email}</p>
          <p><strong>Teléfono:</strong> ${user.phone}</p>
+         <p><strong>Modalidad:</strong> ${user.broker.toUpperCase()}</p>
+         <p><strong>Plan Elegido:</strong> ${user.plan}</p>
          <br>
          <p>Ingresa al panel de administración para autorizarlo o gestionar su cuenta.</p>`
       );
@@ -122,6 +115,8 @@ exports.registerUser = async (req, res, next) => {
       email: user.email, 
       role: user.role, 
       isApproved: user.isApproved, 
+      plan: user.plan,
+      checkoutPrice: user.checkoutPrice,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -145,7 +140,14 @@ exports.loginUser = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
-        _id: user._id, name: user.name, email: user.email, role: user.role, isApproved: user.isApproved, token: generateToken(user._id)
+        _id: user._id, 
+        name: user.name, 
+        email: user.email, 
+        role: user.role, 
+        isApproved: user.isApproved, 
+        plan: user.plan,
+        checkoutPrice: user.checkoutPrice,
+        token: generateToken(user._id)
       });
     } else {
       const error = new Error('Credenciales inválidas');
@@ -162,7 +164,14 @@ exports.getUserProfile = async (req, res, next) => {
     const user = await User.findById(req.user._id).select('-password');
     if (user) {
       res.json({
-        _id: user._id, name: user.name, lastName: user.lastName, email: user.email, role: user.role, isApproved: user.isApproved
+        _id: user._id, 
+        name: user.name, 
+        lastName: user.lastName, 
+        email: user.email, 
+        role: user.role, 
+        isApproved: user.isApproved,
+        plan: user.plan,
+        checkoutPrice: user.checkoutPrice
       });
     } else {
       const error = new Error('Usuario no encontrado');
@@ -175,6 +184,7 @@ exports.getUserProfile = async (req, res, next) => {
 };
 
 exports.forgotPassword = async (req, res, next) => {
+  // ... (Mismo código que ya tenías para forgotPassword)
   try {
     const { email } = req.body;
     if (!email) {
@@ -219,6 +229,7 @@ exports.forgotPassword = async (req, res, next) => {
 };
 
 exports.resetPassword = async (req, res, next) => {
+  // ... (Mismo código que ya tenías)
   try {
     const { token } = req.params;
     const { password } = req.body;
@@ -252,6 +263,7 @@ exports.resetPassword = async (req, res, next) => {
 };
 
 exports.updatePassword = async (req, res, next) => {
+  // ... (Mismo código que ya tenías)
   try {
     const { currentPassword, newPassword } = req.body;
 

@@ -17,7 +17,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const { data } = await api.post(`${import.meta.env.VITE_API_URL}/auth/forgot-password`, { email });
+      const { data } = await api.post('/auth/forgot-password', { email });
       setMessage(data.message);
     } catch (err) {
       setError(err.response?.data?.message || 'Ocurrió un error al enviar el correo');

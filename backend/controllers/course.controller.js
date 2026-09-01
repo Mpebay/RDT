@@ -5,14 +5,11 @@ exports.getModules = async (req, res) => {
     let query = {};
 
     if (req.user.role !== 'admin') {
-      const userPlan = req.user.plan || 'Bronce';
-      
-      if (userPlan === 'Bronce') {
-        query.planRequired = 'Bronce';
-      } else if (userPlan === 'Plata') {
-        query.planRequired = { $in: ['Bronce', 'Plata'] };
+      const userPlan = req.user.plan || 'Plata';
+      // Si el usuario es Plata, solo ve módulos Plata. Si es Oro, no le ponemos filtro (ve todo).
+      if (userPlan === 'Plata') {
+        query.planRequired = 'Plata';
       }
-      // Plan Oro accede a todos los módulos
     }
 
     const modules = await CourseModule.find(query).sort({ createdAt: -1 });
@@ -32,7 +29,7 @@ exports.createModule = async (req, res) => {
       videoUrl,
       duration,
       level,
-      planRequired: planRequired || 'Bronce'
+      planRequired: planRequired || 'Plata'
     });
 
     await module.save();
@@ -45,7 +42,7 @@ exports.createModule = async (req, res) => {
 exports.updateModulePlan = async (req, res) => {
   try {
     const { planRequired } = req.body;
-    if (!['Bronce', 'Plata', 'Oro'].includes(planRequired)) {
+    if (!['Plata', 'Oro'].includes(planRequired)) {
       return res.status(400).json({ message: 'Plan no válido' });
     }
 
@@ -56,7 +53,7 @@ exports.updateModulePlan = async (req, res) => {
     const updatedModule = await module.save();
     res.json(updatedModule);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el plan del módulo' });
+    res.status(500).json({ message: 'Error al actualizar el plan' });
   }
 };
 
