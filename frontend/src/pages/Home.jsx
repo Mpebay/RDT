@@ -8,19 +8,17 @@ export default function Home() {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
   
-  // Estado para la modalidad / bróker (igual que en LandingPromo)
   const [brokerChoice, setBrokerChoice] = useState('vantage');
 
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  // Definición de planes con precios diferenciados por bróker
   const plans = [
     {
       name: 'Plan Plata',
-      priceReferral: 99,       // Precio con bróker asociado
-      priceIndependent: 199,   // Precio independiente
+      priceReferral: 99,       
+      priceIndependent: 199,   
       features: [
         'Estrategia grabada',
         'Trading en vivo',
@@ -30,8 +28,8 @@ export default function Home() {
     },
     {
       name: 'Plan Oro',
-      priceReferral: 199,      // Precio con bróker asociado (Más popular / VIP)
-      priceIndependent: 349,   // Precio independiente
+      priceReferral: 199,      
+      priceIndependent: 349,   
       features: [
         'Todo lo incluido en Plan Plata',
         'Bono en broker (+$150 USD)',
@@ -43,7 +41,6 @@ export default function Home() {
     }
   ];
 
-  // Función de compra que guarda el estado y redirige al registro
   const handlePurchase = (planName, price) => {
     const checkoutData = {
       plan: planName,
@@ -54,10 +51,17 @@ export default function Home() {
     navigate('/register');
   };
 
+  // Función para hacer Scroll Suave a los planes
+  const scrollToPlans = () => {
+    const section = document.getElementById('planes');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 relative overflow-hidden py-16 text-white">
       
-      {/* Glow de fondo cenital */}
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-brandOrange/10 blur-[140px] pointer-events-none rounded-full" />
 
       {/* Hero Section */}
@@ -72,12 +76,14 @@ export default function Home() {
           Únete a la academia exclusiva donde la teoría se convierte en rentabilidad. 
           Regístrate y espera la aprobación para acceder a nuestro contenido premium.
         </p>
-        <Link 
-          to="/register" 
+        
+        {/* BOTÓN ACTUALIZADO: Hace scroll en lugar de redirigir */}
+        <button 
+          onClick={scrollToPlans}
           className="inline-block bg-brandOrange hover:bg-brandOrangeHover text-white px-8 py-4 rounded-full text-lg font-bold transition-all shadow-[0_0_20px_rgba(255,90,0,0.4)] hover:shadow-[0_0_30px_rgba(255,90,0,0.6)]"
         >
           Solicitar Acceso
-        </Link>
+        </button>
       </div>
 
       {/* Barra de Métricas */}
@@ -143,9 +149,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* --- SECCIÓN: PLANES Y MEMBRESÍAS (FLUJO UNIFICADO CON LANDING PROMO) --- */}
-      <div className="mt-28 max-w-6xl w-full z-10">
-        {/* Sección de Selección de Modalidad / Bróker */}
+      {/* --- SECCIÓN: PLANES Y MEMBRESÍAS --- */}
+      {/* AGREGAMOS id="planes" y scroll-mt-24 para que el navbar no tape el título */}
+      <div id="planes" className="mt-28 max-w-6xl w-full z-10 scroll-mt-24">
         <div className="mb-12">
           <div className="text-center mb-6">
             <h3 className="text-3xl font-bold mb-2">Elige tu modalidad de ingreso</h3>
@@ -153,7 +159,6 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {/* Opción Vantage */}
             <button 
               onClick={() => setBrokerChoice('vantage')}
               className={`p-6 rounded-2xl border-2 text-left transition-all ${
@@ -172,7 +177,6 @@ export default function Home() {
               <p className="text-sm text-gray-400">Inscripción a precio reducido + bono al fondear tu cuenta.</p>
             </button>
 
-            {/* Opción Libertex */}
             <button 
               onClick={() => setBrokerChoice('libertex')}
               className={`p-6 rounded-2xl border-2 text-left transition-all ${
@@ -191,7 +195,6 @@ export default function Home() {
               <p className="text-sm text-gray-400">Inscripción a precio reducido operando con Libertex.</p>
             </button>
 
-            {/* Opción Independiente */}
             <button 
               onClick={() => setBrokerChoice('independent')}
               className={`p-6 rounded-2xl border-2 text-left transition-all ${
@@ -212,7 +215,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Tarjetas de Planes Dinámicas */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto items-stretch">
           {plans.map((plan, index) => {
             const currentPrice = brokerChoice === 'independent' ? plan.priceIndependent : plan.priceReferral;

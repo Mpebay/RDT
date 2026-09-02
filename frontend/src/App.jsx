@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { UserCog } from 'lucide-react';
 import Home from './pages/Home';
 import Register from './pages/Register';
@@ -9,9 +9,8 @@ import Dashboard from './pages/Dashboard';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
-import LandingPromo from './pages/LandingPromo'; // Importa el componente LandingPromo
+import LandingPromo from './pages/LandingPromo';
 
-// Componente para el botón flotante de WhatsApp (Solo visible si NO está logueado)
 function WhatsAppButton() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
@@ -34,6 +33,7 @@ function WhatsAppButton() {
 
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation(); // NUEVO: Para saber en qué página estamos
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
   const logoutHandler = () => {
@@ -41,6 +41,21 @@ function Navbar() {
     localStorage.removeItem('token'); 
     navigate('/', { replace: true });
     window.location.reload(); 
+  };
+
+  // Función para manejar el clic en "Únete ahora"
+  const handleJoinClick = (e) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      // Si ya estamos en el Home, solo hacemos scroll
+      document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Si estamos en otra página (ej. Login), navegamos al Home y luego hacemos scroll
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
+      }, 150); // Un pequeño retraso para asegurar que el DOM cargó
+    }
   };
 
   return (
@@ -64,7 +79,6 @@ function Navbar() {
                   <Link to="/dashboard" className="text-gray-300 hover:text-brandOrange px-3 py-2 text-sm font-medium transition-colors">Mis Aulas</Link>
                 )}
 
-                {/* Enlace directo a Perfil / Seguridad */}
                 <Link 
                   to="/profile" 
                   className="flex items-center space-x-1.5 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-200 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition"
@@ -83,9 +97,14 @@ function Navbar() {
             ) : (
               <>
                 <Link to="/login" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Login</Link>
-                <Link to="/register" className="bg-brandOrange hover:bg-brandOrangeHover text-white px-4 py-2 rounded-md text-sm font-bold transition-colors">
+                
+                {/* BOTÓN ACTUALIZADO: Ejecuta la función de scroll */}
+                <button 
+                  onClick={handleJoinClick} 
+                  className="bg-brandOrange hover:bg-brandOrangeHover text-white px-4 py-2 rounded-md text-sm font-bold transition-colors"
+                >
                   Únete ahora
-                </Link>
+                </button>
               </>
             )}
           </div>
@@ -103,7 +122,7 @@ function App() {
         <main className="pt-16">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/promo" element={<LandingPromo />} /> {/* Ruta para LandingPromo */}
+            <Route path="/promo" element={<LandingPromo />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin" element={<AdminDashboard />} />

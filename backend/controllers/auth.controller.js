@@ -11,7 +11,6 @@ const generateToken = (id) => {
 const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   const apiKey = process.env.BREVO_API_KEY;
   const senderEmail = process.env.SENDER_EMAIL;
-
   const targetEmail = toEmail || process.env.ADMIN_EMAIL || senderEmail;
 
   if (!apiKey) throw new Error('La variable de entorno BREVO_API_KEY no está configurada.');
@@ -25,7 +24,7 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: "Academia", email: senderEmail },
+      sender: { name: "El Rincón del Trading", email: senderEmail },
       to: [{ email: targetEmail }],
       subject: subject,
       htmlContent: htmlContent
@@ -45,8 +44,8 @@ const registerSchema = z.object({
   phone: z.string().min(6, 'El número de teléfono no es válido'),
   email: z.string().email('Correo electrónico inválido'),
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-  plan: z.string().optional(),          // NUEVO
-  checkoutPrice: z.number().optional(),  // NUEVO
+  plan: z.string().optional(),
+  checkoutPrice: z.number().optional(),
   broker: z.string().optional()
 });
 
@@ -60,16 +59,14 @@ const parseZodError = (error) => {
   if (Array.isArray(issuesList) && issuesList.length > 0) {
     return issuesList.map(err => err.message).join('. ');
   }
-  return error.message || 'Datos de registro inválidos';
+  return error.message || 'Datos inválidos';
 };
 
 exports.registerUser = async (req, res, next) => {
   try {
     const validation = registerSchema.safeParse(req.body);
-    
     if (!validation.success) {
-      const errorMessage = parseZodError(validation.error);
-      const error = new Error(errorMessage);
+      const error = new Error(parseZodError(validation.error));
       error.statusCode = 400;
       return next(error);
     }
@@ -85,28 +82,29 @@ exports.registerUser = async (req, res, next) => {
 
     const isAdmin = email === process.env.ADMIN_EMAIL;
     const role = isAdmin ? 'admin' : 'user';
-    const isApproved = isAdmin; 
 
-    // Guardar usuario con los nuevos campos
-    const user = await User.create({ name, lastName, phone, email, password, role, isApproved, plan, checkoutPrice, broker: broker || 'independent' });
+    const user = await User.create({ 
+      name, lastName, phone, email, password, role, 
+      isApproved: isAdmin, 
+      isPaid: isAdmin, 
+      plan, checkoutPrice, 
+      broker: broker || 'independent' 
+    });
 
     try {
       await sendBrevoEmail(
         process.env.ADMIN_EMAIL,
         'Nuevo Registro - El Rincón del Trading',
         `<h3>Nuevo usuario registrado en la plataforma</h3>
-         <p><strong>Nombre:</strong> ${user.name}</p>
-         <p><strong>Apellido:</strong> ${user.lastName}</p>
+         <p><strong>Nombre:</strong> ${user.name} ${user.lastName}</p>
          <p><strong>Email:</strong> ${user.email}</p>
          <p><strong>Teléfono:</strong> ${user.phone}</p>
-         <p><strong>Modalidad:</strong> ${user.broker.toUpperCase()}</p>
+         <p><strong>Modalidad (Broker):</strong> ${user.broker.toUpperCase()}</p>
          <p><strong>Plan Elegido:</strong> ${user.plan}</p>
          <br>
-         <p>Ingresa al panel de administración para autorizarlo o gestionar su cuenta.</p>`
+         <p>Ingresa al panel de administración para gestionar su cuenta.</p>`
       );
-    } catch (err) {
-      console.error('⚠️ No se pudo enviar el correo al administrador:', err.message);
-    }
+    } catch (err) { console.error('⚠️ Error enviando correo al admin:', err.message); }
 
     res.status(201).json({
       _id: user._id, 
@@ -114,37 +112,37 @@ exports.registerUser = async (req, res, next) => {
       lastName: user.lastName,
       email: user.email, 
       role: user.role, 
-      isApproved: user.isApproved, 
+      isApproved: user.isApproved,
+      isPaid: user.isPaid, // NUEVO
+      broker: user.broker, // NUEVO
       plan: user.plan,
       checkoutPrice: user.checkoutPrice,
       token: generateToken(user._id)
     });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 exports.loginUser = async (req, res, next) => {
   try {
     const validation = loginSchema.safeParse(req.body);
-    
     if (!validation.success) {
-      const errorMessage = parseZodError(validation.error);
-      const error = new Error(errorMessage);
+      const error = new Error(parseZodError(validation.error));
       error.statusCode = 400;
       return next(error);
     }
 
     const { email, password } = validation.data;
-
     const user = await User.findOne({ email });
+    
     if (user && (await bcrypt.compare(password, user.password))) {
       res.json({
         _id: user._id, 
         name: user.name, 
         email: user.email, 
         role: user.role, 
-        isApproved: user.isApproved, 
+        isApproved: user.isApproved,
+        isPaid: user.isPaid, // NUEVO
+        broker: user.broker, // NUEVO
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
         token: generateToken(user._id)
@@ -154,9 +152,7 @@ exports.loginUser = async (req, res, next) => {
       error.statusCode = 401;
       return next(error);
     }
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 exports.getUserProfile = async (req, res, next) => {
@@ -170,6 +166,8 @@ exports.getUserProfile = async (req, res, next) => {
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
+        isPaid: user.isPaid, // NUEVO
+        broker: user.broker, // NUEVO
         plan: user.plan,
         checkoutPrice: user.checkoutPrice
       });
@@ -178,13 +176,10 @@ exports.getUserProfile = async (req, res, next) => {
       error.statusCode = 404;
       return next(error);
     }
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 exports.forgotPassword = async (req, res, next) => {
-  // ... (Mismo código que ya tenías para forgotPassword)
   try {
     const { email } = req.body;
     if (!email) {
@@ -192,7 +187,6 @@ exports.forgotPassword = async (req, res, next) => {
       error.statusCode = 400;
       return next(error);
     }
-
     const user = await User.findOne({ email });
     if (!user) {
       const error = new Error('No existe una cuenta registrada con este correo');
@@ -215,27 +209,20 @@ exports.forgotPassword = async (req, res, next) => {
           <h2 style="color: #ff5a00;">Solicitud de restablecimiento</h2>
           <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente botón para continuar:</p>
           <a href="${resetUrl}" style="background-color: #ff5a00; color: white; padding: 12px 20px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; margin-top: 15px;">Restablecer Contraseña</a>
-          <p style="margin-top: 20px; font-size: 12px; color: #777;">Si no solicitaste esto, puedes ignorar este correo de forma segura.</p>
         </div>
       `
     );
-
     res.json({ message: 'Se ha enviado un correo con las instrucciones.' });
-
-  } catch (error) {
-    console.error('⚠️ Error enviando correo con Brevo:', error);
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 exports.resetPassword = async (req, res, next) => {
-  // ... (Mismo código que ya tenías)
   try {
     const { token } = req.params;
     const { password } = req.body;
 
     if (!password || password.length < 6) {
-      const error = new Error('La nueva contraseña debe tener al menos 6 caracteres');
+      const error = new Error('La contraseña debe tener al menos 6 caracteres');
       error.statusCode = 400;
       return next(error);
     }
@@ -257,24 +244,20 @@ exports.resetPassword = async (req, res, next) => {
     await user.save();
 
     res.json({ message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 exports.updatePassword = async (req, res, next) => {
-  // ... (Mismo código que ya tenías)
   try {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      const error = new Error('Por favor, ingresa tu contraseña actual y la nueva contraseña');
+      const error = new Error('Ingresa tu contraseña actual y la nueva');
       error.statusCode = 400;
       return next(error);
     }
-
     if (newPassword.length < 6) {
-      const error = new Error('La nueva contraseña debe tener al menos 6 caracteres');
+      const error = new Error('La contraseña debe tener al menos 6 caracteres');
       error.statusCode = 400;
       return next(error);
     }
@@ -297,7 +280,5 @@ exports.updatePassword = async (req, res, next) => {
     await user.save();
 
     res.json({ message: 'Contraseña actualizada exitosamente' });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
