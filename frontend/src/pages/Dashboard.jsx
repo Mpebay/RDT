@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check } from 'lucide-react';
 import api from '../api/axios';
+import qrImage from '../assets/QR.png';
 
 const REFERRAL_LINKS = {
   vantage: "https://latam.vantagemarkets.com/es/?affid=TU_LINK_VANTAGE"
@@ -116,7 +117,7 @@ export default function Dashboard() {
                 {copied && <p className="text-[11px] text-green-400 text-right mb-2 font-medium">¡Dirección copiada al portapapeles!</p>}
 
                 <div className="bg-white p-4 rounded-xl w-36 h-36 mx-auto flex flex-col items-center justify-center text-black shadow-md mt-4">
-                  <span className="text-xs font-bold text-center">ESCANEAR QR</span>
+                  <img src={qrImage} alt="QR Code" className="w-full h-full object-contain" />
                 </div>
               </div>
 
