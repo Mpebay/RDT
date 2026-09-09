@@ -2,7 +2,6 @@ const CourseModule = require('../models/CourseModule');
 
 exports.getModules = async (req, res) => {
   try {
-    // Al haber un único plan "Acceso Total", los usuarios aprobados/admin ven todos los módulos cargados
     const modules = await CourseModule.find({}).sort({ createdAt: -1 });
     res.json(modules);
   } catch (error) {
@@ -30,17 +29,25 @@ exports.createModule = async (req, res) => {
   }
 };
 
-exports.updateModulePlan = async (req, res) => {
+// NUEVA FUNCIÓN PARA ACTUALIZAR MÓDULOS
+exports.updateModule = async (req, res) => {
   try {
-    const { planRequired } = req.body;
+    const { title, description, videoUrl, duration, level, planRequired } = req.body;
     const module = await CourseModule.findById(req.params.id);
+    
     if (!module) return res.status(404).json({ message: 'Módulo no encontrado' });
 
-    module.planRequired = planRequired || 'Acceso Total';
+    module.title = title || module.title;
+    module.description = description !== undefined ? description : module.description;
+    module.videoUrl = videoUrl || module.videoUrl;
+    module.duration = duration || module.duration;
+    module.level = level || module.level;
+    module.planRequired = planRequired || module.planRequired;
+
     const updatedModule = await module.save();
     res.json(updatedModule);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar el plan del módulo' });
+    res.status(500).json({ message: 'Error al actualizar el módulo' });
   }
 };
 

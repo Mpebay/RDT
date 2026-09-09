@@ -103,7 +103,6 @@ exports.registerUser = async (req, res, next) => {
          <p><strong>Teléfono:</strong> ${user.phone}</p>
          <p><strong>Método de Pago:</strong> ${user.paymentMethod.toUpperCase()}</p>
          <p><strong>Modalidad (Broker):</strong> ${user.broker.toUpperCase()}</p>
-         <p><strong>Plan Elegido:</strong> ${user.plan}</p>
          <br>
          <p>Ingresa al panel de administración para gestionar su cuenta.</p>`
       );
@@ -121,6 +120,7 @@ exports.registerUser = async (req, res, next) => {
       paymentMethod: user.paymentMethod,
       plan: user.plan,
       checkoutPrice: user.checkoutPrice,
+      avatar: user.avatar,
       token: generateToken(user._id)
     });
   } catch (error) { next(error); }
@@ -150,6 +150,7 @@ exports.loginUser = async (req, res, next) => {
         paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
+        avatar: user.avatar,
         token: generateToken(user._id)
       });
     } else {
@@ -175,7 +176,8 @@ exports.getUserProfile = async (req, res, next) => {
         broker: user.broker,
         paymentMethod: user.paymentMethod,
         plan: user.plan,
-        checkoutPrice: user.checkoutPrice
+        checkoutPrice: user.checkoutPrice,
+        avatar: user.avatar 
       });
     } else {
       const error = new Error('Usuario no encontrado');
@@ -185,7 +187,6 @@ exports.getUserProfile = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// NUEVO: Cambiar método de pago pendiente
 exports.updatePaymentMethod = async (req, res, next) => {
   try {
     const { paymentMethod } = req.body;
@@ -203,12 +204,31 @@ exports.updatePaymentMethod = async (req, res, next) => {
     }
 
     user.paymentMethod = paymentMethod;
-    await user.save();
+    // Agregamos validateModifiedOnly para no chocar con cuentas viejas sin teléfono
+    await user.save({ validateModifiedOnly: true });
 
     res.json({ 
       message: 'Método de pago actualizado', 
       paymentMethod: user.paymentMethod 
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateAvatar = async (req, res, next) => {
+  try {
+    const { avatar } = req.body;
+    if (!avatar) return res.status(400).json({ message: 'URL de avatar no proporcionada' });
+
+    const user = await User.findById(req.user._id);
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    user.avatar = avatar;
+    // Agregamos validateModifiedOnly para no chocar con cuentas viejas sin teléfono
+    await user.save({ validateModifiedOnly: true });
+
+    res.json({ message: 'Avatar actualizado exitosamente', avatar: user.avatar });
   } catch (error) {
     next(error);
   }
@@ -232,7 +252,7 @@ exports.forgotPassword = async (req, res, next) => {
     const resetToken = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; 
-    await user.save();
+    await user.save({ validateModifiedOnly: true }); // Por seguridad con cuentas viejas
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
@@ -276,7 +296,7 @@ exports.resetPassword = async (req, res, next) => {
     user.password = password;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
-    await user.save();
+    await user.save({ validateModifiedOnly: true });
 
     res.json({ message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión.' });
   } catch (error) { next(error); }
@@ -312,7 +332,7 @@ exports.updatePassword = async (req, res, next) => {
     }
 
     user.password = newPassword;
-    await user.save();
+    await user.save({ validateModifiedOnly: true });
 
     res.json({ message: 'Contraseña actualizada exitosamente' });
   } catch (error) { next(error); }

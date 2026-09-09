@@ -7,7 +7,8 @@ const {
   forgotPassword, 
   resetPassword, 
   updatePassword,
-  updatePaymentMethod // NUEVO
+  updatePaymentMethod,
+  updateAvatar // NUEVO
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 
@@ -18,5 +19,6 @@ router.put('/payment-method', protect, updatePaymentMethod); // NUEVO
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.put('/update-password', protect, updatePassword);
+router.put('/profile/avatar', protect, updateAvatar); // NUEVO
 
 module.exports = router;

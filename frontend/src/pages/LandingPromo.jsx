@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, PlayCircle, Info, QrCode } from 'lucide-react';
 
+// 🔗 PEGA AQUÍ EL LINK DE GOOGLE DRIVE DE TU VIDEO PROMOCIONAL
+const PROMO_VIDEO_URL = "https://drive.google.com/file/d/1dFAwKekdXVTg8B_UMeQkj-w1mh67T9WU/view?usp=drive_link";
+
 export default function LandingPromo() {
   const navigate = useNavigate();
   const [brokerChoice, setBrokerChoice] = useState('vantage');
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false); // Estado para reproducir el video al hacer clic
 
   const USD_TO_ARS_RATE = 1545;
   const basePriceUsd = 97;
@@ -35,6 +39,18 @@ export default function LandingPromo() {
     navigate('/register'); 
   };
 
+  // Función para convertir el link de Google Drive al formato de reproducción (preview)
+  const getEmbedUrl = (url) => {
+    if (!url || url.includes('TU_ID_DE_DRIVE_AQUI')) return '';
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/d\/(.*?)\//);
+      if (match && match[1]) {
+        return `https://drive.google.com/file/d/${match[1]}/preview`;
+      }
+    }
+    return url;
+  };
+
   return (
     <div className="min-h-screen bg-darkBg text-white pt-20 pb-12">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -47,11 +63,37 @@ export default function LandingPromo() {
           <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
             Descubrí nuestro método comprobado para generar rentabilidad consistente. Mirá el video para entender cómo funciona la academia.
           </p>
-          <div className="relative max-w-4xl mx-auto aspect-video bg-darkCard border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(255,90,0,0.15)] flex items-center justify-center group cursor-pointer">
-            <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
-              <PlayCircle size={80} className="text-brandOrange opacity-80 group-hover:scale-110 transition-transform duration-300" />
-            </div>
-            <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop" alt="Intro Video" className="w-full h-full object-cover opacity-60" />
+
+          {/* CONTENEDOR INTERACTIVO DEL VIDEO */}
+          <div className="relative max-w-4xl mx-auto aspect-video bg-darkCard border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(255,90,0,0.15)] flex items-center justify-center">
+            {isPlayingVideo ? (
+              <div className="relative w-full h-full bg-black overflow-hidden">
+                <iframe 
+                  src={getEmbedUrl(PROMO_VIDEO_URL)} 
+                  className="w-full h-full border-none outline-none absolute top-0 left-0 scale-[1.03] translate-y-[-10px]"
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                ></iframe>
+
+                {/* 🛡️ ESCUDO SUPERIOR: Oculta la barra de Drive y el nombre del archivo */}
+                <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
+                  <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - Video Oficial</span>
+                </div>
+                
+                {/* 🛡️ ESCUDO ESQUINA DERECHA: Bloquea el botón de "Abrir en otra pestaña" */}
+                <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
+              </div>
+            ) : (
+              <div 
+                onClick={() => setIsPlayingVideo(true)}
+                className="absolute inset-0 group cursor-pointer flex items-center justify-center"
+              >
+                <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
+                  <PlayCircle size={80} className="text-brandOrange opacity-80 group-hover:scale-110 transition-transform duration-300" />
+                </div>
+                <img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop" alt="Intro Video" className="w-full h-full object-cover opacity-60" />
+              </div>
+            )}
           </div>
         </div>
 

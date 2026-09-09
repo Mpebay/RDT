@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search, Shield } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search, Shield, Edit3, X } from 'lucide-react';
 import api from '../api/axios';
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [modules, setModules] = useState([]);
   const [activeTab, setActiveTab] = useState('users');
-  
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   
+  // Estados para manejo de creación y edición de módulos
+  const [editingId, setEditingId] = useState(null);
   const [newModule, setNewModule] = useState({ 
     title: '', 
     description: '', 
@@ -33,10 +34,8 @@ export default function AdminDashboard() {
   }, [navigate]);
 
   const fetchUsers = async () => {
-    try {
-      const { data } = await api.get('/admin/users');
-      setUsers(data);
-    } catch (error) { console.error('Error fetching users', error); }
+    try { const { data } = await api.get('/admin/users'); setUsers(data); } 
+    catch (error) { console.error('Error fetching users', error); }
   };
 
   const approveHandler = async (user) => {
@@ -56,28 +55,58 @@ export default function AdminDashboard() {
   const toggleRoleHandler = async (id, currentRole) => {
     const newRole = currentRole === 'admin' ? 'user' : 'admin';
     if (window.confirm(newRole === 'admin' ? '¿Hacer ADMINISTRADOR a este usuario?' : '¿Quitar permisos?')) {
-      try {
-        await api.put(`/admin/users/${id}/role`, { role: newRole });
-        fetchUsers();
-      } catch (error) { alert(error.response?.data?.message || 'Error al actualizar rol'); }
+      try { await api.put(`/admin/users/${id}/role`, { role: newRole }); fetchUsers(); } 
+      catch (error) { alert(error.response?.data?.message || 'Error al actualizar rol'); }
     }
   };
 
   const fetchModules = async () => {
-    try {
-      const { data } = await api.get('/courses/modules');
-      setModules(data);
-    } catch (error) { console.error('Error fetching modules', error); }
+    try { const { data } = await api.get('/courses/modules'); setModules(data); } 
+    catch (error) { console.error('Error fetching modules', error); }
   };
 
-  const createModuleHandler = async (e) => {
+  const createOrUpdateModuleHandler = async (e) => {
     e.preventDefault();
+    if (!newModule.videoUrl) {
+      alert("Por favor, ingresa el link del video antes de guardar.");
+      return;
+    }
     try {
-      await api.post('/courses/modules', newModule);
+      if (editingId) {
+        // Modo Edición
+        await api.put(`/courses/modules/${editingId}`, newModule);
+        alert('Módulo actualizado con éxito');
+      } else {
+        // Modo Creación
+        await api.post('/courses/modules', newModule);
+        alert('Módulo creado con éxito');
+      }
+      
       setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', planRequired: 'Acceso Total' });
+      setEditingId(null);
       fetchModules();
-      alert('Módulo creado con éxito');
-    } catch (error) { console.error('Error creando módulo', error); }
+    } catch (error) { 
+      console.error('Error guardando módulo', error); 
+      alert('Error al guardar el módulo');
+    }
+  };
+
+  const startEditHandler = (mod) => {
+    setEditingId(mod._id);
+    setNewModule({
+      title: mod.title,
+      description: mod.description || '',
+      videoUrl: mod.videoUrl,
+      duration: mod.duration,
+      level: mod.level,
+      planRequired: mod.planRequired || 'Acceso Total'
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEditHandler = () => {
+    setEditingId(null);
+    setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', planRequired: 'Acceso Total' });
   };
 
   const deleteModuleHandler = async (id) => {
@@ -149,7 +178,6 @@ export default function AdminDashboard() {
                       <td className="px-4 py-4 text-white font-medium">{user.name} {user.lastName}</td>
                       <td className="px-4 py-4 text-xs">{user.email}</td>
                       
-                      {/* BRÓKER */}
                       <td className="px-4 py-4 text-center">
                         {user.broker === 'vantage' 
                           ? <span className="text-green-400 font-bold uppercase tracking-wider text-[10px] bg-green-500/10 border border-green-500/20 px-2 py-1 rounded">Vantage (Bono)</span> 
@@ -157,7 +185,6 @@ export default function AdminDashboard() {
                         }
                       </td>
 
-                      {/* MÉTODO DE PAGO */}
                       <td className="px-4 py-4 text-center">
                         {user.paymentMethod === 'crypto' 
                           ? <span className="text-[#F3BA2F] font-bold uppercase text-[10px] tracking-widest border border-[#F3BA2F]/30 bg-[#F3BA2F]/10 px-2 py-1 rounded">USDT (Crypto)</span> 
@@ -165,7 +192,6 @@ export default function AdminDashboard() {
                         }
                       </td>
 
-                      {/* ESTADO PAGO */}
                       <td className="px-4 py-4 text-center">
                         {user.isPaid 
                           ? <span className="bg-green-500/10 text-green-500 px-2.5 py-1 rounded text-xs font-bold border border-green-500/20">Pagado</span>
@@ -173,14 +199,12 @@ export default function AdminDashboard() {
                         }
                       </td>
 
-                      {/* ESTADO APROBACIÓN */}
                       <td className="px-4 py-4 text-center">
                         {user.isApproved 
                           ? <span className="text-green-500 font-bold text-xs flex items-center justify-center"><CheckCircle size={14} className="mr-1" /> Aprobado</span>
                           : <span className="text-yellow-500 font-bold text-xs flex items-center justify-center"><XCircle size={14} className="mr-1" /> Pendiente</span>}
                       </td>
 
-                      {/* ACCIONES */}
                       <td className="px-4 py-4 flex justify-center space-x-2 items-center">
                         {!user.isApproved && (
                           <button 
@@ -209,16 +233,42 @@ export default function AdminDashboard() {
       {activeTab === 'modules' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 bg-darkCard p-6 rounded-xl border border-white/10 h-fit">
-            <h2 className="text-xl font-bold mb-4 flex items-center text-white"><Plus size={20} className="text-brandOrange mr-2"/> Nuevo Módulo</h2>
-            <form onSubmit={createModuleHandler} className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold flex items-center text-white">
+                {editingId ? <Edit3 size={20} className="text-brandOrange mr-2"/> : <Plus size={20} className="text-brandOrange mr-2"/>} 
+                {editingId ? 'Editar Módulo' : 'Nuevo Módulo'}
+              </h2>
+              {editingId && (
+                <button onClick={cancelEditHandler} className="text-gray-400 hover:text-white text-xs flex items-center bg-white/5 px-2 py-1 rounded">
+                  <X size={14} className="mr-1" /> Cancelar
+                </button>
+              )}
+            </div>
+
+            <form onSubmit={createOrUpdateModuleHandler} className="space-y-4">
               <div><label className="block text-sm text-gray-400 mb-1">Título</label><input type="text" required value={newModule.title} onChange={e => setNewModule({...newModule, title: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none" /></div>
               <div><label className="block text-sm text-gray-400 mb-1">Descripción</label><textarea rows="2" value={newModule.description} onChange={e => setNewModule({...newModule, description: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none"></textarea></div>
-              <div><label className="block text-sm text-gray-400 mb-1">URL del Video (YouTube/Vimeo)</label><input type="url" required value={newModule.videoUrl} onChange={e => setNewModule({...newModule, videoUrl: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none" placeholder="https://..." /></div>
+              
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Enlace del Video (Google Drive)</label>
+                <input 
+                  type="url" 
+                  required 
+                  value={newModule.videoUrl} 
+                  onChange={e => setNewModule({...newModule, videoUrl: e.target.value})} 
+                  className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none" 
+                  placeholder="https://drive.google.com/file/d/..." 
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div><label className="block text-sm text-gray-400 mb-1">Duración</label><input type="text" required value={newModule.duration} onChange={e => setNewModule({...newModule, duration: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none" placeholder="ej. 45 min" /></div>
                 <div><label className="block text-sm text-gray-400 mb-1">Nivel</label><select value={newModule.level} onChange={e => setNewModule({...newModule, level: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none"><option>Principiante</option><option>Intermedio</option><option>Avanzado</option></select></div>
               </div>
-              <button type="submit" className="w-full bg-brandOrange hover:bg-brandOrangeHover text-white font-bold py-2.5 rounded mt-2 transition-colors">Subir Módulo</button>
+              
+              <button type="submit" className="w-full bg-brandOrange hover:bg-brandOrangeHover text-white font-bold py-2.5 rounded mt-2 transition-colors shadow-[0_0_15px_rgba(255,90,0,0.3)]">
+                {editingId ? 'Actualizar Módulo' : 'Guardar Módulo'}
+              </button>
             </form>
           </div>
 
@@ -229,7 +279,14 @@ export default function AdminDashboard() {
                   <h3 className="text-lg font-bold text-white mb-1">{mod.title}</h3>
                   <p className="text-sm text-gray-400">{mod.level} • {mod.duration} • <span className="text-brandOrange font-semibold">Acceso Total</span></p>
                 </div>
-                <button onClick={() => deleteModuleHandler(mod._id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded transition-colors" title="Eliminar Módulo"><Trash2 size={20} /></button>
+                <div className="flex items-center space-x-2">
+                  <button onClick={() => startEditHandler(mod)} className="text-blue-400 hover:bg-blue-500/10 p-2 rounded transition-colors" title="Editar Módulo">
+                    <Edit3 size={20} />
+                  </button>
+                  <button onClick={() => deleteModuleHandler(mod._id)} className="text-red-500 hover:bg-red-500/10 p-2 rounded transition-colors" title="Eliminar Módulo">
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </div>
             ))}
             {modules.length === 0 && <div className="text-center text-gray-500 py-10 border border-dashed border-white/10 rounded-xl">No has creado ningún módulo aún.</div>}

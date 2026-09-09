@@ -16,7 +16,7 @@ export default function Register() {
   const [checkoutData, setCheckoutData] = useState(null);
   const navigate = useNavigate();
 
-  const USD_TO_ARS_RATE = 1200;
+  const USD_TO_ARS_RATE = 1545;
   const defaultArsPrice = 97 * USD_TO_ARS_RATE;
 
   useEffect(() => {
