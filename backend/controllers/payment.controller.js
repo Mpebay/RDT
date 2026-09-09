@@ -1,22 +1,20 @@
 const { MercadoPagoConfig, Preference, Payment } = require('mercadopago');
 const User = require('../models/User');
 const axios = require('axios');
-// Importamos nuestras plantillas de correos
 const { welcomeEmailTemplate, pendingBrokerEmailTemplate } = require('../utils/emailTemplates'); 
 
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
-const PLAN_PRICES = {
-  Plata: 99,
-  Oro: 199
-};
+// 💱 CONFIGURACIÓN DE PRECIOS Y TASA DE CAMBIO
+const PRICE_USD = 97;
+const USD_TO_ARS_RATE = 1545; // Puedes actualizar este valor según la cotización actual
 
 exports.createPreference = async (req, res) => {
   try {
-    const { plan, email, name, userId, price } = req.body;
+    const { email, name, userId } = req.body;
 
-    const safePlan = ['Plata', 'Oro'].includes(plan) ? plan : 'Plata';
-    const finalPrice = price || PLAN_PRICES[safePlan] || 99;
+    // Calculamos el equivalente en Pesos Argentinos para Mercado Pago
+    const priceInArs = PRICE_USD * USD_TO_ARS_RATE;
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:5000';
@@ -26,10 +24,11 @@ exports.createPreference = async (req, res) => {
       body: {
         items: [
           {
-            id: safePlan,
-            title: `Plan ${safePlan} - El Rincón del Trading`,
+            id: 'Academia-Completa',
+            title: 'Membresía Total - El Rincón del Trading',
             quantity: 1,
-            unit_price: Number(finalPrice),
+            unit_price: Number(priceInArs),
+            currency_id: 'ARS' // Forzamos la moneda en pesos argentinos
           }
         ],
         payer: { email, name: name || 'Trader' },
@@ -62,7 +61,6 @@ exports.receiveWebhook = async (req, res) => {
       if (paymentInfo.status === 'approved') {
         const externalReference = paymentInfo.external_reference;
         const payerEmail = paymentInfo.payer?.email;
-        const itemPurchased = paymentInfo.additional_info?.items?.[0]?.id || paymentInfo.description;
 
         let user = null;
         if (externalReference && externalReference.length === 24) {
@@ -72,37 +70,26 @@ exports.receiveWebhook = async (req, res) => {
           user = await User.findOne({ email: payerEmail });
         }
 
-        // Si encontramos al usuario y aún no figura como pagado
         if (user && !user.isPaid) {
-          let assignedPlan = 'Plata';
-          if (itemPurchased && itemPurchased.includes('Oro')) assignedPlan = 'Oro';
-
-          // 1. Lo marcamos como pagado
           user.isPaid = true;
-          user.plan = assignedPlan;
+          user.plan = 'Acceso Total';
 
           let emailHtml = '';
           let emailSubject = '';
           const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-          // 2. RAMIFICACIÓN LÓGICA (Independiente vs Broker)
           if (!user.broker || user.broker === 'independent') {
-            // A. Independiente: Se aprueba automáticamente
             user.isApproved = true;
-            let planBadgeColor = user.plan === 'Oro' ? '#eab308' : '#94a3b8';
-            emailHtml = welcomeEmailTemplate(user.name, user.plan, planBadgeColor, frontendUrl);
+            emailHtml = welcomeEmailTemplate(user.name, 'Acceso Total', '#ff5a00', frontendUrl);
             emailSubject = '¡Pago Aprobado y Acceso Habilitado! - El Rincón del Trading';
           } else {
-            // B. Bróker: Queda pendiente de aprobación manual
             user.isApproved = false;
             emailHtml = pendingBrokerEmailTemplate(user.name, user.broker, frontendUrl);
             emailSubject = 'Pago Recibido. Acción requerida ⏳ - El Rincón del Trading';
           }
 
-          // Guardamos los cambios en MongoDB
           await user.save();
 
-          // 3. Enviamos el correo correspondiente
           if (typeof welcomeEmailTemplate === 'function' && typeof pendingBrokerEmailTemplate === 'function') {
             await axios.post(
               'https://api.brevo.com/v3/smtp/email',

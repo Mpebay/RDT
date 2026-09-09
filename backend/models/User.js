@@ -7,12 +7,13 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true }, 
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  isApproved: { type: Boolean, default: false }, // Acceso a la plataforma
-  isPaid: { type: Boolean, default: false }, // NUEVO: Si completó el pago en MP
+  isApproved: { type: Boolean, default: false },
+  isPaid: { type: Boolean, default: false },
   role: { type: String, default: 'user' },
-  plan: { type: String, enum: ['Plata', 'Oro'], default: 'Plata' },
-  broker: { type: String, enum: ['vantage', 'libertex', 'independent'], default: 'independent' }, // NUEVO
-  checkoutPrice: { type: Number, default: 0 }, 
+  plan: { type: String, default: 'Acceso Total' }, // Plan único por defecto
+  broker: { type: String, enum: ['vantage', 'libertex', 'independent'], default: 'independent' },
+  paymentMethod: { type: String, enum: ['mercadopago', 'crypto'], default: 'mercadopago' },
+  checkoutPrice: { type: Number, default: 97 }, 
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date }
 }, { timestamps: true });

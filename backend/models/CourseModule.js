@@ -6,7 +6,7 @@ const moduleSchema = new mongoose.Schema({
   videoUrl: { type: String, required: true },
   duration: { type: String, required: true },
   level: { type: String, required: true, enum: ['Principiante', 'Intermedio', 'Avanzado'] },
-  planRequired: { type: String, enum: ['Plata', 'Oro'], default: 'Plata' } // Bronce eliminado
+  planRequired: { type: String, default: 'Acceso Total' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('CourseModule', moduleSchema);

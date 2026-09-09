@@ -13,7 +13,7 @@ const sendBrevoEmail = async (toEmail, subject, htmlContent) => {
   const senderEmail = process.env.SENDER_EMAIL;
   const targetEmail = toEmail || process.env.ADMIN_EMAIL || senderEmail;
 
-  if (!apiKey) throw new Error('La variable de entorno BREVO_API_KEY no está configurada.');
+  if (!apiKey) throw new Error('La variable BREVO_API_KEY no está configurada.');
   if (!targetEmail) throw new Error('No hay un destinatario válido para enviar el correo.');
 
   const response = await fetch('https://api.brevo.com/v3/smtp/email', {
@@ -46,7 +46,8 @@ const registerSchema = z.object({
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
   plan: z.string().optional(),
   checkoutPrice: z.number().optional(),
-  broker: z.string().optional()
+  broker: z.string().optional(),
+  paymentMethod: z.string().optional()
 });
 
 const loginSchema = z.object({
@@ -71,7 +72,7 @@ exports.registerUser = async (req, res, next) => {
       return next(error);
     }
 
-    const { name, lastName, phone, email, password, plan, checkoutPrice, broker } = validation.data;
+    const { name, lastName, phone, email, password, plan, checkoutPrice, broker, paymentMethod } = validation.data;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -88,7 +89,8 @@ exports.registerUser = async (req, res, next) => {
       isApproved: isAdmin, 
       isPaid: isAdmin, 
       plan, checkoutPrice, 
-      broker: broker || 'independent' 
+      broker: broker || 'vantage',
+      paymentMethod: paymentMethod || 'mercadopago'
     });
 
     try {
@@ -99,6 +101,7 @@ exports.registerUser = async (req, res, next) => {
          <p><strong>Nombre:</strong> ${user.name} ${user.lastName}</p>
          <p><strong>Email:</strong> ${user.email}</p>
          <p><strong>Teléfono:</strong> ${user.phone}</p>
+         <p><strong>Método de Pago:</strong> ${user.paymentMethod.toUpperCase()}</p>
          <p><strong>Modalidad (Broker):</strong> ${user.broker.toUpperCase()}</p>
          <p><strong>Plan Elegido:</strong> ${user.plan}</p>
          <br>
@@ -113,8 +116,9 @@ exports.registerUser = async (req, res, next) => {
       email: user.email, 
       role: user.role, 
       isApproved: user.isApproved,
-      isPaid: user.isPaid, // NUEVO
-      broker: user.broker, // NUEVO
+      isPaid: user.isPaid,
+      broker: user.broker,
+      paymentMethod: user.paymentMethod,
       plan: user.plan,
       checkoutPrice: user.checkoutPrice,
       token: generateToken(user._id)
@@ -141,8 +145,9 @@ exports.loginUser = async (req, res, next) => {
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
-        isPaid: user.isPaid, // NUEVO
-        broker: user.broker, // NUEVO
+        isPaid: user.isPaid,
+        broker: user.broker,
+        paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
         token: generateToken(user._id)
@@ -166,8 +171,9 @@ exports.getUserProfile = async (req, res, next) => {
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
-        isPaid: user.isPaid, // NUEVO
-        broker: user.broker, // NUEVO
+        isPaid: user.isPaid,
+        broker: user.broker,
+        paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice
       });
@@ -177,6 +183,35 @@ exports.getUserProfile = async (req, res, next) => {
       return next(error);
     }
   } catch (error) { next(error); }
+};
+
+// NUEVO: Cambiar método de pago pendiente
+exports.updatePaymentMethod = async (req, res, next) => {
+  try {
+    const { paymentMethod } = req.body;
+    if (!['mercadopago', 'crypto'].includes(paymentMethod)) {
+      const error = new Error('Método de pago no válido');
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      const error = new Error('Usuario no encontrado');
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    user.paymentMethod = paymentMethod;
+    await user.save();
+
+    res.json({ 
+      message: 'Método de pago actualizado', 
+      paymentMethod: user.paymentMethod 
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 exports.forgotPassword = async (req, res, next) => {
