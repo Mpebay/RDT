@@ -7,7 +7,7 @@ export default function LandingPromo() {
   const [brokerChoice, setBrokerChoice] = useState('vantage');
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
 
-  const USD_TO_ARS_RATE = 1200;
+  const USD_TO_ARS_RATE = 1545;
   const basePriceUsd = 97;
   const priceInArs = basePriceUsd * USD_TO_ARS_RATE;
 
