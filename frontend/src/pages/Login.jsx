@@ -132,7 +132,8 @@ export default function Login() {
 
         <p className="text-center text-sm text-gray-400 mt-6">
           ¿Aún no tienes cuenta?{' '}
-          <Link to="/register" className="text-brandOrange hover:underline font-semibold">
+          {/* 🔗 ENLACE CORREGIDO QUE APUNTA A LOS PLANES EN LA PÁGINA PRINCIPAL */}
+          <Link to="/#planes" className="text-brandOrange hover:underline font-semibold">
             Regístrate aquí
           </Link>
         </p>

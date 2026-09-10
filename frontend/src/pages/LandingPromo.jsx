@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, PlayCircle, Info, QrCode } from 'lucide-react';
 
@@ -9,7 +9,16 @@ export default function LandingPromo() {
   const navigate = useNavigate();
   const [brokerChoice, setBrokerChoice] = useState('vantage');
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
-  const [isPlayingVideo, setIsPlayingVideo] = useState(false); // Estado para reproducir el video al hacer clic
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+
+  // 🎯 EFECTO PARA DETECTAR SI EL USUARIO VIENE DESDE EL LOGIN CON EL LINK #planes
+  useEffect(() => {
+    if (window.location.hash === '#planes') {
+      setTimeout(() => {
+        document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, []);
 
   const USD_TO_ARS_RATE = 1545;
   const basePriceUsd = 97;
@@ -39,7 +48,6 @@ export default function LandingPromo() {
     navigate('/register'); 
   };
 
-  // Función para convertir el link de Google Drive al formato de reproducción (preview)
   const getEmbedUrl = (url) => {
     if (!url || url.includes('TU_ID_DE_DRIVE_AQUI')) return '';
     if (url.includes('drive.google.com')) {
@@ -64,7 +72,6 @@ export default function LandingPromo() {
             Descubrí nuestro método comprobado para generar rentabilidad consistente. Mirá el video para entender cómo funciona la academia.
           </p>
 
-          {/* CONTENEDOR INTERACTIVO DEL VIDEO */}
           <div className="relative max-w-4xl mx-auto aspect-video bg-darkCard border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(255,90,0,0.15)] flex items-center justify-center">
             {isPlayingVideo ? (
               <div className="relative w-full h-full bg-black overflow-hidden">
@@ -75,12 +82,12 @@ export default function LandingPromo() {
                   allowFullScreen
                 ></iframe>
 
-                {/* 🛡️ ESCUDO SUPERIOR: Oculta la barra de Drive y el nombre del archivo */}
+                {/* 🛡️ ESCUDO SUPERIOR: Oculta la barra de Drive */}
                 <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
                   <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - Video Oficial</span>
                 </div>
                 
-                {/* 🛡️ ESCUDO ESQUINA DERECHA: Bloquea el botón de "Abrir en otra pestaña" */}
+                {/* 🛡️ ESCUDO ESQUINA DERECHA: Bloquea intentos de apertura extra */}
                 <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
               </div>
             ) : (
@@ -97,7 +104,8 @@ export default function LandingPromo() {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto">
+        {/* 🎯 SE UNIFICÓ EL ID A "planes" PARA MANTENER LA CONSISTENCIA */}
+        <div id="planes" className="max-w-4xl mx-auto scroll-mt-28">
           
           <div className="mb-8 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 1: Selecciona tu medio de pago</h3>

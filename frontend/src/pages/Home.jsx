@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Video, MessageCircle, Headphones, Activity, Check, Info, QrCode } from 'lucide-react';
 import vantageLogo from '../assets/logo_vantage.png';
@@ -8,6 +8,15 @@ export default function Home() {
   const [openFaq, setOpenFaq] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
   const [brokerChoice, setBrokerChoice] = useState('vantage');
+
+  // 🎯 EFECTO PARA DETECTAR SI EL USUARIO VIENE DESDE EL LOGIN CON EL LINK #planes
+  useEffect(() => {
+    if (window.location.hash === '#planes') {
+      setTimeout(() => {
+        document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100); // Pequeño retraso para asegurar que la página cargó completa
+    }
+  }, []);
 
   const USD_TO_ARS_RATE = 1545; // Misma tasa de referencia para mostrar al usuario
   const basePriceUsd = 97;
