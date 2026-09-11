@@ -11,7 +11,8 @@ exports.getModules = async (req, res) => {
 
 exports.createModule = async (req, res) => {
   try {
-    const { title, description, videoUrl, duration, level, planRequired } = req.body;
+    // 🎯 AQUÍ FALTABA RECIBIR 'category' DESDE EL FRONTEND
+    const { title, description, videoUrl, duration, level, planRequired, category } = req.body;
 
     const module = new CourseModule({
       title,
@@ -19,6 +20,7 @@ exports.createModule = async (req, res) => {
       videoUrl,
       duration,
       level,
+      category: category || 'Clases Grabadas', // 🎯 AHORA SÍ SE GUARDA
       planRequired: planRequired || 'Acceso Total'
     });
 
@@ -29,10 +31,10 @@ exports.createModule = async (req, res) => {
   }
 };
 
-// NUEVA FUNCIÓN PARA ACTUALIZAR MÓDULOS
 exports.updateModule = async (req, res) => {
   try {
-    const { title, description, videoUrl, duration, level, planRequired } = req.body;
+    // 🎯 TAMBIÉN LO AGREGAMOS AQUÍ PARA QUE PUEDAS EDITARLO
+    const { title, description, videoUrl, duration, level, planRequired, category } = req.body;
     const module = await CourseModule.findById(req.params.id);
     
     if (!module) return res.status(404).json({ message: 'Módulo no encontrado' });
@@ -42,6 +44,7 @@ exports.updateModule = async (req, res) => {
     module.videoUrl = videoUrl || module.videoUrl;
     module.duration = duration || module.duration;
     module.level = level || module.level;
+    module.category = category || module.category; // 🎯 SE ACTUALIZA LA CATEGORÍA
     module.planRequired = planRequired || module.planRequired;
 
     const updatedModule = await module.save();
