@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, PlayCircle, Info, QrCode } from 'lucide-react';
+import Footer from '../components/Footer';
 
 // 🔗 PEGA AQUÍ EL LINK DE GOOGLE DRIVE DE TU VIDEO PROMOCIONAL
 const PROMO_VIDEO_URL = "https://drive.google.com/file/d/1dFAwKekdXVTg8B_UMeQkj-w1mh67T9WU/view?usp=drive_link";
@@ -200,6 +201,7 @@ export default function LandingPromo() {
         </div>
 
       </div>
+      <Footer />
     </div>
   );
 }

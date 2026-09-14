@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, ChevronDown, Video, MessageCircle, Headphones, Activity, Check, Info, QrCode } from 'lucide-react';
+import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, Check, Info, QrCode } from 'lucide-react';
 import vantageLogo from '../assets/logo_vantage.png';
+import libertexLogo from '../assets/logo_libertex.png'; 
 import Footer from '../components/Footer';
-import libertexLogo from '../assets/logo_libertex.png';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -11,16 +11,15 @@ export default function Home() {
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
   const [brokerChoice, setBrokerChoice] = useState('vantage');
 
-  // 🎯 EFECTO PARA DETECTAR SI EL USUARIO VIENE DESDE EL LOGIN CON EL LINK #planes
   useEffect(() => {
     if (window.location.hash === '#planes') {
       setTimeout(() => {
         document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100); // Pequeño retraso para asegurar que la página cargó completa
+      }, 100); 
     }
   }, []);
 
-  const USD_TO_ARS_RATE = 1545; // Misma tasa de referencia para mostrar al usuario
+  const USD_TO_ARS_RATE = 1545; 
   const basePriceUsd = 97;
   const priceInArs = basePriceUsd * USD_TO_ARS_RATE;
 
@@ -55,12 +54,52 @@ export default function Home() {
   };
 
   return (
-    /* 🎯 AQUÍ AGREGAMOS EL FRAGMENTO DE REACT (<>) PARA ENVOLVER TODO */
     <>
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 relative overflow-hidden py-16 text-white">
-        <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-brandOrange/10 blur-[140px] pointer-events-none rounded-full" />
+      {/* Contenedor principal */}
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 relative overflow-hidden py-16 text-white bg-[#0b0b0f]">
+        
+        {/* ----------------- FONDO: LÍNEAS ONDULADAS FINAS (VECTORES CRUZADOS) ----------------- */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden flex items-center justify-center">
+          <svg className="w-full h-full opacity-35" viewBox="0 0 1440 900" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+            
+            {/* Onda Violeta 1 (Cruza desde arriba a la izquierda hacia abajo a la derecha) */}
+            <path 
+              d="M-100,150 C350,50 800,600 1540,200" 
+              stroke="#8b5cf6" 
+              strokeWidth="1.5" 
+              strokeLinecap="round" 
+            />
 
-        <div className="text-center max-w-4xl z-10">
+            {/* Onda Naranja 1 (Se cruza con la violeta formando una X elegante) */}
+            <path 
+              d="M-100,350 C400,700 900,50 1540,600" 
+              stroke="#ff5a00" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+            />
+
+            {/* Onda Violeta 2 (Más abajo, sutil) */}
+            <path 
+              d="M-100,650 C500,900 1000,300 1540,750" 
+              stroke="#a78bfa" 
+              strokeWidth="1" 
+              strokeLinecap="round" 
+            />
+
+            {/* Onda Naranja 2 (En la parte inferior cruzándose) */}
+            <path 
+              d="M-100,500 C450,200 1050,850 1540,400" 
+              stroke="#ff8033" 
+              strokeWidth="1.5" 
+              strokeLinecap="round" 
+            />
+
+          </svg>
+        </div>
+        {/* ----------------- FIN FONDO VECTORES ----------------- */}
+
+        {/* Contenido (z-10 para estar siempre por encima de las líneas) */}
+        <div className="text-center max-w-4xl z-10 relative">
           <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tight">
             DOMINA EL MERCADO CON <br/>
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brandOrange to-yellow-500">PRECISIÓN</span>
@@ -74,28 +113,26 @@ export default function Home() {
           </button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-20 max-w-5xl w-full z-10 border-y border-white/5 py-8 bg-darkCard/40 backdrop-blur-sm rounded-2xl px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-20 max-w-5xl w-full z-10 relative border-y border-white/5 py-8 bg-darkCard/40 backdrop-blur-sm rounded-2xl px-6">
           <MetricItem number="99%" label="Análisis Institucional" />
           <MetricItem number="24/7" label="Comunidad Privada" />
           <MetricItem number="100%" label="Estrategia Verificada" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-5xl w-full z-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-5xl w-full z-10 relative">
           <FeatureCard icon={<TrendingUp size={32}/>} title="Análisis Institucional" desc="Aprende a leer el mercado como los grandes fondos de inversión." />
           <FeatureCard icon={<Zap size={32}/>} title="Acceso Exclusivo" desc="Contenido reservado únicamente para miembros verificados." />
           <FeatureCard icon={<Shield size={32}/>} title="Gestión de Riesgo" desc="Protege tu capital con metodologías profesionales comprobadas." />
         </div>
-        
-        {/* 🎯 NUEVA SECCIÓN DE BRÓKERS RESTAURADA */}
-        <div className="mt-28 max-w-4xl w-full z-10 text-center">
+
+        {/* 🎯 SECCIÓN DE BRÓKERS ASOCIADOS */}
+        <div className="mt-28 max-w-4xl w-full z-10 relative text-center">
           <h2 className="text-3xl font-bold mb-4">Brókers Asociados</h2>
           <p className="text-gray-400 mb-12">Opera con las mismas condiciones que nosotros y accede a beneficios exclusivos.</p>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
-            
-            {/* Tarjeta VANTAGE */}
             <a 
-              href="https://vigco.co/la-com-inv/9HsBqvVz" 
+              href="#" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-darkCard p-8 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(255,90,0,0.15)] flex flex-col items-center justify-center group cursor-pointer"
@@ -107,26 +144,23 @@ export default function Home() {
               <p className="text-sm text-gray-400">Bono operable de $200 USD</p>
             </a>
 
-            {/* Tarjeta LIBERTEX */}
             <a 
-              href="https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634" 
+              href="#" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-darkCard p-8 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(255,90,0,0.15)] flex flex-col items-center justify-center group cursor-pointer"
             >
               <div className="h-16 mb-4 flex items-center justify-center w-full bg-white/5 rounded-xl group-hover:bg-white/10 transition-colors">
-                {/* NOTA: Asegúrate de guardar el logo de libertex como logo_libertex.png en assets */}
                 <img src={libertexLogo} alt="Libertex Logo" className="max-h-10 object-contain group-hover:scale-110 transition-transform duration-300" />
               </div>
               <h3 className="text-xl font-bold text-white mb-1">Libertex</h3>
               <p className="text-sm text-gray-400">Ideal para iniciar en el mercado</p>
             </a>
-
           </div>
         </div>
-        {/* FIN SECCIÓN BRÓKERS */}
 
-        <div id="planes" className="mt-28 max-w-4xl w-full z-10 scroll-mt-24">
+        {/* 🎯 SECCIÓN DE PLANES */}
+        <div id="planes" className="mt-32 max-w-4xl w-full z-10 relative scroll-mt-24">
           
           <div className="text-center mb-12">
             <span className="text-brandOrange text-sm font-bold uppercase tracking-widest bg-brandOrange/10 px-4 py-1.5 rounded-full border border-brandOrange/25">
@@ -228,7 +262,7 @@ export default function Home() {
 
         </div>
 
-        <div className="mt-28 max-w-4xl w-full z-10 text-center">
+        <div className="mt-28 max-w-4xl w-full z-10 relative text-center">
           <h2 className="text-3xl font-bold mb-4">¿Cómo funciona el acceso?</h2>
           <p className="text-gray-400 mb-12">Mantenemos un entorno controlado y seguro para todos nuestros estudiantes.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
@@ -239,8 +273,7 @@ export default function Home() {
         </div>
       </div>
       
-      {/* 🎯 EL FOOTER AHORA ESTÁ DENTRO DEL FRAGMENTO DE REACT */}
-      <div className="w-full mt-24">
+      <div className="w-full">
         <Footer />
       </div>
     </>
@@ -248,5 +281,5 @@ export default function Home() {
 }
 
 function MetricItem({ number, label }) { return ( <div className="text-center"><div className="text-3xl md:text-4xl font-black text-brandOrange mb-1">{number}</div><div className="text-sm text-gray-400 font-medium">{label}</div></div> ); }
-function FeatureCard({ icon, title, desc }) { return ( <div className="bg-darkCard p-6 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-colors shadow-lg"><div className="text-brandOrange mb-4">{icon}</div><h3 className="text-xl font-bold mb-2">{title}</h3><p className="text-gray-400 text-sm leading-relaxed">{desc}</p></div> ); }
+function FeatureCard({ icon, title, desc }) { return ( <div className="bg-darkCard p-6 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-colors shadow-lg flex flex-col items-center text-center"><div className="text-brandOrange mb-4">{icon}</div><h3 className="text-xl font-bold mb-2">{title}</h3><p className="text-gray-400 text-sm leading-relaxed">{desc}</p></div> ); }
 function StepCard({ step, icon, title, desc }) { return ( <div className="bg-darkCard p-6 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col justify-between"><div className="absolute top-4 right-4 text-4xl font-black text-white/5 select-none">{step}</div><div><div className="mb-4">{icon}</div><h3 className="text-lg font-bold mb-2">{title}</h3><p className="text-gray-400 text-sm leading-relaxed">{desc}</p></div></div> ); }
