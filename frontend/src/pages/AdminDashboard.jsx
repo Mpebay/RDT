@@ -10,14 +10,16 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   
-  // Estados para manejo de creación y edición de módulos
   const [editingId, setEditingId] = useState(null);
+  
+  // 🎯 AGREGAMOS 'category' AL ESTADO INICIAL
   const [newModule, setNewModule] = useState({ 
     title: '', 
     description: '', 
     videoUrl: '', 
     duration: '', 
     level: 'Principiante', 
+    category: 'Clases Grabadas', 
     planRequired: 'Acceso Total' 
   });
 
@@ -73,16 +75,15 @@ export default function AdminDashboard() {
     }
     try {
       if (editingId) {
-        // Modo Edición
         await api.put(`/courses/modules/${editingId}`, newModule);
         alert('Módulo actualizado con éxito');
       } else {
-        // Modo Creación
         await api.post('/courses/modules', newModule);
         alert('Módulo creado con éxito');
       }
       
-      setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', planRequired: 'Acceso Total' });
+      // 🎯 RESETEA INCLUYENDO CATEGORÍA
+      setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', category: 'Clases Grabadas', planRequired: 'Acceso Total' });
       setEditingId(null);
       fetchModules();
     } catch (error) { 
@@ -99,6 +100,7 @@ export default function AdminDashboard() {
       videoUrl: mod.videoUrl,
       duration: mod.duration,
       level: mod.level,
+      category: mod.category || 'Clases Grabadas', // 🎯 CARGA LA CATEGORÍA SI EXISTE
       planRequired: mod.planRequired || 'Acceso Total'
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -106,7 +108,7 @@ export default function AdminDashboard() {
 
   const cancelEditHandler = () => {
     setEditingId(null);
-    setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', planRequired: 'Acceso Total' });
+    setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', category: 'Clases Grabadas', planRequired: 'Acceso Total' });
   };
 
   const deleteModuleHandler = async (id) => {
@@ -247,6 +249,20 @@ export default function AdminDashboard() {
 
             <form onSubmit={createOrUpdateModuleHandler} className="space-y-4">
               <div><label className="block text-sm text-gray-400 mb-1">Título</label><input type="text" required value={newModule.title} onChange={e => setNewModule({...newModule, title: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none" /></div>
+              
+              {/* 🎯 NUEVO SELECTOR DE CATEGORÍA */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Categoría</label>
+                <select 
+                  value={newModule.category} 
+                  onChange={e => setNewModule({...newModule, category: e.target.value})} 
+                  className="w-full bg-darkBg border border-brandOrange/50 text-brandOrange rounded px-3 py-2 focus:border-brandOrange outline-none font-bold"
+                >
+                  <option value="Clases Grabadas">🎬 Clases Grabadas</option>
+                  <option value="Videos Técnicos">💻 Videos Técnicos</option>
+                </select>
+              </div>
+
               <div><label className="block text-sm text-gray-400 mb-1">Descripción</label><textarea rows="2" value={newModule.description} onChange={e => setNewModule({...newModule, description: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none"></textarea></div>
               
               <div>
@@ -273,11 +289,16 @@ export default function AdminDashboard() {
           </div>
 
           <div className="lg:col-span-2 space-y-4">
-            {modules.map(mod => (
+            {/* 🎯 ORDENAMOS LOS MÓDULOS POR FECHA DE CREACIÓN ANTES DE MAPEARLOS */}
+            {modules.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(mod => (
               <div key={mod._id} className="bg-darkCard p-4 rounded-xl border border-white/10 flex justify-between items-center hover:border-white/30 transition-colors">
                 <div>
+                  {/* 🎯 ETIQUETA VISUAL EN EL ADMIN PARA SABER QUÉ TIPO DE VIDEO ES */}
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded mb-1 inline-block ${mod.category === 'Videos Técnicos' ? 'bg-blue-500/20 text-blue-400' : 'bg-brandOrange/20 text-brandOrange'}`}>
+                    {mod.category || 'Clases Grabadas'}
+                  </span>
                   <h3 className="text-lg font-bold text-white mb-1">{mod.title}</h3>
-                  <p className="text-sm text-gray-400">{mod.level} • {mod.duration} • <span className="text-brandOrange font-semibold">Acceso Total</span></p>
+                  <p className="text-sm text-gray-400">{mod.level} • {mod.duration}</p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button onClick={() => startEditHandler(mod)} className="text-blue-400 hover:bg-blue-500/10 p-2 rounded transition-colors" title="Editar Módulo">

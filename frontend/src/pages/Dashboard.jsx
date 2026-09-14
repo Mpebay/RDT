@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check, ChevronLeft } from 'lucide-react';
+import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check, ChevronLeft, MonitorPlay, Terminal } from 'lucide-react';
 import api from '../api/axios';
 import qrImage from '../assets/QR.png';
 
@@ -17,8 +17,10 @@ export default function Dashboard() {
   const [updatingMethod, setUpdatingMethod] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  // Estado para saber qué clase se está reproduciendo
   const [activeModule, setActiveModule] = useState(null);
+  
+  // 🎯 NUEVO: Estado para saber qué solapa está activa
+  const [activeCategory, setActiveCategory] = useState('Clases Grabadas');
 
   useEffect(() => {
     if (!userInfo) return;
@@ -154,9 +156,6 @@ export default function Dashboard() {
     return <div className="text-center mt-20 text-gray-400">Procesando acceso...</div>;
   }
 
-  // --- VISTA DE AULAS Y REPRODUCTOR ---
-  
-  // Función automática para convertir un link de Drive a un Iframe incrustable
   const getEmbedUrl = (url) => {
     if (!url) return '';
     if (url.includes('drive.google.com')) {
@@ -168,7 +167,6 @@ export default function Dashboard() {
     return url;
   };
   
-  // Si el usuario hizo clic en una clase, mostramos el reproductor protegido
   if (activeModule) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
@@ -180,7 +178,6 @@ export default function Dashboard() {
         </button>
 
         <div className="bg-darkCard rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-          {/* REPRODUCTOR GOOGLE DRIVE PROTEGIDO CON ESCUDO */}
           <div className="aspect-video w-full bg-black relative overflow-hidden">
             <iframe 
               src={getEmbedUrl(activeModule.videoUrl)} 
@@ -188,19 +185,15 @@ export default function Dashboard() {
               allow="autoplay; fullscreen"
               allowFullScreen
             ></iframe>
-
-            {/* 🛡️ ESCUDO SUPERIOR: Oculta la barra de Drive y el nombre del archivo */}
             <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
-              <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - Clase Exclusiva</span>
+              <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - {activeModule.category || 'Clase Exclusiva'}</span>
             </div>
-            
-            {/* 🛡️ ESCUDO ESQUINA DERECHA: Bloquea el botón de "Abrir en otra pestaña" */}
             <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
           </div>
           
           <div className="p-8">
             <div className="flex items-center gap-3 mb-3">
-              <span className="bg-brandOrange/10 border border-brandOrange/30 text-brandOrange px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+              <span className={`border px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${activeModule.category === 'Videos Técnicos' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-brandOrange/10 border-brandOrange/30 text-brandOrange'}`}>
                 {activeModule.level}
               </span>
               <span className="text-gray-400 text-sm flex items-center"><Clock size={16} className="mr-1"/> {activeModule.duration} min.</span>
@@ -213,15 +206,39 @@ export default function Dashboard() {
     );
   }
 
-  // Vista Normal del Grid de Aulas
+  // 🎯 FILTRAMOS Y ORDENAMOS POR FECHA (Del más antiguo al más nuevo)
+  const filteredModules = modules
+    .filter(mod => (mod.category || 'Clases Grabadas') === activeCategory)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-3xl font-bold text-white mb-6">Aulas Exclusivas</h1>
-      {modules.length === 0 ? (
-        <p className="text-gray-400 text-center py-10">Aún no hay módulos disponibles.</p>
+      <h1 className="text-3xl font-bold text-white mb-8">Aulas Exclusivas</h1>
+      
+      {/* 🎯 SOLAPAS DE NAVEGACIÓN */}
+      <div className="flex space-x-2 sm:space-x-4 mb-8 border-b border-white/10 pb-4 overflow-x-auto">
+        <button 
+          onClick={() => setActiveCategory('Clases Grabadas')} 
+          className={`flex items-center px-5 py-2.5 rounded-lg font-bold transition-all whitespace-nowrap ${activeCategory === 'Clases Grabadas' ? 'bg-brandOrange text-white shadow-[0_0_15px_rgba(255,90,0,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+        >
+          <MonitorPlay size={20} className="mr-2" /> Clases Grabadas
+        </button>
+        
+        <button 
+          onClick={() => setActiveCategory('Videos Técnicos')} 
+          className={`flex items-center px-5 py-2.5 rounded-lg font-bold transition-all whitespace-nowrap ${activeCategory === 'Videos Técnicos' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+        >
+          <Terminal size={20} className="mr-2" /> Videos Técnicos
+        </button>
+      </div>
+
+      {filteredModules.length === 0 ? (
+        <div className="text-center py-16 bg-darkCard border border-white/5 rounded-2xl">
+          <p className="text-gray-400 text-lg">Aún no hay contenido disponible en esta sección.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {modules.map((mod) => (
+          {filteredModules.map((mod) => (
             <div 
               key={mod._id} 
               onClick={() => setActiveModule(mod)}
@@ -233,8 +250,10 @@ export default function Dashboard() {
               </div>
               <div className="p-5">
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-xs font-bold text-brandOrange bg-brandOrange/10 border border-brandOrange/20 px-2.5 py-1 rounded-full uppercase tracking-wider">{mod.level}</span>
-                  <span className="text-xs text-gray-400">{mod.duration} min.</span>
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${mod.category === 'Videos Técnicos' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' : 'bg-brandOrange/10 border border-brandOrange/20 text-brandOrange'}`}>
+                    {mod.level}
+                  </span>
+                  <span className="text-xs text-gray-400 flex items-center"><Clock size={14} className="mr-1"/> {mod.duration} min.</span>
                 </div>
                 <h3 className="text-lg font-bold mb-2 text-white group-hover:text-brandOrange transition-colors">{mod.title}</h3>
                 <p className="text-sm text-gray-400 line-clamp-2">{mod.description}</p>

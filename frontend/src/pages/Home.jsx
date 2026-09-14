@@ -27,10 +27,10 @@ export default function Home() {
   const planData = {
     name: 'Membresía Total Academia',
     features: [
-      'Estrategia institucional grabada (SMC & Precio)',
+      'Estrategia institucional grabada zonas de aceleracion',
       'Sesiones de Trading en vivo diarias',
       'Canal de señales y alertas exclusivas',
-      'Clases intensivas de Psicología de Mercado',
+      'Clases intensivas de Psicología de Mercado (opcional c/costo extra)',
       'Acompañamiento personalizado en comunidad VIP',
       'Acceso a todos los futuros módulos sin costo extra'
     ]
@@ -74,7 +74,7 @@ export default function Home() {
         <MetricItem number="+500" label="Traders Activos" />
         <MetricItem number="99%" label="Análisis Institucional" />
         <MetricItem number="24/7" label="Comunidad Privada" />
-        <MetricItem number="100%" label="Estrategias Verificadas" />
+        <MetricItem number="100%" label="Estrategia Verificada" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-5xl w-full z-10">
@@ -149,7 +149,7 @@ export default function Home() {
             {paymentMethod === 'mercadopago' ? (
               <div>
                 <span className="text-4xl md:text-5xl font-black text-white">$ {priceInArs.toLocaleString('es-AR')}</span>
-                <span className="text-gray-400 text-sm block mt-1">ARS (Pesos Argentinos) / único pago</span>
+                <span className="text-gray-400 text-sm block mt-1">ARS (Pesos Argentinos) / único pago <br />=<br />97 USDT</span>
               </div>
             ) : (
               <div>
