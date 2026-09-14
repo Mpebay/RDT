@@ -10,6 +10,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import LandingPromo from './pages/LandingPromo';
+import BackgroundWaves from './components/BackgroundWaves'; // 🎯 Componente global de ondas
 
 function WhatsAppButton() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -33,7 +34,7 @@ function WhatsAppButton() {
 
 function Navbar() {
   const navigate = useNavigate();
-  const location = useLocation(); // NUEVO: Para saber en qué página estamos
+  const location = useLocation();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
   const logoutHandler = () => {
@@ -43,18 +44,15 @@ function Navbar() {
     window.location.reload(); 
   };
 
-  // Función para manejar el clic en "Únete ahora"
   const handleJoinClick = (e) => {
     e.preventDefault();
     if (location.pathname === '/') {
-      // Si ya estamos en el Home, solo hacemos scroll
       document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
     } else {
-      // Si estamos en otra página (ej. Login), navegamos al Home y luego hacemos scroll
       navigate('/');
       setTimeout(() => {
         document.getElementById('planes')?.scrollIntoView({ behavior: 'smooth' });
-      }, 150); // Un pequeño retraso para asegurar que el DOM cargó
+      }, 150);
     }
   };
 
@@ -98,7 +96,6 @@ function Navbar() {
               <>
                 <Link to="/login" className="text-gray-300 hover:text-white px-3 py-2 text-sm font-medium">Login</Link>
                 
-                {/* BOTÓN ACTUALIZADO: Ejecuta la función de scroll */}
                 <button 
                   onClick={handleJoinClick} 
                   className="bg-brandOrange hover:bg-brandOrangeHover text-white px-4 py-2 rounded-md text-sm font-bold transition-colors"
@@ -117,9 +114,12 @@ function Navbar() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-darkBg text-white font-sans relative">
+      <div className="min-h-screen bg-darkBg text-white font-sans relative overflow-hidden">
+        {/* 🎯 Fondo global de ondas vectoriales en todo el sitio */}
+        <BackgroundWaves />
+        
         <Navbar />
-        <main className="pt-16">
+        <main className="pt-16 relative z-10">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/promo" element={<LandingPromo />} />
