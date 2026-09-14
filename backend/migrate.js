@@ -1,38 +1,35 @@
-require('dotenv').config(); // Carga las variables de tu archivo .env
+require('dotenv').config();
 const mongoose = require('mongoose');
-const User = require('./models/User'); // Asegúrate de que la ruta a tu modelo sea correcta
+const User = require('./models/User'); 
 const bcrypt = require('bcrypt');
 const axios = require('axios');
 
-// Tu lista de correos a migrar
 const emailsMigrar = [
   "manupebay@hotmail.com"
 ];
 
 async function migrarYNotificar() {
   try {
-    // Conexión a tu base de datos
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Conectado a MongoDB...');
 
-    // Contraseña temporal genérica ya hasheada
     const tempPasswordHash = await bcrypt.hash('Temporal123*', 10);
 
     for (const email of emailsMigrar) {
-      // Extraemos un nombre base del correo (ej: "juan" de "juan@gmail.com")
       const nombreGenerico = email.split('@')[0];
       const nombreCapitalizado = nombreGenerico.charAt(0).toUpperCase() + nombreGenerico.slice(1);
 
-      // Verificamos si el usuario ya existe para no duplicarlo
       const existe = await User.findOne({ email });
       
       if (!existe) {
-        // 1. Crear el usuario en la base de datos (aprobado por defecto)
+        // 1. Crear el usuario con DATOS DE RELLENO para pasar la validación
         await User.create({
           name: nombreCapitalizado,
+          lastName: '-',             // 🎯 DATO GENÉRICO PARA PASAR LA VALIDACIÓN
+          phone: '0000000000',       // 🎯 DATO GENÉRICO PARA PASAR LA VALIDACIÓN
           email: email,
           password: tempPasswordHash,
-          isApproved: true, 
+          isApproved: true,
           role: 'user'
         });
         console.log(`[BD] Usuario migrado con éxito: ${email}`);
@@ -64,11 +61,11 @@ async function migrarYNotificar() {
 
               <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 30px;">
                 Para ingresar por primera vez, haz clic en el botón de abajo con este correo para generar tu nueva clave de acceso personal.
-
+              </p>
 
               <!-- Botón de Acción -->
               <div style="text-align: center; margin-bottom: 35px;">
-                <a href="${process.env.FRONTEND_URL || 'https://rdt-neon.vercel.app/forgot-password'}" 
+                <a href="${process.env.FRONTEND_URL || 'https://rdt-neon.vercel.app/forgot-password'}"
                    style="background-color: #ff5a00; color: #ffffff; padding: 14px 28px; border-radius: 9999px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 0 15px rgba(255,90,0,0.4);">
                   Acceder a la Plataforma
                 </a>
@@ -90,9 +87,9 @@ async function migrarYNotificar() {
           await axios.post(
             'https://api.brevo.com/v3/smtp/email',
             {
-              sender: { 
-                name: "El Rincón del Trading", 
-                email: process.env.SENDER_EMAIL 
+              sender: {
+                name: "El Rincón del Trading",
+                email: process.env.SENDER_EMAIL
               },
               to: [{ email: email, name: nombreCapitalizado }],
               subject: '¡Actualizamos la plataforma! - Activa tu acceso',
@@ -111,7 +108,6 @@ async function migrarYNotificar() {
           console.error(`[ERROR EMAIL] No se pudo enviar a ${email}:`, mailError.response?.data || mailError.message);
         }
 
-        // Pausa de 1 segundo entre envíos para respetar límites de la API de Brevo
         await new Promise(resolve => setTimeout(resolve, 1000));
       } else {
         console.log(`[OMITIDO] El usuario ${email} ya existe en la base de datos.`);

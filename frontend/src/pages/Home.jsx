@@ -70,8 +70,7 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 max-w-5xl w-full z-10 border-y border-white/5 py-8 bg-darkCard/40 backdrop-blur-sm rounded-2xl px-6">
-        <MetricItem number="+500" label="Traders Activos" />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mt-20 max-w-5xl w-full z-10 border-y border-white/5 py-8 bg-darkCard/40 backdrop-blur-sm rounded-2xl px-6">
         <MetricItem number="99%" label="Análisis Institucional" />
         <MetricItem number="24/7" label="Comunidad Privada" />
         <MetricItem number="100%" label="Estrategia Verificada" />
