@@ -30,6 +30,7 @@ async function migrarYNotificar() {
           email: email,
           password: tempPasswordHash,
           isApproved: true,
+          isPaid: true,
           role: 'user'
         });
         console.log(`[BD] Usuario migrado con éxito: ${email}`);

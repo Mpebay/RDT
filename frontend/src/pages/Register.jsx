@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { Mail, Lock, User, Phone, AlertCircle, CheckCircle, ShoppingCart } from 'lucide-react';
+import { Mail, Lock, User, Phone, AlertCircle, CheckCircle, ShoppingCart, Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -10,6 +10,11 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  
+  // 🎯 Estados para mostrar/ocultar contraseñas
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -115,8 +120,46 @@ export default function Register() {
             </div>
             <div className="relative"><input type="tel" placeholder="Teléfono / WhatsApp" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm" required /></div>
             <div className="relative"><input type="email" placeholder="Correo electrónico" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm" required /></div>
-            <div className="relative"><input type="password" placeholder="Contraseña" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm" required minLength={6} /></div>
-            <div className="relative"><input type="password" placeholder="Confirmar contraseña" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full px-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm" required minLength={6} /></div>
+            
+            {/* 🎯 Input de Contraseña con Ojo */}
+            <div className="relative">
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Contraseña" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className="w-full px-4 pr-10 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm transition-colors" 
+                required 
+                minLength={6} 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+
+            {/* 🎯 Input de Confirmar Contraseña con Ojo */}
+            <div className="relative">
+              <input 
+                type={showConfirmPassword ? 'text' : 'password'} 
+                placeholder="Confirmar contraseña" 
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                className="w-full px-4 pr-10 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm transition-colors" 
+                required 
+                minLength={6} 
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white transition-colors focus:outline-none"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             
             <button type="submit" disabled={loading} className="w-full py-3 rounded-xl font-bold bg-brandOrange hover:bg-brandOrangeHover text-white transition-all shadow-[0_0_15px_rgba(255,90,0,0.3)]">
               {loading ? 'Procesando...' : 'Registrarse y Pagar'}
