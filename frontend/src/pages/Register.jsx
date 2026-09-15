@@ -88,7 +88,7 @@ export default function Register() {
   const isCrypto = checkoutData?.paymentMethod === 'crypto';
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-12">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 py-12 relative z-10">
       <div className="max-w-md w-full">
         <div className="bg-darkCard p-8 rounded-2xl border border-white/10 shadow-2xl">
           <div className="text-center mb-8">
@@ -101,7 +101,12 @@ export default function Register() {
               <div className="flex items-center gap-2 text-brandOrange mb-2"><ShoppingCart size={20} /><h3 className="font-bold">Resumen de inscripción</h3></div>
               <div className="text-sm text-gray-300 space-y-1">
                 <p><strong>Plan:</strong> Pase Total Academia</p>
-                <p><strong>Bróker:</strong> {checkoutData.broker === 'vantage' ? 'Vantage (Con Bono)' : 'Independiente'}</p>
+                {/* 🎯 AQUÍ SE ACTUALIZÓ PARA LEER LA OPCIÓN DE LIBERTEX */}
+                <p><strong>Bróker:</strong> {
+                  checkoutData.broker === 'vantage' ? 'Vantage (Con Bono)' : 
+                  checkoutData.broker === 'libertex' ? 'Libertex (Sin Bono)' : 
+                  'Independiente'
+                }</p>
                 <p><strong>Pago:</strong> {isCrypto ? 'USDT (Binance)' : 'Mercado Pago (ARS)'}</p>
                 <p className="text-lg text-white font-bold mt-2">
                   Total: {isCrypto ? `${checkoutData.price} USDT` : `$ ${Number(checkoutData.price).toLocaleString('es-AR')} ARS`}

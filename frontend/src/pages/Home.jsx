@@ -150,7 +150,8 @@ export default function Home() {
 
           <div className="mb-10 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Elige tu modalidad con el bróker</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* 🎯 SE ACTUALIZÓ LA GRILLA A 3 COLUMNAS Y SE AGREGÓ LIBERTEX */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => setBrokerChoice('vantage')}
                 className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'vantage' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
@@ -164,14 +165,25 @@ export default function Home() {
               </button>
 
               <button
+                onClick={() => setBrokerChoice('libertex')}
+                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'libertex' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold text-white">Libertex (Con Referido)</span>
+                  {brokerChoice === 'libertex' && <Check className="text-brandOrange" size={18} />}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Ideal para iniciar en el mercado (Sin bono operable).</p>
+              </button>
+
+              <button
                 onClick={() => setBrokerChoice('independent')}
                 className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'independent' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-white">Independiente (Tu propio bróker)</span>
+                  <span className="font-bold text-white">Independiente (Tu bróker)</span>
                   {brokerChoice === 'independent' && <Check className="text-brandOrange" size={18} />}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Opera con tu bróker actual sin bonos asociados.</p>
+                <p className="text-xs text-gray-400 mt-1">Opera con tu bróker actual sin beneficios asociados.</p>
               </button>
             </div>
           </div>
