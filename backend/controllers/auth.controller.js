@@ -111,12 +111,14 @@ exports.registerUser = async (req, res, next) => {
     res.status(201).json({
       _id: user._id, 
       name: user.name, 
-      lastName: user.lastName,
+      lastName: user.lastName, 
+      phone: user.phone, // 🎯 AHORA SE ENVÍA EL TELÉFONO
       email: user.email, 
       role: user.role, 
       isApproved: user.isApproved,
       isPaid: user.isPaid,
       broker: user.broker,
+      brokerAccountId: user.brokerAccountId,
       paymentMethod: user.paymentMethod,
       plan: user.plan,
       checkoutPrice: user.checkoutPrice,
@@ -142,11 +144,14 @@ exports.loginUser = async (req, res, next) => {
       res.json({
         _id: user._id, 
         name: user.name, 
+        lastName: user.lastName, // 🎯 AHORA SE ENVÍA EL APELLIDO
+        phone: user.phone,       // 🎯 AHORA SE ENVÍA EL TELÉFONO
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
         isPaid: user.isPaid,
         broker: user.broker,
+        brokerAccountId: user.brokerAccountId,
         paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
@@ -169,11 +174,13 @@ exports.getUserProfile = async (req, res, next) => {
         _id: user._id, 
         name: user.name, 
         lastName: user.lastName, 
+        phone: user.phone, // 🎯 AHORA SE ENVÍA EL TELÉFONO
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
         isPaid: user.isPaid,
         broker: user.broker,
+        brokerAccountId: user.brokerAccountId,
         paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
@@ -204,15 +211,74 @@ exports.updatePaymentMethod = async (req, res, next) => {
     }
 
     user.paymentMethod = paymentMethod;
-    // Agregamos validateModifiedOnly para no chocar con cuentas viejas sin teléfono
     await user.save({ validateModifiedOnly: true });
 
-    res.json({ 
-      message: 'Método de pago actualizado', 
-      paymentMethod: user.paymentMethod 
-    });
-  } catch (error) {
-    next(error);
+    res.json({ message: 'Método de pago actualizado', paymentMethod: user.paymentMethod });
+  } catch (error) { next(error); }
+};
+
+// 🎯 FUNCIÓN PARA ENVIAR EL ID DEL BRÓKER
+exports.submitBrokerId = async (req, res, next) => {
+  try {
+    const { brokerAccountId } = req.body;
+    
+    if (!brokerAccountId || brokerAccountId.trim() === '') {
+      const error = new Error('Por favor, ingresa el ID de tu cuenta');
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      const error = new Error('Usuario no encontrado');
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    user.brokerAccountId = brokerAccountId;
+    await user.save({ validateModifiedOnly: true });
+
+    try {
+      await sendBrevoEmail(
+        process.env.ADMIN_EMAIL,
+        'ID de Bróker Enviado - Revisión Pendiente',
+        `<h3>Un usuario ha fondeado su cuenta y enviado su ID</h3>
+         <p><strong>Usuario:</strong> ${user.name} ${user.lastName} (${user.email})</p>
+         <p><strong>Bróker:</strong> ${user.broker.toUpperCase()}</p>
+         <p><strong>ID de Cuenta:</strong> ${user.brokerAccountId}</p>
+         <br>
+         <p>Por favor verifica este ID y apruébalo desde el panel de administrador para darle acceso.</p>`
+      );
+    } catch (err) { console.error('⚠️ Error enviando correo al admin:', err.message); }
+
+    res.json({ message: 'ID de cuenta enviado exitosamente', brokerAccountId: user.brokerAccountId });
+  } catch (error) { next(error); }
+};
+
+// 🎯 NUEVA FUNCIÓN PARA ACTUALIZAR EL TELÉFONO DESDE EL PERFIL
+exports.updatePhone = async (req, res, next) => {
+  try {
+    const { phone } = req.body;
+    
+    if (!phone || phone.trim() === '') {
+      const error = new Error('El teléfono no puede estar vacío');
+      error.statusCode = 400;
+      return next(error);
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      const error = new Error('Usuario no encontrado');
+      error.statusCode = 404;
+      return next(error);
+    }
+
+    user.phone = phone;
+    await user.save({ validateModifiedOnly: true });
+
+    res.json({ message: 'Teléfono actualizado exitosamente', phone: user.phone });
+  } catch (error) { 
+    next(error); 
   }
 };
 
@@ -225,13 +291,10 @@ exports.updateAvatar = async (req, res, next) => {
     if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
 
     user.avatar = avatar;
-    // Agregamos validateModifiedOnly para no chocar con cuentas viejas sin teléfono
     await user.save({ validateModifiedOnly: true });
 
     res.json({ message: 'Avatar actualizado exitosamente', avatar: user.avatar });
-  } catch (error) {
-    next(error);
-  }
+  } catch (error) { next(error); }
 };
 
 exports.forgotPassword = async (req, res, next) => {
@@ -252,7 +315,7 @@ exports.forgotPassword = async (req, res, next) => {
     const resetToken = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = Date.now() + 3600000; 
-    await user.save({ validateModifiedOnly: true }); // Por seguridad con cuentas viejas
+    await user.save({ validateModifiedOnly: true });
 
     const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 

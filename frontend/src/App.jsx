@@ -10,7 +10,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import LandingPromo from './pages/LandingPromo';
-import BackgroundWaves from './components/BackgroundWaves'; // 🎯 Componente global de ondas
+import BackgroundWaves from './components/BackgroundWaves';
 
 function WhatsAppButton() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -37,6 +37,23 @@ function Navbar() {
   const location = useLocation();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
+  // 🎯 AQUÍ APLICAMOS EL BLOQUEO TANTO PARA /promo COMO PARA /register
+  if (location.pathname === '/promo' || location.pathname === '/register') {
+    return (
+      <nav className="border-b border-white/10 bg-darkBg/80 backdrop-blur-md fixed w-full z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-center h-16">
+            {/* Logo centrado, NO clickeable */}
+            <span className="text-2xl font-black italic tracking-tighter text-white cursor-default select-none">
+              EL RINCÓN <span className="text-brandOrange text-sm uppercase tracking-widest font-bold">del trading</span>
+            </span>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  // 👇 Navbar normal para el resto del sitio 👇
   const logoutHandler = () => {
     localStorage.removeItem('userInfo');
     localStorage.removeItem('token'); 
@@ -115,9 +132,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-darkBg text-white font-sans relative overflow-hidden">
-        {/* 🎯 Fondo global de ondas vectoriales en todo el sitio */}
         <BackgroundWaves />
-        
         <Navbar />
         <main className="pt-16 relative z-10">
           <Routes>

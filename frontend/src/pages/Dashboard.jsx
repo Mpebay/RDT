@@ -4,7 +4,11 @@ import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCod
 import api from '../api/axios';
 import qrImage from '../assets/QR.png';
 
-const REFERRAL_LINKS = { vantage: "https://latam.vantagemarkets.com/es/?affid=TU_LINK_VANTAGE" };
+// 🔗 TUS LINKS DE REFERIDOS
+const REFERRAL_LINKS = { 
+  vantage: "https://latam.vantagemarkets.com/es/?affid=TU_LINK_VANTAGE",
+  libertex: "https://libertex.org/?affid=TU_LINK_LIBERTEX"
+};
 const BINANCE_WALLET_TRC20 = "TM9JArvFEZMkPNdosYGSmXMJap1XUb8qU"; 
 const WHATSAPP_NUMBER = "5492494475552";
 
@@ -18,16 +22,19 @@ export default function Dashboard() {
   const [copied, setCopied] = useState(false);
   
   const [activeModule, setActiveModule] = useState(null);
-  
-  // 🎯 NUEVO: Estado para saber qué solapa está activa
   const [activeCategory, setActiveCategory] = useState('Clases Grabadas');
+
+  // 🎯 NUEVO: Estados para manejar el ID del Bróker
+  const [brokerIdInput, setBrokerIdInput] = useState('');
+  const [submittingBroker, setSubmittingBroker] = useState(false);
+  const [brokerError, setBrokerError] = useState('');
 
   useEffect(() => {
     if (!userInfo) return;
     const checkApprovalStatus = async () => {
       try {
         const { data } = await api.get('/auth/profile');
-        if (data.isApproved !== userInfo.isApproved || data.isPaid !== userInfo.isPaid || data.paymentMethod !== userInfo.paymentMethod) {
+        if (data.isApproved !== userInfo.isApproved || data.isPaid !== userInfo.isPaid || data.paymentMethod !== userInfo.paymentMethod || data.brokerAccountId !== userInfo.brokerAccountId) {
           const updatedUser = { ...data, token: userInfo.token };
           localStorage.setItem('userInfo', JSON.stringify(updatedUser));
           setUserInfo(updatedUser);
@@ -68,14 +75,38 @@ export default function Dashboard() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // 🎯 NUEVO: Función para enviar el ID del Bróker
+  const handleSubmitBroker = async (e) => {
+    e.preventDefault();
+    setBrokerError('');
+    if (!brokerIdInput.trim()) { setBrokerError('Por favor ingresa tu ID de cuenta'); return; }
+    
+    try {
+      setSubmittingBroker(true);
+      const { data } = await api.put('/auth/broker-id', { brokerAccountId: brokerIdInput });
+      const updatedUser = { ...userInfo, brokerAccountId: data.brokerAccountId };
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
+      setUserInfo(updatedUser);
+    } catch(err) {
+      setBrokerError(err.response?.data?.message || 'Error al enviar el ID');
+    } finally {
+      setSubmittingBroker(false);
+    }
+  };
+
   if (!userInfo) return <div className="flex justify-center items-center h-[calc(100vh-64px)] text-gray-400">Inicia sesión para acceder.</div>;
 
+  // ========================================================
+  // ⛔ ZONA DE BLOQUEO (Solo para usuarios no aprobados)
+  // ========================================================
   if (!userInfo.isApproved && userInfo.role !== 'admin') {
+    
+    // 1️⃣ PANTALLAS DE PAGO (Si aún no han pagado)
     if (!userInfo.isPaid) {
       if (userInfo.paymentMethod === 'crypto') {
         const wpText = `Hola, ya transferí los 97 USDT para la Academia. Mi email es ${userInfo.email}. Adjunto el comprobante.`;
         return (
-          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10">
+          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
             <div className="bg-darkCard p-8 rounded-2xl border border-white/10 max-w-lg w-full relative shadow-2xl">
               <div className="absolute top-0 left-0 w-full h-1 bg-[#F3BA2F]"></div>
               <div className="w-16 h-16 bg-[#F3BA2F]/10 border border-[#F3BA2F]/30 text-[#F3BA2F] rounded-full flex items-center justify-center mx-auto mb-6 mt-4"><QrCode size={32} /></div>
@@ -109,8 +140,9 @@ export default function Dashboard() {
           </div>
         );
       }
+
       return (
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center relative z-10">
           <div className="bg-darkCard p-8 rounded-2xl border border-white/10 max-w-lg w-full relative shadow-2xl">
             <div className="absolute top-0 left-0 w-full h-1 bg-[#009EE3]"></div>
             <div className="w-16 h-16 bg-[#009EE3]/10 border border-[#009EE3]/30 text-[#009EE3] rounded-full flex items-center justify-center mx-auto mb-6 mt-4"><ShoppingCart size={32} /></div>
@@ -140,21 +172,85 @@ export default function Dashboard() {
         </div>
       );
     }
-    if (userInfo.isPaid && userInfo.broker === 'vantage') {
+
+    // 2️⃣ PANTALLA DE BRÓKER (Si ya pagaron pero eligieron Vantage o Libertex y no enviaron su ID)
+    if (userInfo.isPaid) {
+      if ((userInfo.broker === 'vantage' || userInfo.broker === 'libertex') && !userInfo.brokerAccountId) {
+        
+        const brokerName = userInfo.broker === 'vantage' ? 'Vantage Markets' : 'Libertex';
+        const brokerLink = REFERRAL_LINKS[userInfo.broker];
+
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
+            <div className="bg-darkCard p-8 md:p-10 rounded-3xl border-2 border-brandOrange max-w-xl w-full relative shadow-[0_0_50px_rgba(255,90,0,0.15)]">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brandOrange text-white text-xs font-bold uppercase tracking-wider px-6 py-1.5 rounded-full shadow-md">
+                Paso Final
+              </div>
+              <h2 className="text-3xl font-black mb-3 mt-4 text-white">¡Bienvenido a la Academia!</h2>
+              <p className="text-gray-400 mb-8 text-sm md:text-base">
+                Hemos recibido tu pago correctamente. Para desbloquear las aulas, es requisito crear y fondear tu cuenta en <strong>{brokerName}</strong> utilizando nuestro enlace oficial.
+              </p>
+
+              <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
+                <div className="flex items-start gap-3 mb-5">
+                  <div className="bg-brandOrange/20 text-brandOrange w-7 h-7 rounded-full flex items-center justify-center font-bold shrink-0 text-sm">1</div>
+                  <p className="text-sm text-gray-300">Crea tu cuenta en {brokerName} desde el siguiente botón oficial.</p>
+                </div>
+                <div className="flex items-start gap-3 mb-6">
+                  <div className="bg-brandOrange/20 text-brandOrange w-7 h-7 rounded-full flex items-center justify-center font-bold shrink-0 text-sm">2</div>
+                  <p className="text-sm text-gray-300">Realiza tu primer fondeo en la cuenta que acabas de crear.</p>
+                </div>
+                
+                <a href={brokerLink} target="_blank" rel="noopener noreferrer" className="bg-white hover:bg-gray-200 text-black px-6 py-3.5 rounded-xl font-bold w-full flex justify-center items-center shadow-lg transition-all">
+                  Crear cuenta en {brokerName} <ExternalLink size={18} className="ml-2"/>
+                </a>
+              </div>
+
+              <form onSubmit={handleSubmitBroker} className="text-left bg-black/30 p-6 rounded-2xl border border-white/5">
+                <label className="block text-sm font-bold text-gray-300 mb-2">Una vez fondeada, ingresa el ID de tu cuenta:</label>
+                <input
+                  type="text"
+                  placeholder="Ej: 12345678"
+                  value={brokerIdInput}
+                  onChange={(e) => setBrokerIdInput(e.target.value)}
+                  className="w-full bg-darkBg border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brandOrange mb-2 transition-colors"
+                  required
+                />
+                {brokerError && <p className="text-red-400 text-xs mb-3 font-medium">{brokerError}</p>}
+                
+                <button
+                  type="submit"
+                  disabled={submittingBroker}
+                  className="bg-brandOrange hover:bg-brandOrangeHover text-white px-6 py-3.5 rounded-xl font-bold w-full shadow-[0_0_15px_rgba(255,90,0,0.3)] transition-all disabled:opacity-50 mt-3"
+                >
+                  {submittingBroker ? 'Enviando...' : 'Ya fondeé y envié mi ID'}
+                </button>
+              </form>
+            </div>
+          </div>
+        );
+      }
+
+      // 3️⃣ PANTALLA "EN REVISIÓN" (Si ya mandaron el ID o son Independientes)
       return (
-        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center">
-          <div className="bg-darkCard p-8 rounded-2xl border border-white/10 max-w-lg w-full relative shadow-2xl">
-            <h2 className="text-2xl font-bold mb-3">¡Pago Recibido!</h2>
-            <p className="text-gray-400 mb-6">Para habilitar tu acceso con el bono de $200 USD, crea tu cuenta en <strong>Vantage</strong> con nuestro link de referido.</p>
-            <a href={REFERRAL_LINKS.vantage} target="_blank" rel="noopener noreferrer" className="bg-brandOrange text-white px-6 py-3 rounded-xl font-bold w-full flex justify-center items-center shadow-lg">
-              Crear cuenta en Vantage <ExternalLink size={18} className="ml-2"/>
-            </a>
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center relative z-10">
+          <div className="bg-darkCard p-10 rounded-3xl border border-white/10 max-w-md w-full relative shadow-2xl">
+            <div className="w-20 h-20 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6"><Clock size={40} /></div>
+            <h2 className="text-2xl font-bold mb-3 text-white">Cuenta en Revisión</h2>
+            <p className="text-gray-400 text-sm leading-relaxed mb-6">
+              {userInfo.brokerAccountId
+                ? `Estamos verificando tu fondeo en la cuenta (${userInfo.brokerAccountId}). Una vez validado, se desbloquearán automáticamente las aulas.`
+                : 'Estamos verificando tu pago. En breve habilitaremos tu acceso a la academia.'}
+            </p>
+            <p className="text-xs text-gray-500 font-medium">Este proceso puede demorar algunas horas.<br/>Te notificaremos por correo electrónico.</p>
           </div>
         </div>
       );
     }
-    return <div className="text-center mt-20 text-gray-400">Procesando acceso...</div>;
   }
+  // ========================================================
+  // ✅ FIN DE ZONA DE BLOQUEO (Lo de abajo solo lo ven aprobados y migrados)
+  // ========================================================
 
   const getEmbedUrl = (url) => {
     if (!url) return '';
@@ -169,7 +265,7 @@ export default function Dashboard() {
   
   if (activeModule) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in relative z-10">
         <button 
           onClick={() => setActiveModule(null)} 
           className="flex items-center text-gray-400 hover:text-brandOrange mb-6 transition-colors font-medium"
@@ -206,16 +302,14 @@ export default function Dashboard() {
     );
   }
 
-  // 🎯 FILTRAMOS Y ORDENAMOS POR FECHA (Del más antiguo al más nuevo)
   const filteredModules = modules
     .filter(mod => (mod.category || 'Clases Grabadas') === activeCategory)
     .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">
       <h1 className="text-3xl font-bold text-white mb-8">Aulas Exclusivas</h1>
       
-      {/* 🎯 SOLAPAS DE NAVEGACIÓN */}
       <div className="flex space-x-2 sm:space-x-4 mb-8 border-b border-white/10 pb-4 overflow-x-auto">
         <button 
           onClick={() => setActiveCategory('Clases Grabadas')} 

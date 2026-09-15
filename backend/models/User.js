@@ -11,8 +11,9 @@ const userSchema = new mongoose.Schema({
   isApproved: { type: Boolean, default: false },
   isPaid: { type: Boolean, default: false },
   role: { type: String, default: 'user' },
-  plan: { type: String, default: 'Acceso Total' }, // Plan único por defecto
+  plan: { type: String, default: 'Acceso Total' }, 
   broker: { type: String, enum: ['vantage', 'libertex', 'independent'], default: 'independent' },
+  brokerAccountId: { type: String, default: '' }, // 🎯 NUEVO: Guardará el ID del bróker
   paymentMethod: { type: String, enum: ['mercadopago', 'crypto'], default: 'mercadopago' },
   checkoutPrice: { type: Number, default: 97 }, 
   resetPasswordToken: { type: String },

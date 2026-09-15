@@ -12,7 +12,6 @@ export default function AdminDashboard() {
   
   const [editingId, setEditingId] = useState(null);
   
-  // 🎯 AGREGAMOS 'category' AL ESTADO INICIAL
   const [newModule, setNewModule] = useState({ 
     title: '', 
     description: '', 
@@ -82,7 +81,6 @@ export default function AdminDashboard() {
         alert('Módulo creado con éxito');
       }
       
-      // 🎯 RESETEA INCLUYENDO CATEGORÍA
       setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', category: 'Clases Grabadas', planRequired: 'Acceso Total' });
       setEditingId(null);
       fetchModules();
@@ -100,7 +98,7 @@ export default function AdminDashboard() {
       videoUrl: mod.videoUrl,
       duration: mod.duration,
       level: mod.level,
-      category: mod.category || 'Clases Grabadas', // 🎯 CARGA LA CATEGORÍA SI EXISTE
+      category: mod.category || 'Clases Grabadas', 
       planRequired: mod.planRequired || 'Acceso Total'
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -162,12 +160,13 @@ export default function AdminDashboard() {
 
           <div className="bg-darkCard rounded-xl border border-white/10 overflow-hidden shadow-lg">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-gray-400 min-w-[700px]">
+              <table className="w-full text-left text-sm text-gray-400 min-w-[800px]">
                 <thead className="bg-white/5 text-gray-200 uppercase font-semibold text-xs">
                   <tr>
                     <th className="px-4 py-4">Nombre</th>
                     <th className="px-4 py-4">Email</th>
                     <th className="px-4 py-4 text-center">Modalidad Bróker</th>
+                    <th className="px-4 py-4 text-center">ID Bróker</th> {/* 🎯 NUEVA COLUMNA */}
                     <th className="px-4 py-4 text-center">Medio de Pago</th>
                     <th className="px-4 py-4 text-center">Estado Pago</th>
                     <th className="px-4 py-4 text-center">Acceso Plataforma</th>
@@ -183,7 +182,17 @@ export default function AdminDashboard() {
                       <td className="px-4 py-4 text-center">
                         {user.broker === 'vantage' 
                           ? <span className="text-green-400 font-bold uppercase tracking-wider text-[10px] bg-green-500/10 border border-green-500/20 px-2 py-1 rounded">Vantage (Bono)</span> 
-                          : <span className="text-gray-400 uppercase tracking-wider text-[10px] bg-gray-500/10 border border-gray-500/20 px-2 py-1 rounded">Independiente</span>
+                          : user.broker === 'libertex' 
+                            ? <span className="text-brandOrange font-bold uppercase tracking-wider text-[10px] bg-brandOrange/10 border border-brandOrange/20 px-2 py-1 rounded">Libertex</span>
+                            : <span className="text-gray-400 uppercase tracking-wider text-[10px] bg-gray-500/10 border border-gray-500/20 px-2 py-1 rounded">Independiente</span>
+                        }
+                      </td>
+
+                      {/* 🎯 NUEVA CELDA: Muestra el ID si existe, o un guion si no */}
+                      <td className="px-4 py-4 text-center">
+                        {user.brokerAccountId && user.brokerAccountId.trim() !== '' 
+                          ? <span className="text-[#ffcb99] font-mono text-xs font-bold tracking-wider">{user.brokerAccountId}</span>
+                          : <span className="text-gray-600">-</span>
                         }
                       </td>
 
@@ -223,7 +232,7 @@ export default function AdminDashboard() {
                     </tr>
                   ))}
                   {filteredUsers.length === 0 && (
-                    <tr><td colSpan="7" className="px-6 py-10 text-center text-gray-500">No hay usuarios disponibles.</td></tr>
+                    <tr><td colSpan="8" className="px-6 py-10 text-center text-gray-500">No hay usuarios disponibles.</td></tr>
                   )}
                 </tbody>
               </table>
@@ -250,7 +259,6 @@ export default function AdminDashboard() {
             <form onSubmit={createOrUpdateModuleHandler} className="space-y-4">
               <div><label className="block text-sm text-gray-400 mb-1">Título</label><input type="text" required value={newModule.title} onChange={e => setNewModule({...newModule, title: e.target.value})} className="w-full bg-darkBg border border-white/10 rounded px-3 py-2 text-white focus:border-brandOrange outline-none" /></div>
               
-              {/* 🎯 NUEVO SELECTOR DE CATEGORÍA */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">Categoría</label>
                 <select 
@@ -289,11 +297,9 @@ export default function AdminDashboard() {
           </div>
 
           <div className="lg:col-span-2 space-y-4">
-            {/* 🎯 ORDENAMOS LOS MÓDULOS POR FECHA DE CREACIÓN ANTES DE MAPEARLOS */}
             {modules.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(mod => (
               <div key={mod._id} className="bg-darkCard p-4 rounded-xl border border-white/10 flex justify-between items-center hover:border-white/30 transition-colors">
                 <div>
-                  {/* 🎯 ETIQUETA VISUAL EN EL ADMIN PARA SABER QUÉ TIPO DE VIDEO ES */}
                   <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded mb-1 inline-block ${mod.category === 'Videos Técnicos' ? 'bg-blue-500/20 text-blue-400' : 'bg-brandOrange/20 text-brandOrange'}`}>
                     {mod.category || 'Clases Grabadas'}
                   </span>
