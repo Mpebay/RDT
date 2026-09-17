@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check, ChevronLeft, MonitorPlay, Terminal } from 'lucide-react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check, ChevronLeft, MonitorPlay, Terminal, UserCog } from 'lucide-react';
 import api from '../api/axios';
 import qrImage from '../assets/QR.png';
 
@@ -24,17 +24,18 @@ export default function Dashboard() {
   const [activeModule, setActiveModule] = useState(null);
   const [activeCategory, setActiveCategory] = useState('Clases Grabadas');
 
-  // 🎯 NUEVO: Estados para manejar el ID del Bróker
   const [brokerIdInput, setBrokerIdInput] = useState('');
   const [submittingBroker, setSubmittingBroker] = useState(false);
   const [brokerError, setBrokerError] = useState('');
+  
+  const navigate = useNavigate(); // 🎯 NECESARIO PARA REDIRIGIR AL PERFIL
 
   useEffect(() => {
     if (!userInfo) return;
     const checkApprovalStatus = async () => {
       try {
         const { data } = await api.get('/auth/profile');
-        if (data.isApproved !== userInfo.isApproved || data.isPaid !== userInfo.isPaid || data.paymentMethod !== userInfo.paymentMethod || data.brokerAccountId !== userInfo.brokerAccountId) {
+        if (data.isApproved !== userInfo.isApproved || data.isPaid !== userInfo.isPaid || data.paymentMethod !== userInfo.paymentMethod || data.brokerAccountId !== userInfo.brokerAccountId || data.phone !== userInfo.phone) {
           const updatedUser = { ...data, token: userInfo.token };
           localStorage.setItem('userInfo', JSON.stringify(updatedUser));
           setUserInfo(updatedUser);
@@ -49,7 +50,8 @@ export default function Dashboard() {
   }, [userInfo]);
 
   useEffect(() => {
-    if (userInfo?.isApproved || userInfo?.role === 'admin') {
+    // 🎯 SOLO CARGA LOS MÓDULOS SI ESTÁ APROBADO Y SUS DATOS SON REALES
+    if ((userInfo?.isApproved || userInfo?.role === 'admin') && userInfo?.phone !== '0000000000' && userInfo?.lastName !== '-') {
       const fetchModules = async () => {
         try { const { data } = await api.get('/courses/modules'); setModules(data); } 
         catch (error) { console.error("Error cargando módulos", error); }
@@ -75,7 +77,6 @@ export default function Dashboard() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // 🎯 NUEVO: Función para enviar el ID del Bróker
   const handleSubmitBroker = async (e) => {
     e.preventDefault();
     setBrokerError('');
@@ -97,7 +98,31 @@ export default function Dashboard() {
   if (!userInfo) return <div className="flex justify-center items-center h-[calc(100vh-64px)] text-gray-400">Inicia sesión para acceder.</div>;
 
   // ========================================================
-  // ⛔ ZONA DE BLOQUEO (Solo para usuarios no aprobados)
+  // ⛔ ZONA DE BLOQUEO 1: USUARIOS MIGRADOS (Aprobados pero sin datos)
+  // ========================================================
+  if (userInfo.isApproved && userInfo.role !== 'admin' && (!userInfo.phone || userInfo.phone === '0000000000' || userInfo.lastName === '-')) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
+        <div className="bg-darkCard p-8 md:p-10 rounded-3xl border-2 border-brandOrange max-w-xl w-full relative shadow-[0_0_50px_rgba(255,90,0,0.15)]">
+          <div className="w-20 h-20 bg-brandOrange/10 border border-brandOrange/30 text-brandOrange rounded-full flex items-center justify-center mx-auto mb-6"><UserCog size={40} /></div>
+          <h2 className="text-3xl font-black mb-3 text-white">¡Actualiza tu información!</h2>
+          <p className="text-gray-400 mb-8 text-sm md:text-base">
+            Como fuiste migrado a la nueva plataforma, necesitamos que completes tus datos reales (Nombre, Apellido, Teléfono) y cambies tu contraseña temporal por seguridad antes de ingresar a las aulas.
+          </p>
+          
+          <button 
+            onClick={() => navigate('/profile')}
+            className="bg-brandOrange hover:bg-brandOrangeHover text-white px-6 py-3.5 rounded-xl font-bold w-full shadow-[0_0_15px_rgba(255,90,0,0.3)] transition-all"
+          >
+            Ir a Mi Perfil a completar datos
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ========================================================
+  // ⛔ ZONA DE BLOQUEO 2: USUARIOS NUEVOS NO APROBADOS
   // ========================================================
   if (!userInfo.isApproved && userInfo.role !== 'admin') {
     
