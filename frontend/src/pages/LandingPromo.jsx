@@ -12,7 +12,6 @@ export default function LandingPromo() {
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
-  // 🎯 EFECTO PARA DETECTAR SI EL USUARIO VIENE DESDE EL LOGIN CON EL LINK #planes
   useEffect(() => {
     if (window.location.hash === '#planes') {
       setTimeout(() => {
@@ -73,23 +72,25 @@ export default function LandingPromo() {
             Descubrí nuestro método comprobado para generar rentabilidad consistente. Mirá el video para entender cómo funciona la academia.
           </p>
 
-          <div className="relative max-w-4xl mx-auto aspect-video bg-darkCard border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(255,90,0,0.15)] flex items-center justify-center">
+          {/* 🎯 SOLUCIÓN DRIVE: w-full y h-[280px] en celular para mostrar botones */}
+          <div className="relative w-full max-w-4xl mx-auto h-[280px] sm:h-[350px] md:h-auto md:aspect-video bg-darkCard border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(255,90,0,0.15)] flex items-center justify-center">
             {isPlayingVideo ? (
               <div className="relative w-full h-full bg-black overflow-hidden">
+                
                 <iframe 
                   src={getEmbedUrl(PROMO_VIDEO_URL)} 
-                  className="w-full h-full border-none outline-none absolute top-0 left-0 scale-[1.03] translate-y-[-10px]"
+                  className="w-full h-full border-none outline-none absolute top-0 left-0"
                   allow="autoplay; fullscreen"
                   allowFullScreen
                 ></iframe>
 
-                {/* 🛡️ ESCUDO SUPERIOR: Oculta la barra de Drive */}
-                <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
-                  <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - Video Oficial</span>
+                <div className="absolute top-0 left-0 w-full h-12 md:h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-4 md:px-6">
+                  <span className="text-[10px] md:text-xs text-gray-400 font-medium tracking-wide truncate">
+                    El Rincón del Trading - Video Oficial
+                  </span>
                 </div>
                 
-                {/* 🛡️ ESCUDO ESQUINA DERECHA: Bloquea intentos de apertura extra */}
-                <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
+                <div className="absolute top-0 right-0 w-20 md:w-32 h-12 md:h-14 bg-black pointer-events-auto z-30" />
               </div>
             ) : (
               <div 
@@ -105,7 +106,6 @@ export default function LandingPromo() {
           </div>
         </div>
 
-        {/* 🎯 SE UNIFICÓ EL ID A "planes" PARA MANTENER LA CONSISTENCIA */}
         <div id="planes" className="max-w-4xl mx-auto scroll-mt-28">
           
           <div className="mb-8 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
@@ -129,7 +129,6 @@ export default function LandingPromo() {
 
           <div className="mb-8 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Elige tu modalidad con el bróker</h3>
-            {/* 🎯 SE ACTUALIZÓ LA GRILLA A 3 COLUMNAS Y SE AGREGÓ LIBERTEX */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => setBrokerChoice('vantage')}

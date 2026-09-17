@@ -4,7 +4,6 @@ import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCod
 import api from '../api/axios';
 import qrImage from '../assets/QR.png';
 
-// 🔗 TUS LINKS DE REFERIDOS
 const REFERRAL_LINKS = { 
   vantage: "https://latam.vantagemarkets.com/es/?affid=TU_LINK_VANTAGE",
   libertex: "https://libertex.org/?affid=TU_LINK_LIBERTEX"
@@ -40,7 +39,7 @@ export default function Dashboard() {
             data.paymentMethod !== userInfo.paymentMethod || 
             data.brokerAccountId !== userInfo.brokerAccountId || 
             data.phone !== userInfo.phone ||
-            data.requirePasswordChange !== userInfo.requirePasswordChange) { // 🎯 CHEQUEA EL CANDADO
+            data.requirePasswordChange !== userInfo.requirePasswordChange) { 
           const updatedUser = { ...data, token: userInfo.token };
           localStorage.setItem('userInfo', JSON.stringify(updatedUser));
           setUserInfo(updatedUser);
@@ -55,7 +54,6 @@ export default function Dashboard() {
   }, [userInfo]);
 
   useEffect(() => {
-    // 🎯 SOLO CARGA LOS MÓDULOS SI ESTÁ APROBADO, SUS DATOS SON REALES Y EL CANDADO DE CONTRASEÑA ESTÁ APAGADO
     if ((userInfo?.isApproved || userInfo?.role === 'admin') && userInfo?.phone !== '0000000000' && userInfo?.lastName !== '-' && !userInfo?.requirePasswordChange) {
       const fetchModules = async () => {
         try { const { data } = await api.get('/courses/modules'); setModules(data); } 
@@ -102,10 +100,6 @@ export default function Dashboard() {
 
   if (!userInfo) return <div className="flex justify-center items-center h-[calc(100vh-64px)] text-gray-400">Inicia sesión para acceder.</div>;
 
-  // ========================================================
-  // ⛔ ZONA DE BLOQUEO 1: USUARIOS MIGRADOS (Aprobados pero sin datos o con CANDADO ACTIVO)
-  // ========================================================
-  // 🎯 AGREGAMOS EL `userInfo.requirePasswordChange` AL CONDICIONAL
   if (userInfo.isApproved && userInfo.role !== 'admin' && (!userInfo.phone || userInfo.phone === '0000000000' || userInfo.lastName === '-' || userInfo.requirePasswordChange)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
@@ -127,12 +121,7 @@ export default function Dashboard() {
     );
   }
 
-  // ========================================================
-  // ⛔ ZONA DE BLOQUEO 2: USUARIOS NUEVOS NO APROBADOS
-  // ========================================================
   if (!userInfo.isApproved && userInfo.role !== 'admin') {
-    
-    // 1️⃣ PANTALLAS DE PAGO (Si aún no han pagado)
     if (!userInfo.isPaid) {
       if (userInfo.paymentMethod === 'crypto') {
         const wpText = `Hola, ya transferí los 97 USDT para la Academia. Mi email es ${userInfo.email}. Adjunto el comprobante.`;
@@ -204,7 +193,6 @@ export default function Dashboard() {
       );
     }
 
-    // 2️⃣ PANTALLA DE BRÓKER (Si ya pagaron pero eligieron Vantage o Libertex y no enviaron su ID)
     if (userInfo.isPaid) {
       if ((userInfo.broker === 'vantage' || userInfo.broker === 'libertex') && !userInfo.brokerAccountId) {
         
@@ -262,7 +250,6 @@ export default function Dashboard() {
         );
       }
 
-      // 3️⃣ PANTALLA "EN REVISIÓN"
       return (
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center relative z-10">
           <div className="bg-darkCard p-10 rounded-3xl border border-white/10 max-w-md w-full relative shadow-2xl">
@@ -279,10 +266,6 @@ export default function Dashboard() {
       );
     }
   }
-
-  // ========================================================
-  // ✅ FIN DE ZONA DE BLOQUEO (Lo de abajo solo lo ven aprobados y con candados apagados)
-  // ========================================================
 
   const getEmbedUrl = (url) => {
     if (!url) return '';
@@ -306,17 +289,23 @@ export default function Dashboard() {
         </button>
 
         <div className="bg-darkCard rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-          <div className="aspect-video w-full bg-black relative overflow-hidden">
+          
+          {/* 🎯 SOLUCIÓN DRIVE: Forzamos h-[280px] mínimo en celular para que muestre botones */}
+          <div className="w-full h-[280px] sm:h-[350px] md:h-auto md:aspect-video bg-black relative overflow-hidden">
             <iframe 
               src={getEmbedUrl(activeModule.videoUrl)} 
-              className="w-full h-full border-none outline-none absolute top-0 left-0 scale-[1.03] translate-y-[-10px]"
+              className="w-full h-full border-none outline-none absolute top-0 left-0"
               allow="autoplay; fullscreen"
               allowFullScreen
             ></iframe>
-            <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
-              <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - {activeModule.category || 'Clase Exclusiva'}</span>
+            
+            {/* 🛡️ ESCUDOS (sin cambios, tapan los botones de descarga/abrir de Drive) */}
+            <div className="absolute top-0 left-0 w-full h-12 md:h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-4 md:px-6">
+              <span className="text-[10px] md:text-xs text-gray-400 font-medium tracking-wide truncate">
+                El Rincón del Trading - {activeModule.category || 'Clase Exclusiva'}
+              </span>
             </div>
-            <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
+            <div className="absolute top-0 right-0 w-20 md:w-32 h-12 md:h-14 bg-black pointer-events-auto z-30" />
           </div>
           
           <div className="p-8">
