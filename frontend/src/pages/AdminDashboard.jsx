@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search, Shield, Edit3, X } from 'lucide-react';
+import { CheckCircle, XCircle, Trash2, Users, Video, Plus, Search, Shield, Edit3, X, MonitorPlay, Terminal } from 'lucide-react';
 import api from '../api/axios';
 
 export default function AdminDashboard() {
@@ -11,6 +11,9 @@ export default function AdminDashboard() {
   const [filterStatus, setFilterStatus] = useState('all');
   
   const [editingId, setEditingId] = useState(null);
+  
+  // 🎯 NUEVO ESTADO: Para controlar qué categoría se ve en la lista de la derecha
+  const [activeCategoryAdmin, setActiveCategoryAdmin] = useState('Clases Grabadas');
   
   const [newModule, setNewModule] = useState({ 
     title: '', 
@@ -81,6 +84,9 @@ export default function AdminDashboard() {
         alert('Módulo creado con éxito');
       }
       
+      // 🎯 MAGIA: Cambiamos automáticamente a la pestaña de la categoría que acaba de guardar
+      setActiveCategoryAdmin(newModule.category);
+
       setNewModule({ title: '', description: '', videoUrl: '', duration: '', level: 'Principiante', category: 'Clases Grabadas', planRequired: 'Acceso Total' });
       setEditingId(null);
       fetchModules();
@@ -101,6 +107,8 @@ export default function AdminDashboard() {
       category: mod.category || 'Clases Grabadas', 
       planRequired: mod.planRequired || 'Acceso Total'
     });
+    // También cambiamos la pestaña activa a la del módulo que está editando
+    setActiveCategoryAdmin(mod.category || 'Clases Grabadas');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -121,6 +129,11 @@ export default function AdminDashboard() {
     const matchesStatus = filterStatus === 'all' || (filterStatus === 'approved' && user.isApproved) || (filterStatus === 'pending' && !user.isApproved);
     return matchesSearch && matchesStatus;
   });
+
+  // 🎯 FILTRAMOS LOS MÓDULOS SEGÚN LA PESTAÑA ACTIVA EN EL PANEL ADMIN
+  const filteredAdminModules = modules
+    .filter(mod => (mod.category || 'Clases Grabadas') === activeCategoryAdmin)
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -166,7 +179,7 @@ export default function AdminDashboard() {
                     <th className="px-4 py-4">Nombre</th>
                     <th className="px-4 py-4">Email</th>
                     <th className="px-4 py-4 text-center">Modalidad Bróker</th>
-                    <th className="px-4 py-4 text-center">ID Bróker</th> {/* 🎯 NUEVA COLUMNA */}
+                    <th className="px-4 py-4 text-center">ID Bróker</th>
                     <th className="px-4 py-4 text-center">Medio de Pago</th>
                     <th className="px-4 py-4 text-center">Estado Pago</th>
                     <th className="px-4 py-4 text-center">Acceso Plataforma</th>
@@ -188,7 +201,6 @@ export default function AdminDashboard() {
                         }
                       </td>
 
-                      {/* 🎯 NUEVA CELDA: Muestra el ID si existe, o un guion si no */}
                       <td className="px-4 py-4 text-center">
                         {user.brokerAccountId && user.brokerAccountId.trim() !== '' 
                           ? <span className="text-[#ffcb99] font-mono text-xs font-bold tracking-wider">{user.brokerAccountId}</span>
@@ -243,6 +255,7 @@ export default function AdminDashboard() {
 
       {activeTab === 'modules' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* COLUMNA IZQUIERDA: FORMULARIO */}
           <div className="lg:col-span-1 bg-darkCard p-6 rounded-xl border border-white/10 h-fit">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold flex items-center text-white">
@@ -296,8 +309,28 @@ export default function AdminDashboard() {
             </form>
           </div>
 
+          {/* COLUMNA DERECHA: LISTA DE MÓDULOS CON PESTAÑAS */}
           <div className="lg:col-span-2 space-y-4">
-            {modules.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(mod => (
+            
+            {/* 🎯 PESTAÑAS DE NAVEGACIÓN EN EL PANEL ADMIN */}
+            <div className="flex space-x-2 sm:space-x-4 mb-6 border-b border-white/10 pb-4 overflow-x-auto">
+              <button 
+                onClick={() => setActiveCategoryAdmin('Clases Grabadas')} 
+                className={`flex items-center px-4 py-2 rounded-lg font-bold transition-all whitespace-nowrap ${activeCategoryAdmin === 'Clases Grabadas' ? 'bg-brandOrange text-white shadow-[0_0_15px_rgba(255,90,0,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+              >
+                <MonitorPlay size={18} className="mr-2" /> Clases Grabadas
+              </button>
+              
+              <button 
+                onClick={() => setActiveCategoryAdmin('Videos Técnicos')} 
+                className={`flex items-center px-4 py-2 rounded-lg font-bold transition-all whitespace-nowrap ${activeCategoryAdmin === 'Videos Técnicos' ? 'bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.3)]' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+              >
+                <Terminal size={18} className="mr-2" /> Videos Técnicos
+              </button>
+            </div>
+
+            {/* 🎯 MAPEO DE LOS MÓDULOS YA FILTRADOS */}
+            {filteredAdminModules.map(mod => (
               <div key={mod._id} className="bg-darkCard p-4 rounded-xl border border-white/10 flex justify-between items-center hover:border-white/30 transition-colors">
                 <div>
                   <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded mb-1 inline-block ${mod.category === 'Videos Técnicos' ? 'bg-blue-500/20 text-blue-400' : 'bg-brandOrange/20 text-brandOrange'}`}>
@@ -316,7 +349,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
-            {modules.length === 0 && <div className="text-center text-gray-500 py-10 border border-dashed border-white/10 rounded-xl">No has creado ningún módulo aún.</div>}
+            
+            {filteredAdminModules.length === 0 && (
+              <div className="text-center text-gray-500 py-10 border border-dashed border-white/10 rounded-xl">
+                No hay módulos en la categoría "{activeCategoryAdmin}".
+              </div>
+            )}
           </div>
         </div>
       )}
