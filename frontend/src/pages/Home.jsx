@@ -91,7 +91,7 @@ export default function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
             <a 
-              href="#" 
+              href="https://vigco.co/la-com-inv/9HsBqvVz" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-darkCard p-8 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(255,90,0,0.15)] flex flex-col items-center justify-center group cursor-pointer"
@@ -104,7 +104,7 @@ export default function Home() {
             </a>
 
             <a 
-              href="#" 
+              href="https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634" 
               target="_blank" 
               rel="noopener noreferrer"
               className="bg-darkCard p-8 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(255,90,0,0.15)] flex flex-col items-center justify-center group cursor-pointer"
