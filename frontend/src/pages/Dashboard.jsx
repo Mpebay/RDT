@@ -105,7 +105,6 @@ export default function Dashboard() {
   // ========================================================
   // ⛔ ZONA DE BLOQUEO 1: USUARIOS MIGRADOS (Aprobados pero sin datos o con CANDADO ACTIVO)
   // ========================================================
-  // 🎯 AGREGAMOS EL `userInfo.requirePasswordChange` AL CONDICIONAL
   if (userInfo.isApproved && userInfo.role !== 'admin' && (!userInfo.phone || userInfo.phone === '0000000000' || userInfo.lastName === '-' || userInfo.requirePasswordChange)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
@@ -308,15 +307,18 @@ export default function Dashboard() {
         <div className="bg-darkCard rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
           <div className="aspect-video w-full bg-black relative overflow-hidden">
             <iframe 
-              src={getEmbedUrl(activeModule.videoUrl)} 
-              className="w-full h-full border-none outline-none absolute top-0 left-0 scale-[1.03] translate-y-[-10px]"
+              src={getEmbedUrl(activeModule.videoUrl)}
+              className="w-full h-full border-none outline-none absolute top-0 left-0 md:scale-[1.03] md:translate-y-[-10px]"
               allow="autoplay; fullscreen"
               allowFullScreen
             ></iframe>
-            <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
-              <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - {activeModule.category || 'Clase Exclusiva'}</span>
+            {/* 🎯 FIX MOBILE: Escudos más delgados en móvil (h-10) */}
+            <div className="absolute top-0 left-0 w-full h-10 md:h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-4 md:px-6">
+              <span className="text-[10px] md:text-xs text-gray-400 font-medium tracking-wide truncate">
+                El Rincón del Trading - {activeModule.category || 'Clase Exclusiva'}
+              </span>
             </div>
-            <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
+            <div className="absolute top-0 right-0 w-16 md:w-32 h-10 md:h-14 bg-black pointer-events-auto z-30" />
           </div>
           
           <div className="p-8">

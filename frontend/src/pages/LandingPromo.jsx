@@ -77,19 +77,20 @@ export default function LandingPromo() {
             {isPlayingVideo ? (
               <div className="relative w-full h-full bg-black overflow-hidden">
                 <iframe 
-                  src={getEmbedUrl(PROMO_VIDEO_URL)} 
-                  className="w-full h-full border-none outline-none absolute top-0 left-0 scale-[1.03] translate-y-[-10px]"
+                  src={getEmbedUrl(PROMO_VIDEO_URL)}
+                  className="w-full h-full border-none outline-none absolute top-0 left-0 md:scale-[1.03] md:translate-y-[-10px]"
                   allow="autoplay; fullscreen"
                   allowFullScreen
                 ></iframe>
 
-                {/* 🛡️ ESCUDO SUPERIOR: Oculta la barra de Drive */}
-                <div className="absolute top-0 left-0 w-full h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-6">
-                  <span className="text-xs text-gray-400 font-medium tracking-wide">El Rincón del Trading - Video Oficial</span>
+                {/* 🎯 FIX MOBILE: Escudos más delgados en móvil (h-10) */}
+                <div className="absolute top-0 left-0 w-full h-10 md:h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-4 md:px-6">
+                  <span className="text-[10px] md:text-xs text-gray-400 font-medium tracking-wide truncate">
+                    El Rincón del Trading - Video Oficial
+                  </span>
                 </div>
                 
-                {/* 🛡️ ESCUDO ESQUINA DERECHA: Bloquea intentos de apertura extra */}
-                <div className="absolute top-0 right-0 w-32 h-14 bg-black pointer-events-auto z-30" />
+                <div className="absolute top-0 right-0 w-16 md:w-32 h-10 md:h-14 bg-black pointer-events-auto z-30" />
               </div>
             ) : (
               <div 
