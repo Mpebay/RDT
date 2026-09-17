@@ -7,7 +7,6 @@ export default function ChangePassword() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // 🎯 Estados para mostrar/ocultar contraseñas
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -33,13 +32,12 @@ export default function ChangePassword() {
 
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      const config = {
-        headers: {
-          Authorization: `Bearer ${userInfo?.token}`
-        }
-      };
 
       const { data } = await api.put('/auth/update-password', { currentPassword, newPassword });
+
+      // 🎯 ACTUALIZAMOS EL LOCALSTORAGE PARA APAGAR EL BLOQUEO EN EL FRONTEND
+      const updatedUser = { ...userInfo, requirePasswordChange: false };
+      localStorage.setItem('userInfo', JSON.stringify(updatedUser));
 
       setMessage({ text: data.message || 'Contraseña actualizada con éxito', type: 'success' });
       setCurrentPassword('');
@@ -75,7 +73,6 @@ export default function ChangePassword() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Contraseña Actual */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
             Contraseña Actual
@@ -99,7 +96,6 @@ export default function ChangePassword() {
           </div>
         </div>
 
-        {/* Nueva Contraseña */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
             Nueva Contraseña
@@ -123,7 +119,6 @@ export default function ChangePassword() {
           </div>
         </div>
 
-        {/* Confirmar Nueva Contraseña */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">
             Confirmar Nueva Contraseña

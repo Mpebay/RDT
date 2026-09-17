@@ -13,9 +13,10 @@ const userSchema = new mongoose.Schema({
   role: { type: String, default: 'user' },
   plan: { type: String, default: 'Acceso Total' }, 
   broker: { type: String, enum: ['vantage', 'libertex', 'independent'], default: 'independent' },
-  brokerAccountId: { type: String, default: '' }, // 🎯 NUEVO: Guardará el ID del bróker
+  brokerAccountId: { type: String, default: '' }, 
   paymentMethod: { type: String, enum: ['mercadopago', 'crypto'], default: 'mercadopago' },
-  checkoutPrice: { type: Number, default: 97 }, 
+  checkoutPrice: { type: Number, default: 97 },
+  requirePasswordChange: { type: Boolean, default: false }, // 🎯 EL NUEVO CANDADO
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date }
 }, { timestamps: true });

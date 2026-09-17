@@ -12,7 +12,6 @@ async function migrarYNotificar() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Conectado a MongoDB...');
 
-    // 🎯 TEXTO PLANO: Tu modelo User.js lo encriptará automáticamente
     const plainTempPassword = 'Rincon2026!'; 
 
     for (const email of emailsMigrar) {
@@ -22,21 +21,20 @@ async function migrarYNotificar() {
       const existe = await User.findOne({ email });
       
       if (!existe) {
-        // 1. Crear el usuario con DATOS DE RELLENO y la contraseña sin encriptar aquí
         await User.create({
           name: nombreCapitalizado,
           lastName: '-',             
           phone: '0000000000',       
           email: email,
-          password: plainTempPassword, // 🎯 PASAMOS TEXTO PLANO
+          password: plainTempPassword,
           isApproved: true,
           isPaid: true,
           role: 'user',
-          broker: 'independent'      
+          broker: 'independent',
+          requirePasswordChange: true // 🎯 ACTIVA EL BLOQUEO DE CONTRASEÑA OBLIGATORIO
         });
         console.log(`[BD] Usuario migrado con éxito: ${email}`);
 
-        // 2. Plantilla del correo de migración
         const emailHtml = `
           <div style="background-color: #0b0b0f; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 0; margin: 0;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #13131a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">

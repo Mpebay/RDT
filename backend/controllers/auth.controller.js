@@ -112,7 +112,7 @@ exports.registerUser = async (req, res, next) => {
       _id: user._id, 
       name: user.name, 
       lastName: user.lastName, 
-      phone: user.phone,
+      phone: user.phone, 
       email: user.email, 
       role: user.role, 
       isApproved: user.isApproved,
@@ -122,6 +122,7 @@ exports.registerUser = async (req, res, next) => {
       paymentMethod: user.paymentMethod,
       plan: user.plan,
       checkoutPrice: user.checkoutPrice,
+      requirePasswordChange: user.requirePasswordChange, // 🎯 DEVUELVE EL CANDADO
       avatar: user.avatar,
       token: generateToken(user._id)
     });
@@ -144,8 +145,8 @@ exports.loginUser = async (req, res, next) => {
       res.json({
         _id: user._id, 
         name: user.name, 
-        lastName: user.lastName,
-        phone: user.phone,
+        lastName: user.lastName, 
+        phone: user.phone,       
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
@@ -155,6 +156,7 @@ exports.loginUser = async (req, res, next) => {
         paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
+        requirePasswordChange: user.requirePasswordChange, // 🎯 DEVUELVE EL CANDADO
         avatar: user.avatar,
         token: generateToken(user._id)
       });
@@ -174,7 +176,7 @@ exports.getUserProfile = async (req, res, next) => {
         _id: user._id, 
         name: user.name, 
         lastName: user.lastName, 
-        phone: user.phone,
+        phone: user.phone, 
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
@@ -184,6 +186,7 @@ exports.getUserProfile = async (req, res, next) => {
         paymentMethod: user.paymentMethod,
         plan: user.plan,
         checkoutPrice: user.checkoutPrice,
+        requirePasswordChange: user.requirePasswordChange, // 🎯 DEVUELVE EL CANDADO
         avatar: user.avatar 
       });
     } else {
@@ -254,7 +257,6 @@ exports.submitBrokerId = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// 🎯 NUEVA FUNCIÓN COMPLETA: Actualiza Nombre, Apellido y Teléfono juntos
 exports.updateProfileData = async (req, res, next) => {
   try {
     const { name, lastName, phone } = req.body;
@@ -401,8 +403,9 @@ exports.updatePassword = async (req, res, next) => {
     }
 
     user.password = newPassword;
+    user.requirePasswordChange = false; // 🎯 APAGAMOS EL CANDADO AL CAMBIAR LA CLAVE
     await user.save({ validateModifiedOnly: true });
 
-    res.json({ message: 'Contraseña actualizada exitosamente' });
+    res.json({ message: 'Contraseña actualizada exitosamente', requirePasswordChange: false });
   } catch (error) { next(error); }
 };
