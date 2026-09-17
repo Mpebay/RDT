@@ -112,7 +112,7 @@ exports.registerUser = async (req, res, next) => {
       _id: user._id, 
       name: user.name, 
       lastName: user.lastName, 
-      phone: user.phone, // 🎯 AHORA SE ENVÍA EL TELÉFONO
+      phone: user.phone,
       email: user.email, 
       role: user.role, 
       isApproved: user.isApproved,
@@ -144,8 +144,8 @@ exports.loginUser = async (req, res, next) => {
       res.json({
         _id: user._id, 
         name: user.name, 
-        lastName: user.lastName, // 🎯 AHORA SE ENVÍA EL APELLIDO
-        phone: user.phone,       // 🎯 AHORA SE ENVÍA EL TELÉFONO
+        lastName: user.lastName,
+        phone: user.phone,
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
@@ -174,7 +174,7 @@ exports.getUserProfile = async (req, res, next) => {
         _id: user._id, 
         name: user.name, 
         lastName: user.lastName, 
-        phone: user.phone, // 🎯 AHORA SE ENVÍA EL TELÉFONO
+        phone: user.phone,
         email: user.email, 
         role: user.role, 
         isApproved: user.isApproved,
@@ -217,7 +217,6 @@ exports.updatePaymentMethod = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// 🎯 FUNCIÓN PARA ENVIAR EL ID DEL BRÓKER
 exports.submitBrokerId = async (req, res, next) => {
   try {
     const { brokerAccountId } = req.body;
@@ -255,13 +254,13 @@ exports.submitBrokerId = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// 🎯 NUEVA FUNCIÓN PARA ACTUALIZAR EL TELÉFONO DESDE EL PERFIL
-exports.updatePhone = async (req, res, next) => {
+// 🎯 NUEVA FUNCIÓN COMPLETA: Actualiza Nombre, Apellido y Teléfono juntos
+exports.updateProfileData = async (req, res, next) => {
   try {
-    const { phone } = req.body;
+    const { name, lastName, phone } = req.body;
     
-    if (!phone || phone.trim() === '') {
-      const error = new Error('El teléfono no puede estar vacío');
+    if (!name || !lastName || !phone) {
+      const error = new Error('Todos los campos personales son obligatorios');
       error.statusCode = 400;
       return next(error);
     }
@@ -273,10 +272,17 @@ exports.updatePhone = async (req, res, next) => {
       return next(error);
     }
 
+    user.name = name;
+    user.lastName = lastName;
     user.phone = phone;
     await user.save({ validateModifiedOnly: true });
 
-    res.json({ message: 'Teléfono actualizado exitosamente', phone: user.phone });
+    res.json({ 
+      message: 'Datos actualizados exitosamente', 
+      name: user.name,
+      lastName: user.lastName,
+      phone: user.phone 
+    });
   } catch (error) { 
     next(error); 
   }
