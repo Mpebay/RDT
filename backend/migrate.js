@@ -1,11 +1,10 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User'); 
-const bcrypt = require('bcrypt');
 const axios = require('axios');
 
 const emailsMigrar = [
-  "manupebay@hotmail.com" // Añade aquí el resto de correos
+  "manupebay@hotmail.com" // Pon aquí todos los correos que vayas a migrar
 ];
 
 async function migrarYNotificar() {
@@ -13,9 +12,8 @@ async function migrarYNotificar() {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('Conectado a MongoDB...');
 
-    // 🎯 CLAVE TEMPORAL UNIFICADA
-    const plainTempPassword = 'Rincon2024!';
-    const tempPasswordHash = await bcrypt.hash(plainTempPassword, 10);
+    // 🎯 TEXTO PLANO: Tu modelo User.js lo encriptará automáticamente
+    const plainTempPassword = 'Rincon2026!'; 
 
     for (const email of emailsMigrar) {
       const nombreGenerico = email.split('@')[0];
@@ -24,17 +22,17 @@ async function migrarYNotificar() {
       const existe = await User.findOne({ email });
       
       if (!existe) {
-        // 1. Crear el usuario con DATOS DE RELLENO 
+        // 1. Crear el usuario con DATOS DE RELLENO y la contraseña sin encriptar aquí
         await User.create({
           name: nombreCapitalizado,
-          lastName: '-',             // 🎯 Marca para saber que es migrado
-          phone: '0000000000',       // 🎯 Marca clave para saber que es migrado
+          lastName: '-',             
+          phone: '0000000000',       
           email: email,
-          password: tempPasswordHash,
+          password: plainTempPassword, // 🎯 PASAMOS TEXTO PLANO
           isApproved: true,
           isPaid: true,
           role: 'user',
-          broker: 'independent'      // Asumimos independiente al venir de otra BD
+          broker: 'independent'      
         });
         console.log(`[BD] Usuario migrado con éxito: ${email}`);
 
@@ -114,7 +112,10 @@ async function migrarYNotificar() {
 
     console.log('¡Migración finalizada!');
     process.exit(0);
-  } catch (error) { process.exit(1); }
+  } catch (error) { 
+    console.error('Error general en el script de migración:', error);
+    process.exit(1); 
+  }
 }
 
 migrarYNotificar();
