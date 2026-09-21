@@ -4,7 +4,7 @@ const User = require('./models/User');
 const axios = require('axios');
 
 const emailsMigrar = [
-  "martinanido2@gmail.com"
+  "lautarotrading10@gmail.com"
 ];
 
 async function migrarYNotificar() {
@@ -68,7 +68,7 @@ async function migrarYNotificar() {
               </p>
 
               <div style="text-align: center; margin-bottom: 35px;">
-                <a href="https://rdt-neon.vercel.app/login"
+                <a href="https://www.rdt-academy.com/login"
                    style="background-color: #ff5a00; color: #ffffff; padding: 14px 28px; border-radius: 9999px; text-decoration: none; font-weight: bold; font-size: 15px; display: inline-block; box-shadow: 0 0 15px rgba(255,90,0,0.4);">
                   Iniciar Sesión
                 </a>

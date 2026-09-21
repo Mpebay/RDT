@@ -111,7 +111,7 @@ export default function Dashboard() {
           </p>
           
           <button 
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate('/profile/update')}
             className="bg-brandOrange hover:bg-brandOrangeHover text-white px-6 py-3.5 rounded-xl font-bold w-full shadow-[0_0_15px_rgba(255,90,0,0.3)] transition-all"
           >
             Ir a Mi Perfil a completar mis datos
