@@ -4,7 +4,7 @@ const User = require('./models/User');
 const axios = require('axios');
 
 const emailsMigrar = [
-  "lautarotrading10@gmail.com"
+  "manupebay@hotmail.com"
 ];
 
 async function migrarYNotificar() {
