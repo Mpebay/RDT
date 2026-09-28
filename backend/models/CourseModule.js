@@ -10,8 +10,9 @@ const moduleSchema = new mongoose.Schema({
   category: {
     type: String,
     enum: ['Clases Grabadas', 'Videos Técnicos'],
-    default: 'Clases Grabadas'
-  }
+    default: 'Clases Grabadas',
+  },
+  order: { type: Number, default: 1 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('CourseModule', moduleSchema);

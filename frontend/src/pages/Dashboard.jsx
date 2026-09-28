@@ -323,9 +323,10 @@ export default function Dashboard() {
     );
   }
 
+ // 🎯 AHORA SE ORDENAN POR TU NÚMERO DE ORDEN
   const filteredModules = modules
     .filter(mod => (mod.category || 'Clases Grabadas') === activeCategory)
-    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    .sort((a, b) => (a.order || 0) - (b.order || 0) || new Date(a.createdAt) - new Date(b.createdAt));
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10">

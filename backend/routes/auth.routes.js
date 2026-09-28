@@ -10,7 +10,8 @@ const {
   updatePaymentMethod,
   updateAvatar,
   submitBrokerId,
-  updateProfileData // 🎯 CAMBIAMOS EL NOMBRE A LA FUNCIÓN
+  updateProfileData,
+  migrateUsers // 🎯 NUEVA RUTA IMPORTADA
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
 
@@ -23,6 +24,7 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password/:token', resetPassword);
 router.put('/update-password', protect, updatePassword);
 router.put('/profile/avatar', protect, updateAvatar); 
-router.put('/profile/update', protect, updateProfileData); // 🎯 NUEVA RUTA PARA DATOS PERSONALES
+router.put('/profile/update', protect, updateProfileData);
+router.post('/admin/migrate', protect, migrateUsers); // 🎯 NUEVO ENDPOINT DE MIGRACIÓN
 
 module.exports = router;
