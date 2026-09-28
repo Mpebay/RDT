@@ -109,7 +109,6 @@ export default function Dashboard() {
           <p className="text-gray-400 mb-8 text-sm md:text-base">
             Como fuiste migrado a la nueva plataforma, es <strong>obligatorio</strong> que completes tus datos personales reales (Nombre, Apellido, Teléfono) y que cambies tu contraseña temporal por seguridad antes de ingresar a las aulas.
           </p>
-          
           <button 
             onClick={() => navigate('/profile')}
             className="bg-brandOrange hover:bg-brandOrangeHover text-white px-6 py-3.5 rounded-xl font-bold w-full shadow-[0_0_15px_rgba(255,90,0,0.3)] transition-all"
@@ -138,7 +137,7 @@ export default function Dashboard() {
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Dirección de Wallet</p>
                 <div className="bg-white/5 p-3 rounded-lg flex items-center justify-between border border-white/10 mb-4 gap-2">
                   <span className="text-xs text-brandOrange font-mono break-all select-all">{BINANCE_WALLET_TRC20}</span>
-                  <button onClick={handleCopyWallet} className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-all flex items-center justify-center shrink-0 relative" title="Copiar dirección">
+                  <button onClick={handleCopyWallet} className="bg-white/10 hover:bg-white/20 text-white p-2 rounded-lg transition-all flex items-center justify-center shrink-0 relative">
                     {copied ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
                   </button>
                 </div>
@@ -147,7 +146,7 @@ export default function Dashboard() {
                   <img src={qrImage} alt="QR Code" className="w-full h-full object-contain" />
                 </div>
               </div>
-              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(wpText)}`} target="_blank" rel="noopener noreferrer" className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold shadow-[0_0_15px_rgba(34,197,94,0.3)] flex items-center justify-center mx-auto w-full transition-all mb-4">
+              <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(wpText)}`} target="_blank" rel="noopener noreferrer" className="bg-green-600 hover:bg-green-500 text-white px-6 py-3 rounded-xl font-bold flex items-center justify-center mx-auto w-full transition-all mb-4">
                 Ya transferí (Enviar comprobante por WhatsApp)
               </a>
               <div className="border-t border-white/10 pt-4 mt-4">
@@ -195,10 +194,8 @@ export default function Dashboard() {
 
     if (userInfo.isPaid) {
       if ((userInfo.broker === 'vantage' || userInfo.broker === 'libertex') && !userInfo.brokerAccountId) {
-        
         const brokerName = userInfo.broker === 'vantage' ? 'Vantage Markets' : 'Libertex';
         const brokerLink = REFERRAL_LINKS[userInfo.broker];
-
         return (
           <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
             <div className="bg-darkCard p-8 md:p-10 rounded-3xl border-2 border-brandOrange max-w-xl w-full relative shadow-[0_0_50px_rgba(255,90,0,0.15)]">
@@ -219,7 +216,6 @@ export default function Dashboard() {
                   <div className="bg-brandOrange/20 text-brandOrange w-7 h-7 rounded-full flex items-center justify-center font-bold shrink-0 text-sm">2</div>
                   <p className="text-sm text-gray-300">Realiza tu primer fondeo en la cuenta que acabas de crear.</p>
                 </div>
-                
                 <a href={brokerLink} target="_blank" rel="noopener noreferrer" className="bg-white hover:bg-gray-200 text-black px-6 py-3.5 rounded-xl font-bold w-full flex justify-center items-center shadow-lg transition-all">
                   Crear cuenta en {brokerName} <ExternalLink size={18} className="ml-2"/>
                 </a>
@@ -236,7 +232,6 @@ export default function Dashboard() {
                   required
                 />
                 {brokerError && <p className="text-red-400 text-xs mb-3 font-medium">{brokerError}</p>}
-                
                 <button
                   type="submit"
                   disabled={submittingBroker}
@@ -267,6 +262,10 @@ export default function Dashboard() {
     }
   }
 
+  // ========================================================
+  // 🎯 FUNCIONES PARA EL REPRODUCTOR Y LAS MINIATURAS
+  // ========================================================
+
   const getEmbedUrl = (url) => {
     if (!url) return '';
     if (url.includes('drive.google.com')) {
@@ -276,6 +275,19 @@ export default function Dashboard() {
       }
     }
     return url;
+  };
+
+  // 🎯 NUEVA FUNCIÓN: Extrae la miniatura del video de Google Drive
+  const getThumbnailUrl = (url) => {
+    if (!url) return '';
+    if (url.includes('drive.google.com')) {
+      const match = url.match(/\/d\/(.*?)\//);
+      if (match && match[1]) {
+        // sz=w800 le dice a Google que nos de una foto de 800px de ancho (liviana pero nítida)
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+      }
+    }
+    return '';
   };
   
   if (activeModule) {
@@ -289,8 +301,6 @@ export default function Dashboard() {
         </button>
 
         <div className="bg-darkCard rounded-2xl border border-white/10 overflow-hidden shadow-2xl">
-          
-          {/* 🎯 SOLUCIÓN DRIVE: Forzamos h-[280px] mínimo en celular para que muestre botones */}
           <div className="w-full h-[280px] sm:h-[350px] md:h-auto md:aspect-video bg-black relative overflow-hidden">
             <iframe 
               src={getEmbedUrl(activeModule.videoUrl)} 
@@ -299,7 +309,6 @@ export default function Dashboard() {
               allowFullScreen
             ></iframe>
             
-            {/* 🛡️ ESCUDOS (sin cambios, tapan los botones de descarga/abrir de Drive) */}
             <div className="absolute top-0 left-0 w-full h-12 md:h-14 bg-black/90 backdrop-blur-sm pointer-events-auto z-20 flex items-center px-4 md:px-6">
               <span className="text-[10px] md:text-xs text-gray-400 font-medium tracking-wide truncate">
                 El Rincón del Trading - {activeModule.category || 'Clase Exclusiva'}
@@ -323,7 +332,6 @@ export default function Dashboard() {
     );
   }
 
- // 🎯 AHORA SE ORDENAN POR TU NÚMERO DE ORDEN
   const filteredModules = modules
     .filter(mod => (mod.category || 'Clases Grabadas') === activeCategory)
     .sort((a, b) => (a.order || 0) - (b.order || 0) || new Date(a.createdAt) - new Date(b.createdAt));
@@ -360,11 +368,21 @@ export default function Dashboard() {
               onClick={() => setActiveModule(mod)}
               className="block bg-darkCard rounded-xl border border-white/10 overflow-hidden hover:border-brandOrange/50 transition-all group hover:shadow-[0_0_20px_rgba(255,90,0,0.15)] cursor-pointer"
             >
-              <div className="h-48 bg-black flex items-center justify-center text-brandOrange group-hover:scale-105 transition-transform duration-500 relative">
+              <div className="h-48 bg-black flex items-center justify-center text-brandOrange group-hover:scale-105 transition-transform duration-500 relative overflow-hidden">
+                
+                {/* 🎯 ACÁ ESTÁ LA MAGIA: Muestra la miniatura real del video */}
+                {getThumbnailUrl(mod.videoUrl) && (
+                  <img 
+                    src={getThumbnailUrl(mod.videoUrl)} 
+                    alt={mod.title} 
+                    className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-500" 
+                  />
+                )}
+                
                 <PlayCircle size={48} className="z-10 group-hover:scale-110 transition-transform" />
                 <div className="absolute inset-0 bg-brandOrange/5 group-hover:bg-brandOrange/10 transition-colors"></div>
               </div>
-              <div className="p-5">
+              <div className="p-5 relative z-20 bg-darkCard">
                 <div className="flex justify-between items-start mb-3">
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${mod.category === 'Videos Técnicos' ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400' : 'bg-brandOrange/10 border border-brandOrange/20 text-brandOrange'}`}>
                     {mod.level}
