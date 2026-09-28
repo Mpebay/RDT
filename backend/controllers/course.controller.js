@@ -2,7 +2,8 @@ const CourseModule = require('../models/CourseModule');
 
 exports.getModules = async (req, res) => {
   try {
-    const modules = await CourseModule.find({}).sort({ createdAt: -1 });
+    // 🎯 AHORA EL BACKEND TAMBIÉN LOS ORDENA POR EL NÚMERO (de menor a mayor)
+    const modules = await CourseModule.find({}).sort({ order: 1, createdAt: 1 });
     res.json(modules);
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener los módulos' });
@@ -11,8 +12,8 @@ exports.getModules = async (req, res) => {
 
 exports.createModule = async (req, res) => {
   try {
-    // 🎯 AQUÍ FALTABA RECIBIR 'category' DESDE EL FRONTEND
-    const { title, description, videoUrl, duration, level, planRequired, category } = req.body;
+    // 🎯 AGREGAMOS 'order' PARA QUE LO RECIBA DEL FRONTEND
+    const { title, description, videoUrl, duration, level, planRequired, category, order } = req.body;
 
     const module = new CourseModule({
       title,
@@ -20,8 +21,9 @@ exports.createModule = async (req, res) => {
       videoUrl,
       duration,
       level,
-      category: category || 'Clases Grabadas', // 🎯 AHORA SÍ SE GUARDA
-      planRequired: planRequired || 'Acceso Total'
+      category: category || 'Clases Grabadas', 
+      planRequired: planRequired || 'Acceso Total',
+      order: order || 1 // 🎯 SE GUARDA EL NÚMERO DE ORDEN
     });
 
     await module.save();
@@ -33,8 +35,8 @@ exports.createModule = async (req, res) => {
 
 exports.updateModule = async (req, res) => {
   try {
-    // 🎯 TAMBIÉN LO AGREGAMOS AQUÍ PARA QUE PUEDAS EDITARLO
-    const { title, description, videoUrl, duration, level, planRequired, category } = req.body;
+    // 🎯 AGREGAMOS 'order' TAMBIÉN AL EDITAR
+    const { title, description, videoUrl, duration, level, planRequired, category, order } = req.body;
     const module = await CourseModule.findById(req.params.id);
     
     if (!module) return res.status(404).json({ message: 'Módulo no encontrado' });
@@ -44,8 +46,9 @@ exports.updateModule = async (req, res) => {
     module.videoUrl = videoUrl || module.videoUrl;
     module.duration = duration || module.duration;
     module.level = level || module.level;
-    module.category = category || module.category; // 🎯 SE ACTUALIZA LA CATEGORÍA
+    module.category = category || module.category; 
     module.planRequired = planRequired || module.planRequired;
+    module.order = order !== undefined ? order : module.order; // 🎯 SE ACTUALIZA EL ORDEN
 
     const updatedModule = await module.save();
     res.json(updatedModule);
