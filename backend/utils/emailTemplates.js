@@ -1,5 +1,4 @@
 const REFERRAL_LINKS = {
-  vantage: "https://vigco.co/la-com-inv/9HsBqvVz",
   libertex: "https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634"
 };
 
@@ -33,7 +32,7 @@ exports.welcomeEmailTemplate = (name, plan, color, frontendUrl) => {
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hola <strong style="color: #ffffff;">${name || 'Trader'}</strong>,</p>
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hemos recibido tu pago correctamente. Tu membresía ya se encuentra activa:</p>
     <div style="text-align: center; margin-bottom: 25px;">
-      <span style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}50; padding: 8px 20px; border-radius: 9999px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">Plan ${plan}</span>
+      <span style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}50; padding: 8px 20px; border-radius: 9999px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">Plan ${plan || 'Acceso Total'}</span>
     </div>`;
   return baseHtml('¡Pago Exitoso y Cuenta Aprobada! 🚀', content, `${frontendUrl}/login`);
 };
@@ -43,26 +42,25 @@ exports.approvalEmailTemplate = (name, plan, color, frontendUrl) => {
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hola <strong style="color: #ffffff;">${name || 'Trader'}</strong>,</p>
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Tu solicitud de acceso ha sido aprobada por el administrador. Tu nivel de membresía asignado es:</p>
     <div style="text-align: center; margin-bottom: 25px;">
-      <span style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}50; padding: 8px 20px; border-radius: 9999px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">Plan ${plan || 'Plata'}</span>
+      <span style="background-color: ${color}20; color: ${color}; border: 1px solid ${color}50; padding: 8px 20px; border-radius: 9999px; font-weight: bold; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; display: inline-block;">Plan ${plan || 'Acceso Total'}</span>
     </div>`;
   return baseHtml('¡Cuenta Aprobada con Éxito! 🚀', content, `${frontendUrl}/login`);
 };
 
 exports.pendingBrokerEmailTemplate = (name, brokerName, frontendUrl) => {
-  const brokerCapitalized = brokerName.charAt(0).toUpperCase() + brokerName.slice(1);
-  const brokerLink = REFERRAL_LINKS[brokerName] || frontendUrl;
+  const brokerCapitalized = brokerName ? brokerName.charAt(0).toUpperCase() + brokerName.slice(1) : 'Libertex';
+  const brokerLink = REFERRAL_LINKS[brokerName] || REFERRAL_LINKS.libertex;
 
   const content = `
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hola <strong style="color: #ffffff;">${name || 'Trader'}</strong>,</p>
-    <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hemos recibido tu pago de inscripción correctamente a través de Mercado Pago. ¡Bienvenido a este primer paso!</p>
+    <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hemos recibido tu pago de inscripción correctamente. ¡Bienvenido a este primer paso!</p>
     <div style="background-color: #ff5a0015; border-left: 4px solid #ff5a00; padding: 15px; margin-bottom: 25px;">
       <p style="color: #ffffff; font-size: 14px; margin: 0; line-height: 1.5;">
-        <strong>Paso final requerido:</strong> Como elegiste la modalidad con descuento, tu acceso a la academia se activará una vez que crees y fondees tu cuenta en el bróker <strong>${brokerCapitalized}</strong>.
+        <strong>Paso final requerido:</strong> Como elegiste operar junto a nuestro bróker asociado, tu acceso a las aulas se activará una vez que crees y fondees tu cuenta en <strong>${brokerCapitalized}</strong> con un mínimo de <strong>$50 USD</strong> utilizando nuestro enlace oficial.
       </p>
     </div>
-    <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Haz clic en el botón de abajo para crear tu cuenta en el bróker asociado.</p>
+    <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">1. Haz clic en el botón de abajo para crear y fondear tu cuenta en ${brokerCapitalized}.<br/>2. Luego ingresa a <a href="${frontendUrl}/dashboard" style="color: #ff5a00; text-decoration: underline;">tu panel de la academia</a> y envía tu ID de cuenta para que habilitemos tu acceso.</p>
   `;
-  // El botón los llevará a crear la cuenta del broker
   return baseHtml('¡Pago Recibido! Paso final ⏳', content, brokerLink, `Crear cuenta en ${brokerCapitalized}`);
 };
 

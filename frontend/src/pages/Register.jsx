@@ -11,7 +11,6 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   
-  // 🎯 Estados para mostrar/ocultar contraseñas
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
@@ -21,8 +20,10 @@ export default function Register() {
   const [checkoutData, setCheckoutData] = useState(null);
   const navigate = useNavigate();
 
-  const USD_TO_ARS_RATE = 1545;
-  const defaultArsPrice = 97 * USD_TO_ARS_RATE;
+  // 🎯 ALINEADO CON EL BACKEND Y HOME: 50 USD a 1560 ARS
+  const USD_TO_ARS_RATE = 1560;
+  const BASE_PRICE_USD = 50;
+  const defaultArsPrice = BASE_PRICE_USD * USD_TO_ARS_RATE;
 
   useEffect(() => {
     const pendingCheckout = localStorage.getItem('checkout_pending');
@@ -31,7 +32,7 @@ export default function Register() {
     } else {
       setCheckoutData({
         plan: 'Membresía Total Academia',
-        broker: 'vantage',
+        broker: 'libertex', // 🎯 LIBERTEX POR DEFECTO
         price: defaultArsPrice,
         paymentMethod: 'mercadopago'
       });
@@ -54,7 +55,7 @@ export default function Register() {
         password,
         plan: 'Acceso Total',
         checkoutPrice: checkoutData?.price || defaultArsPrice,
-        broker: checkoutData?.broker || 'vantage',
+        broker: checkoutData?.broker || 'libertex',
         paymentMethod: checkoutData?.paymentMethod || 'mercadopago'
       };
 
@@ -101,11 +102,8 @@ export default function Register() {
               <div className="flex items-center gap-2 text-brandOrange mb-2"><ShoppingCart size={20} /><h3 className="font-bold">Resumen de inscripción</h3></div>
               <div className="text-sm text-gray-300 space-y-1">
                 <p><strong>Plan:</strong> Pase Total Academia</p>
-                {/* 🎯 AQUÍ SE ACTUALIZÓ PARA LEER LA OPCIÓN DE LIBERTEX */}
                 <p><strong>Bróker:</strong> {
-                  checkoutData.broker === 'vantage' ? 'Vantage (Con Bono)' : 
-                  checkoutData.broker === 'libertex' ? 'Libertex (Sin Bono)' : 
-                  'Independiente'
+                  checkoutData.broker === 'libertex' ? 'Libertex (Fondeo $50 USD)' : 'Independiente'
                 }</p>
                 <p><strong>Pago:</strong> {isCrypto ? 'USDT (Binance)' : 'Mercado Pago (ARS)'}</p>
                 <p className="text-lg text-white font-bold mt-2">
@@ -126,7 +124,6 @@ export default function Register() {
             <div className="relative"><input type="tel" placeholder="Teléfono / WhatsApp" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full px-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm" required /></div>
             <div className="relative"><input type="email" placeholder="Correo electrónico" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3 bg-darkBg border border-white/10 rounded-xl focus:border-brandOrange text-white text-sm" required /></div>
             
-            {/* 🎯 Input de Contraseña con Ojo */}
             <div className="relative">
               <input 
                 type={showPassword ? 'text' : 'password'} 
@@ -146,7 +143,6 @@ export default function Register() {
               </button>
             </div>
 
-            {/* 🎯 Input de Confirmar Contraseña con Ojo */}
             <div className="relative">
               <input 
                 type={showConfirmPassword ? 'text' : 'password'} 

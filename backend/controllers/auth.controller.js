@@ -89,7 +89,7 @@ exports.registerUser = async (req, res, next) => {
       isApproved: isAdmin, 
       isPaid: isAdmin, 
       plan, checkoutPrice, 
-      broker: broker || 'vantage',
+      broker: broker || 'libertex', // 🎯 LIBERTEX POR DEFECTO
       paymentMethod: paymentMethod || 'mercadopago'
     });
 
@@ -410,12 +410,8 @@ exports.updatePassword = async (req, res, next) => {
   } catch (error) { next(error); }
 };
 
-// =========================================================
-// 🎯 NUEVA FUNCIÓN: MIGRACIÓN MASIVA DESDE EL PANEL ADMIN
-// =========================================================
 exports.migrateUsers = async (req, res, next) => {
   try {
-    // 1. Verificamos que quien llama esto sea el administrador
     const adminUser = await User.findById(req.user._id);
     if (!adminUser || adminUser.role !== 'admin') {
       const error = new Error('No tienes permisos para realizar esta acción');
@@ -433,7 +429,6 @@ exports.migrateUsers = async (req, res, next) => {
     const plainTempPassword = 'Rincon2026!';
     const resultados = [];
 
-    // 2. Iteramos sobre los correos enviados desde el panel
     for (const emailRaw of emails) {
       const email = emailRaw.trim().toLowerCase();
       if (!email) continue;
@@ -444,7 +439,6 @@ exports.migrateUsers = async (req, res, next) => {
         const nombreGenerico = email.split('@')[0];
         const nombreCapitalizado = nombreGenerico.charAt(0).toUpperCase() + nombreGenerico.slice(1);
 
-        // Creamos el usuario migrado (con candado y datos de prueba)
         await User.create({
           name: nombreCapitalizado,
           lastName: '-',
@@ -458,7 +452,6 @@ exports.migrateUsers = async (req, res, next) => {
           requirePasswordChange: true
         });
 
-        // 3. Plantilla del correo
         const emailHtml = `
           <div style="background-color: #0b0b0f; color: #ffffff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 40px 0; margin: 0;">
             <div style="max-width: 600px; margin: 0 auto; background-color: #13131a; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">

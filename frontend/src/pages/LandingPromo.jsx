@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { Check, PlayCircle, Info, QrCode } from 'lucide-react';
 import Footer from '../components/Footer';
 
-// 🔗 PEGA AQUÍ EL LINK DE GOOGLE DRIVE DE TU VIDEO PROMOCIONAL
 const PROMO_VIDEO_URL = "https://drive.google.com/file/d/19Y6iT-gNKyasOyYcOXxTPIUmVDZh1Lux/view?usp=drive_link";
 
 export default function LandingPromo() {
   const navigate = useNavigate();
-  const [brokerChoice, setBrokerChoice] = useState('vantage');
+  const [brokerChoice, setBrokerChoice] = useState('libertex');
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
@@ -20,8 +19,9 @@ export default function LandingPromo() {
     }
   }, []);
 
-  const USD_TO_ARS_RATE = 1545;
-  const basePriceUsd = 97;
+  // 🎯 TASA UNIFICADA A 1560 IGUAL QUE EN BACKEND Y HOME
+  const USD_TO_ARS_RATE = 1560;
+  const basePriceUsd = 50;
   const priceInArs = basePriceUsd * USD_TO_ARS_RATE;
 
   const planData = {
@@ -59,16 +59,15 @@ export default function LandingPromo() {
     return url;
   };
 
-  // 🎯 NUEVA FUNCIÓN PARA EXTRAER LA MINIATURA DEL VIDEO PROMO
   const getThumbnailUrl = (url) => {
     if (!url) return '';
     if (url.includes('drive.google.com')) {
       const match = url.match(/\/d\/(.*?)\//);
       if (match && match[1]) {
-        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`; // sz=w1000 para que sea grande y nítida
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
       }
     }
-    return 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop'; // Imagen genérica por si falla
+    return 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop';
   };
 
   return (
@@ -108,7 +107,6 @@ export default function LandingPromo() {
                 <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors flex items-center justify-center z-10">
                   <PlayCircle size={80} className="text-brandOrange opacity-80 group-hover:scale-110 transition-transform duration-300" />
                 </div>
-                {/* 🎯 AQUÍ REEMPLAZAMOS LA IMAGEN DE INTERNET POR LA FOTO REAL DE TU VIDEO PROMO */}
                 <img src={getThumbnailUrl(PROMO_VIDEO_URL)} alt="Intro Video" className="w-full h-full object-cover opacity-60" />
               </div>
             )}
@@ -137,28 +135,28 @@ export default function LandingPromo() {
 
           <div className="mb-8 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Elige tu modalidad con el bróker</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <button onClick={() => setBrokerChoice('vantage')} className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'vantage' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-white">Vantage (Con Referido)</span>
-                  {brokerChoice === 'vantage' && <Check className="text-brandOrange" size={18} />}
-                </div>
-                <p className="text-xs text-green-400 font-semibold mb-2">✨ Incluye bono operable de $200 USD al fondear</p>
-                <p className="text-xs text-gray-400">Asócitate con nuestro link oficial.</p>
-              </button>
-              <button onClick={() => setBrokerChoice('libertex')} className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'libertex' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button 
+                onClick={() => setBrokerChoice('libertex')} 
+                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'libertex' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
+              >
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-bold text-white">Libertex (Con Referido)</span>
                   {brokerChoice === 'libertex' && <Check className="text-brandOrange" size={18} />}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Ideal para iniciar en el mercado (Sin bono operable).</p>
+                <p className="text-xs text-brandOrange font-semibold mb-1">Requisito: Fondear cuenta con $50 USD</p>
+                <p className="text-xs text-gray-400">Asóciate con nuestro link oficial para operar junto a la academia.</p>
               </button>
-              <button onClick={() => setBrokerChoice('independent')} className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'independent' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}>
+
+              <button 
+                onClick={() => setBrokerChoice('independent')} 
+                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'independent' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
+              >
                 <div className="flex justify-between items-center mb-1">
                   <span className="font-bold text-white">Independiente (Tu bróker)</span>
                   {brokerChoice === 'independent' && <Check className="text-brandOrange" size={18} />}
                 </div>
-                <p className="text-xs text-gray-400 mt-1">Opera con tu bróker actual sin beneficios asociados.</p>
+                <p className="text-xs text-gray-400 mt-1">Opera con tu bróker de preferencia sin requisitos de fondeo asociados.</p>
               </button>
             </div>
           </div>
@@ -167,16 +165,25 @@ export default function LandingPromo() {
             <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-brandOrange text-white text-xs font-bold uppercase tracking-wider px-6 py-1.5 rounded-full shadow-md">Pase Total Academia</div>
             <div className="mb-6 mt-4">
               {paymentMethod === 'mercadopago' ? (
-                <div><span className="text-4xl md:text-5xl font-black text-white">$ {priceInArs.toLocaleString('es-AR')}</span><span className="text-gray-400 text-sm block mt-1">ARS (Pesos Argentinos) / único pago <br />=<br />97 USDT</span></div>
+                <div>
+                  <span className="text-4xl md:text-5xl font-black text-white">$ {priceInArs.toLocaleString('es-AR')}</span>
+                  <span className="text-gray-400 text-sm block mt-1">ARS (Pesos Argentinos) / único pago <br />=<br />{basePriceUsd} USDT</span>
+                </div>
               ) : (
-                <div><span className="text-5xl md:text-6xl font-black text-white">97 USDT</span><span className="text-gray-400 text-sm block mt-1">Crypto (Red TRC20) / único pago</span></div>
+                <div>
+                  <span className="text-5xl md:text-6xl font-black text-white">{basePriceUsd} USDT</span>
+                  <span className="text-gray-400 text-sm block mt-1">Crypto (Red TRC20) / único pago</span>
+                </div>
               )}
             </div>
-            {brokerChoice === 'vantage' && (
-              <div className="inline-flex items-center gap-2 mb-6 bg-green-500/10 text-green-400 px-4 py-2 rounded-xl text-sm border border-green-500/30">
-                <Info size={16} /><span>Modalidad Vantage seleccionada: Accedes al bono operable de $200 USD.</span>
+
+            {brokerChoice === 'libertex' && (
+              <div className="inline-flex items-center gap-2 mb-6 bg-brandOrange/10 text-brandOrange px-4 py-2 rounded-xl text-sm border border-brandOrange/30">
+                <Info size={16} className="shrink-0" />
+                <span>Modalidad Libertex: Luego del pago habilitarás tu acceso fondeando tu cuenta con $50 USD.</span>
               </div>
             )}
+
             <ul className="space-y-4 mb-8 text-left max-w-xl mx-auto text-sm md:text-base text-gray-300">
               {planData.features.map((feature, i) => (
                 <li key={i} className="flex items-center gap-3"><Check size={20} className="text-brandOrange shrink-0" /> <span>{feature}</span></li>

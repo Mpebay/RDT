@@ -4,9 +4,9 @@ import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCod
 import api from '../api/axios';
 import qrImage from '../assets/QR.png';
 
+// 🔗 LINK DE REFERIDO OFICIAL DE LIBERTEX CONECTADO
 const REFERRAL_LINKS = { 
-  vantage: "https://latam.vantagemarkets.com/es/?affid=TU_LINK_VANTAGE",
-  libertex: "https://libertex.org/?affid=TU_LINK_LIBERTEX"
+  libertex: "https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634"
 };
 const BINANCE_WALLET_TRC20 = "TM9JArvFEZMkPNdosYGSmXMJap1XUb8qU"; 
 const WHATSAPP_NUMBER = "5492494475552";
@@ -123,14 +123,14 @@ export default function Dashboard() {
   if (!userInfo.isApproved && userInfo.role !== 'admin') {
     if (!userInfo.isPaid) {
       if (userInfo.paymentMethod === 'crypto') {
-        const wpText = `Hola, ya transferí los 97 USDT para la Academia. Mi email es ${userInfo.email}. Adjunto el comprobante.`;
+        const wpText = `Hola, ya transferí los 50 USDT para la Academia. Mi email es ${userInfo.email}. Adjunto el comprobante.`;
         return (
           <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
             <div className="bg-darkCard p-8 rounded-2xl border border-white/10 max-w-lg w-full relative shadow-2xl">
               <div className="absolute top-0 left-0 w-full h-1 bg-[#F3BA2F]"></div>
               <div className="w-16 h-16 bg-[#F3BA2F]/10 border border-[#F3BA2F]/30 text-[#F3BA2F] rounded-full flex items-center justify-center mx-auto mb-6 mt-4"><QrCode size={32} /></div>
-              <h2 className="text-2xl font-bold mb-3">Pago con 97 USDT (Crypto)</h2>
-              <p className="text-gray-400 mb-6 text-sm">Transfiere exactamente <strong>97 USDT</strong> a nuestra red TRC20 para activar tu cuenta.</p>
+              <h2 className="text-2xl font-bold mb-3">Pago con 50 USDT (Crypto)</h2>
+              <p className="text-gray-400 mb-6 text-sm">Transfiere exactamente <strong>50 USDT</strong> a nuestra red TRC20 para activar tu cuenta.</p>
               <div className="bg-black/50 border border-white/10 rounded-xl p-5 mb-6 text-left">
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-1">Red / Network</p>
                 <p className="text-white font-bold mb-4">Tron (TRC20)</p>
@@ -193,9 +193,9 @@ export default function Dashboard() {
     }
 
     if (userInfo.isPaid) {
-      if ((userInfo.broker === 'vantage' || userInfo.broker === 'libertex') && !userInfo.brokerAccountId) {
-        const brokerName = userInfo.broker === 'vantage' ? 'Vantage Markets' : 'Libertex';
-        const brokerLink = REFERRAL_LINKS[userInfo.broker];
+      if (userInfo.broker === 'libertex' && !userInfo.brokerAccountId) {
+        const brokerName = 'Libertex';
+        const brokerLink = REFERRAL_LINKS.libertex;
         return (
           <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
             <div className="bg-darkCard p-8 md:p-10 rounded-3xl border-2 border-brandOrange max-w-xl w-full relative shadow-[0_0_50px_rgba(255,90,0,0.15)]">
@@ -204,7 +204,7 @@ export default function Dashboard() {
               </div>
               <h2 className="text-3xl font-black mb-3 mt-4 text-white">¡Bienvenido a la Academia!</h2>
               <p className="text-gray-400 mb-8 text-sm md:text-base">
-                Hemos recibido tu pago correctamente. Para desbloquear las aulas, es requisito crear y fondear tu cuenta en <strong>{brokerName}</strong> utilizando nuestro enlace oficial.
+                Hemos recibido tu pago correctamente. Para desbloquear las aulas, es requisito crear y fondear tu cuenta en <strong>{brokerName}</strong> con <strong>50 USD</strong> utilizando nuestro enlace oficial.
               </p>
 
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
@@ -214,7 +214,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-start gap-3 mb-6">
                   <div className="bg-brandOrange/20 text-brandOrange w-7 h-7 rounded-full flex items-center justify-center font-bold shrink-0 text-sm">2</div>
-                  <p className="text-sm text-gray-300">Realiza tu primer fondeo en la cuenta que acabas de crear.</p>
+                  <p className="text-sm text-gray-300">Realiza tu primer fondeo de <strong>50 USD</strong> en la cuenta que acabas de crear.</p>
                 </div>
                 <a href={brokerLink} target="_blank" rel="noopener noreferrer" className="bg-white hover:bg-gray-200 text-black px-6 py-3.5 rounded-xl font-bold w-full flex justify-center items-center shadow-lg transition-all">
                   Crear cuenta en {brokerName} <ExternalLink size={18} className="ml-2"/>
@@ -222,7 +222,7 @@ export default function Dashboard() {
               </div>
 
               <form onSubmit={handleSubmitBroker} className="text-left bg-black/30 p-6 rounded-2xl border border-white/5">
-                <label className="block text-sm font-bold text-gray-300 mb-2">Una vez fondeada, ingresa el ID de tu cuenta:</label>
+                <label className="block text-sm font-bold text-gray-300 mb-2">Una vez fondeada con 50 USD, ingresa el ID de tu cuenta:</label>
                 <input
                   type="text"
                   placeholder="Ej: 12345678"
@@ -262,10 +262,6 @@ export default function Dashboard() {
     }
   }
 
-  // ========================================================
-  // 🎯 FUNCIONES PARA EL REPRODUCTOR Y LAS MINIATURAS
-  // ========================================================
-
   const getEmbedUrl = (url) => {
     if (!url) return '';
     if (url.includes('drive.google.com')) {
@@ -277,13 +273,11 @@ export default function Dashboard() {
     return url;
   };
 
-  // 🎯 NUEVA FUNCIÓN: Extrae la miniatura del video de Google Drive
   const getThumbnailUrl = (url) => {
     if (!url) return '';
     if (url.includes('drive.google.com')) {
       const match = url.match(/\/d\/(.*?)\//);
       if (match && match[1]) {
-        // sz=w800 le dice a Google que nos de una foto de 800px de ancho (liviana pero nítida)
         return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
       }
     }
@@ -369,8 +363,6 @@ export default function Dashboard() {
               className="block bg-darkCard rounded-xl border border-white/10 overflow-hidden hover:border-brandOrange/50 transition-all group hover:shadow-[0_0_20px_rgba(255,90,0,0.15)] cursor-pointer"
             >
               <div className="h-48 bg-black flex items-center justify-center text-brandOrange group-hover:scale-105 transition-transform duration-500 relative overflow-hidden">
-                
-                {/* 🎯 ACÁ ESTÁ LA MAGIA: Muestra la miniatura real del video */}
                 {getThumbnailUrl(mod.videoUrl) && (
                   <img 
                     src={getThumbnailUrl(mod.videoUrl)} 
@@ -378,7 +370,6 @@ export default function Dashboard() {
                     className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-30 transition-opacity duration-500" 
                   />
                 )}
-                
                 <PlayCircle size={48} className="z-10 group-hover:scale-110 transition-transform" />
                 <div className="absolute inset-0 bg-brandOrange/5 group-hover:bg-brandOrange/10 transition-colors"></div>
               </div>
