@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Shield, Zap, UserPlus, Clock, CheckCircle2, Check, Info, QrCode } from 'lucide-react';
+import vantageLogo from '../assets/logo_vantage.png';
 import libertexLogo from '../assets/logo_libertex.png'; 
 import Footer from '../components/Footer';
 
 export default function Home() {
   const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
-  // 🎯 LIBERTEX POR DEFECTO
-  const [brokerChoice, setBrokerChoice] = useState('libertex');
+  const [brokerChoice, setBrokerChoice] = useState('vantage');
 
   useEffect(() => {
     if (window.location.hash === '#planes') {
@@ -79,12 +79,25 @@ export default function Home() {
           <FeatureCard icon={<Shield size={32}/>} title="Gestión de Riesgo" desc="Protege tu capital con metodologías profesionales comprobadas." />
         </div>
 
-        {/* 🎯 SECCIÓN DE BRÓKER OFICIAL ASOCIADO */}
+        {/* 🎯 SECCIÓN DE BRÓKERS ASOCIADOS (VANTAGE Y LIBERTEX SIN CONDICIÓN DE FONDEO) */}
         <div className="mt-28 max-w-4xl w-full z-10 relative text-center">
-          <h2 className="text-3xl font-bold mb-4">Bróker Oficial Asociado</h2>
-          <p className="text-gray-400 mb-12">Opera con las mismas condiciones que nosotros en la plataforma líder del mercado.</p>
+          <h2 className="text-3xl font-bold mb-4">Brókers Asociados</h2>
+          <p className="text-gray-400 mb-12">Opera con las mismas condiciones que nosotros registrándote con nuestro enlace oficial.</p>
           
-          <div className="max-w-sm mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-2xl mx-auto">
+            <a 
+              href="https://vigco.co/la-com-inv/9HsBqvVz" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="bg-darkCard p-8 rounded-2xl border border-white/5 hover:border-brandOrange/50 transition-all duration-300 shadow-lg hover:shadow-[0_0_25px_rgba(255,90,0,0.15)] flex flex-col items-center justify-center group cursor-pointer"
+            >
+              <div className="h-16 mb-4 flex items-center justify-center w-full bg-white/5 rounded-xl group-hover:bg-white/10 transition-colors">
+                <img src={vantageLogo} alt="Vantage Logo" className="max-h-10 object-contain group-hover:scale-110 transition-transform duration-300" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-1">Vantage Markets</h3>
+              <p className="text-sm text-gray-400">Bróker oficial asociado</p>
+            </a>
+
             <a 
               href="https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634" 
               target="_blank" 
@@ -95,8 +108,7 @@ export default function Home() {
                 <img src={libertexLogo} alt="Libertex Logo" className="max-h-10 object-contain group-hover:scale-110 transition-transform duration-300" />
               </div>
               <h3 className="text-xl font-bold text-white mb-1">Libertex</h3>
-              <p className="text-sm text-brandOrange font-semibold">Fondeo inicial requerido: $50 USD</p>
-              <p className="text-xs text-gray-400 mt-1">Regístrate con nuestro enlace oficial</p>
+              <p className="text-sm text-gray-400">Bróker oficial asociado</p>
             </a>
           </div>
         </div>
@@ -132,9 +144,20 @@ export default function Home() {
           </div>
 
           <div className="mb-10 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Elige tu modalidad con el bróker</h3>
-            {/* 🎯 GRILLA DE 2 COLUMNAS: LIBERTEX O INDEPENDIENTE */}
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Selecciona tu bróker asociado</h3>
+            {/* 🎯 GRILLA DE 2 COLUMNAS: SOLO VANTAGE Y LIBERTEX CON LINK DE REFERIDO */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setBrokerChoice('vantage')}
+                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'vantage' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold text-white">Vantage (Con Referido)</span>
+                  {brokerChoice === 'vantage' && <Check className="text-brandOrange" size={18} />}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Crea tu cuenta con nuestro link oficial de referido.</p>
+              </button>
+
               <button
                 onClick={() => setBrokerChoice('libertex')}
                 className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'libertex' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
@@ -143,19 +166,7 @@ export default function Home() {
                   <span className="font-bold text-white">Libertex (Con Referido)</span>
                   {brokerChoice === 'libertex' && <Check className="text-brandOrange" size={18} />}
                 </div>
-                <p className="text-xs text-brandOrange font-semibold mb-1">Requisito: Fondear cuenta con $50 USD</p>
-                <p className="text-xs text-gray-400">Asóciate con nuestro link oficial para operar junto a la academia.</p>
-              </button>
-
-              <button
-                onClick={() => setBrokerChoice('independent')}
-                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'independent' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-white">Independiente (Tu bróker)</span>
-                  {brokerChoice === 'independent' && <Check className="text-brandOrange" size={18} />}
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Opera con tu bróker de preferencia sin requisitos de fondeo asociados.</p>
+                <p className="text-xs text-gray-400 mt-1">Crea tu cuenta con nuestro link oficial de referido.</p>
               </button>
             </div>
           </div>
@@ -179,12 +190,12 @@ export default function Home() {
               )}
             </div>
 
-            {brokerChoice === 'libertex' && (
-              <div className="inline-flex items-center gap-2 mb-6 bg-brandOrange/10 text-brandOrange px-4 py-2 rounded-xl text-sm border border-brandOrange/30">
-                <Info size={16} className="shrink-0" />
-                <span>Modalidad Libertex: Luego del pago habilitarás tu acceso fondeando tu cuenta con $50 USD.</span>
-              </div>
-            )}
+            <div className="inline-flex items-center gap-2 mb-6 bg-brandOrange/10 text-brandOrange px-4 py-2 rounded-xl text-sm border border-brandOrange/30">
+              <Info size={16} className="shrink-0" />
+              <span>
+                Modalidad {brokerChoice === 'vantage' ? 'Vantage' : 'Libertex'}: Luego del pago habilitarás tu acceso registrándote con nuestro enlace oficial.
+              </span>
+            </div>
 
             <ul className="space-y-4 mb-8 text-left max-w-xl mx-auto text-sm md:text-base text-gray-300">
               {planData.features.map((feature, i) => (
@@ -211,7 +222,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
             <StepCard step="01" icon={<UserPlus className="text-brandOrange" size={24} />} title="Regístrate" desc="Crea tu cuenta con tus datos reales de forma segura." />
             <StepCard step="02" icon={<Clock className="text-brandOrange" size={24} />} title="Realiza el Pago" desc="Abona mediante Mercado Pago en pesos o transfiere 50 USDT a nuestra wallet." />
-            <StepCard step="03" icon={<CheckCircle2 className="text-brandOrange" size={24} />} title="Acceso Total" desc="Desbloquea de inmediato las aulas y el contenido institucional." />
+            <StepCard step="03" icon={<CheckCircle2 className="text-brandOrange" size={24} />} title="Acceso Total" desc="Crea tu cuenta en el bróker elegido con nuestro link y desbloquea las aulas." />
           </div>
         </div>
       </div>

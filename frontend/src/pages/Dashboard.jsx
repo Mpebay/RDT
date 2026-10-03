@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Clock, PlayCircle, Lock, AlertCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check, ChevronLeft, MonitorPlay, Terminal, UserCog } from 'lucide-react';
+import { Clock, PlayCircle, ShoppingCart, ExternalLink, QrCode, Copy, Check, ChevronLeft, MonitorPlay, Terminal, UserCog } from 'lucide-react';
 import api from '../api/axios';
 import qrImage from '../assets/QR.png';
 
-// 🔗 LINK DE REFERIDO OFICIAL DE LIBERTEX CONECTADO
+// 🔗 LINKS DE REFERIDOS OFICIALES (VANTAGE Y LIBERTEX)
 const REFERRAL_LINKS = { 
+  vantage: "https://vigco.co/la-com-inv/9HsBqvVz",
   libertex: "https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634"
 };
 const BINANCE_WALLET_TRC20 = "TM9JArvFEZMkPNdosYGSmXMJap1XUb8qU"; 
@@ -192,10 +193,11 @@ export default function Dashboard() {
       );
     }
 
+    // 🎯 PASO FINAL: VANTAGE O LIBERTEX CON LINK DE REFERIDO (SIN CONDICIÓN DE FONDEO)
     if (userInfo.isPaid) {
-      if (userInfo.broker === 'libertex' && !userInfo.brokerAccountId) {
-        const brokerName = 'Libertex';
-        const brokerLink = REFERRAL_LINKS.libertex;
+      if ((userInfo.broker === 'vantage' || userInfo.broker === 'libertex') && !userInfo.brokerAccountId) {
+        const brokerName = userInfo.broker === 'vantage' ? 'Vantage Markets' : 'Libertex';
+        const brokerLink = REFERRAL_LINKS[userInfo.broker];
         return (
           <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)] px-4 text-center py-10 relative z-10">
             <div className="bg-darkCard p-8 md:p-10 rounded-3xl border-2 border-brandOrange max-w-xl w-full relative shadow-[0_0_50px_rgba(255,90,0,0.15)]">
@@ -204,7 +206,7 @@ export default function Dashboard() {
               </div>
               <h2 className="text-3xl font-black mb-3 mt-4 text-white">¡Bienvenido a la Academia!</h2>
               <p className="text-gray-400 mb-8 text-sm md:text-base">
-                Hemos recibido tu pago correctamente. Para desbloquear las aulas, es requisito crear y fondear tu cuenta en <strong>{brokerName}</strong> con <strong>50 USD</strong> utilizando nuestro enlace oficial.
+                Hemos recibido tu pago correctamente. Para desbloquear las aulas, es requisito crear tu cuenta en <strong>{brokerName}</strong> utilizando nuestro enlace oficial de referido.
               </p>
 
               <div className="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 text-left">
@@ -214,7 +216,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-start gap-3 mb-6">
                   <div className="bg-brandOrange/20 text-brandOrange w-7 h-7 rounded-full flex items-center justify-center font-bold shrink-0 text-sm">2</div>
-                  <p className="text-sm text-gray-300">Realiza tu primer fondeo de <strong>50 USD</strong> en la cuenta que acabas de crear.</p>
+                  <p className="text-sm text-gray-300">Copia el ID de tu cuenta recién creada e ingrésalo abajo para habilitar tu acceso.</p>
                 </div>
                 <a href={brokerLink} target="_blank" rel="noopener noreferrer" className="bg-white hover:bg-gray-200 text-black px-6 py-3.5 rounded-xl font-bold w-full flex justify-center items-center shadow-lg transition-all">
                   Crear cuenta en {brokerName} <ExternalLink size={18} className="ml-2"/>
@@ -222,7 +224,7 @@ export default function Dashboard() {
               </div>
 
               <form onSubmit={handleSubmitBroker} className="text-left bg-black/30 p-6 rounded-2xl border border-white/5">
-                <label className="block text-sm font-bold text-gray-300 mb-2">Una vez fondeada con 50 USD, ingresa el ID de tu cuenta:</label>
+                <label className="block text-sm font-bold text-gray-300 mb-2">Una vez creada, ingresa el ID de tu cuenta:</label>
                 <input
                   type="text"
                   placeholder="Ej: 12345678"
@@ -237,7 +239,7 @@ export default function Dashboard() {
                   disabled={submittingBroker}
                   className="bg-brandOrange hover:bg-brandOrangeHover text-white px-6 py-3.5 rounded-xl font-bold w-full shadow-[0_0_15px_rgba(255,90,0,0.3)] transition-all disabled:opacity-50 mt-3"
                 >
-                  {submittingBroker ? 'Enviando...' : 'Ya fondeé y envié mi ID'}
+                  {submittingBroker ? 'Enviando...' : 'Ya creé mi cuenta y envié mi ID'}
                 </button>
               </form>
             </div>
@@ -252,7 +254,7 @@ export default function Dashboard() {
             <h2 className="text-2xl font-bold mb-3 text-white">Cuenta en Revisión</h2>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
               {userInfo.brokerAccountId
-                ? `Estamos verificando tu fondeo en la cuenta (${userInfo.brokerAccountId}). Una vez validado, se desbloquearán automáticamente las aulas.`
+                ? `Estamos verificando tu cuenta (${userInfo.brokerAccountId}). Una vez validada, se desbloquearán automáticamente las aulas.`
                 : 'Estamos verificando tu pago. En breve habilitaremos tu acceso a la academia.'}
             </p>
             <p className="text-xs text-gray-500 font-medium">Este proceso puede demorar algunas horas.<br/>Te notificaremos por correo electrónico.</p>

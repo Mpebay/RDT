@@ -7,7 +7,7 @@ const PROMO_VIDEO_URL = "https://drive.google.com/file/d/19Y6iT-gNKyasOyYcOXxTPI
 
 export default function LandingPromo() {
   const navigate = useNavigate();
-  const [brokerChoice, setBrokerChoice] = useState('libertex');
+  const [brokerChoice, setBrokerChoice] = useState('vantage');
   const [paymentMethod, setPaymentMethod] = useState('mercadopago');
   const [isPlayingVideo, setIsPlayingVideo] = useState(false);
 
@@ -19,7 +19,6 @@ export default function LandingPromo() {
     }
   }, []);
 
-  // 🎯 TASA UNIFICADA A 1560 IGUAL QUE EN BACKEND Y HOME
   const USD_TO_ARS_RATE = 1560;
   const basePriceUsd = 50;
   const priceInArs = basePriceUsd * USD_TO_ARS_RATE;
@@ -134,8 +133,20 @@ export default function LandingPromo() {
           </div>
 
           <div className="mb-8 bg-darkCard p-6 rounded-2xl border border-white/10 shadow-lg">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Elige tu modalidad con el bróker</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-3 text-center">Paso 2: Selecciona tu bróker asociado</h3>
+            {/* 🎯 GRILLA DE 2 COLUMNAS: SOLO VANTAGE Y LIBERTEX CON LINK DE REFERIDO */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button 
+                onClick={() => setBrokerChoice('vantage')} 
+                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'vantage' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
+              >
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-bold text-white">Vantage (Con Referido)</span>
+                  {brokerChoice === 'vantage' && <Check className="text-brandOrange" size={18} />}
+                </div>
+                <p className="text-xs text-gray-400 mt-1">Crea tu cuenta con nuestro link oficial de referido.</p>
+              </button>
+
               <button 
                 onClick={() => setBrokerChoice('libertex')} 
                 className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'libertex' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
@@ -144,19 +155,7 @@ export default function LandingPromo() {
                   <span className="font-bold text-white">Libertex (Con Referido)</span>
                   {brokerChoice === 'libertex' && <Check className="text-brandOrange" size={18} />}
                 </div>
-                <p className="text-xs text-brandOrange font-semibold mb-1">Requisito: Fondear cuenta con $50 USD</p>
-                <p className="text-xs text-gray-400">Asóciate con nuestro link oficial para operar junto a la academia.</p>
-              </button>
-
-              <button 
-                onClick={() => setBrokerChoice('independent')} 
-                className={`p-5 rounded-xl border-2 text-left transition-all ${brokerChoice === 'independent' ? 'border-brandOrange bg-brandOrange/10 shadow-[0_0_15px_rgba(255,90,0,0.2)]' : 'border-white/10 bg-darkBg hover:border-white/30'}`}
-              >
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-bold text-white">Independiente (Tu bróker)</span>
-                  {brokerChoice === 'independent' && <Check className="text-brandOrange" size={18} />}
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Opera con tu bróker de preferencia sin requisitos de fondeo asociados.</p>
+                <p className="text-xs text-gray-400 mt-1">Crea tu cuenta con nuestro link oficial de referido.</p>
               </button>
             </div>
           </div>
@@ -177,12 +176,12 @@ export default function LandingPromo() {
               )}
             </div>
 
-            {brokerChoice === 'libertex' && (
-              <div className="inline-flex items-center gap-2 mb-6 bg-brandOrange/10 text-brandOrange px-4 py-2 rounded-xl text-sm border border-brandOrange/30">
-                <Info size={16} className="shrink-0" />
-                <span>Modalidad Libertex: Luego del pago habilitarás tu acceso fondeando tu cuenta con $50 USD.</span>
-              </div>
-            )}
+            <div className="inline-flex items-center gap-2 mb-6 bg-brandOrange/10 text-brandOrange px-4 py-2 rounded-xl text-sm border border-brandOrange/30">
+              <Info size={16} className="shrink-0" />
+              <span>
+                Modalidad {brokerChoice === 'vantage' ? 'Vantage' : 'Libertex'}: Luego del pago habilitarás tu acceso registrándote con nuestro enlace oficial.
+              </span>
+            </div>
 
             <ul className="space-y-4 mb-8 text-left max-w-xl mx-auto text-sm md:text-base text-gray-300">
               {planData.features.map((feature, i) => (

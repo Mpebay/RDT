@@ -244,7 +244,7 @@ exports.submitBrokerId = async (req, res, next) => {
       await sendBrevoEmail(
         process.env.ADMIN_EMAIL,
         'ID de Bróker Enviado - Revisión Pendiente',
-        `<h3>Un usuario ha fondeado su cuenta y enviado su ID</h3>
+        `<h3>Un usuario ha registrado su cuenta en el bróker y enviado su ID</h3>
          <p><strong>Usuario:</strong> ${user.name} ${user.lastName} (${user.email})</p>
          <p><strong>Bróker:</strong> ${user.broker.toUpperCase()}</p>
          <p><strong>ID de Cuenta:</strong> ${user.brokerAccountId}</p>

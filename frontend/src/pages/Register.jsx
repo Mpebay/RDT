@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { Mail, Lock, User, Phone, AlertCircle, CheckCircle, ShoppingCart, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle, CheckCircle, ShoppingCart, Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
   const [name, setName] = useState('');
@@ -20,7 +20,6 @@ export default function Register() {
   const [checkoutData, setCheckoutData] = useState(null);
   const navigate = useNavigate();
 
-  // 🎯 ALINEADO CON EL BACKEND Y HOME: 50 USD a 1560 ARS
   const USD_TO_ARS_RATE = 1560;
   const BASE_PRICE_USD = 50;
   const defaultArsPrice = BASE_PRICE_USD * USD_TO_ARS_RATE;
@@ -32,7 +31,7 @@ export default function Register() {
     } else {
       setCheckoutData({
         plan: 'Membresía Total Academia',
-        broker: 'libertex', // 🎯 LIBERTEX POR DEFECTO
+        broker: 'vantage',
         price: defaultArsPrice,
         paymentMethod: 'mercadopago'
       });
@@ -55,7 +54,7 @@ export default function Register() {
         password,
         plan: 'Acceso Total',
         checkoutPrice: checkoutData?.price || defaultArsPrice,
-        broker: checkoutData?.broker || 'libertex',
+        broker: checkoutData?.broker || 'vantage',
         paymentMethod: checkoutData?.paymentMethod || 'mercadopago'
       };
 
@@ -103,7 +102,7 @@ export default function Register() {
               <div className="text-sm text-gray-300 space-y-1">
                 <p><strong>Plan:</strong> Pase Total Academia</p>
                 <p><strong>Bróker:</strong> {
-                  checkoutData.broker === 'libertex' ? 'Libertex (Fondeo $50 USD)' : 'Independiente'
+                  checkoutData.broker === 'libertex' ? 'Libertex (Con Referido)' : 'Vantage (Con Referido)'
                 }</p>
                 <p><strong>Pago:</strong> {isCrypto ? 'USDT (Binance)' : 'Mercado Pago (ARS)'}</p>
                 <p className="text-lg text-white font-bold mt-2">

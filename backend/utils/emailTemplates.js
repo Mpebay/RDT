@@ -1,4 +1,5 @@
 const REFERRAL_LINKS = {
+  vantage: "https://vigco.co/la-com-inv/9HsBqvVz",
   libertex: "https://go.libertex-affiliates.com/visit/?bta=64770&nci=22634"
 };
 
@@ -48,18 +49,18 @@ exports.approvalEmailTemplate = (name, plan, color, frontendUrl) => {
 };
 
 exports.pendingBrokerEmailTemplate = (name, brokerName, frontendUrl) => {
-  const brokerCapitalized = brokerName ? brokerName.charAt(0).toUpperCase() + brokerName.slice(1) : 'Libertex';
-  const brokerLink = REFERRAL_LINKS[brokerName] || REFERRAL_LINKS.libertex;
+  const brokerCapitalized = brokerName ? brokerName.charAt(0).toUpperCase() + brokerName.slice(1) : 'Vantage';
+  const brokerLink = REFERRAL_LINKS[brokerName] || REFERRAL_LINKS.vantage;
 
   const content = `
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hola <strong style="color: #ffffff;">${name || 'Trader'}</strong>,</p>
     <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">Hemos recibido tu pago de inscripción correctamente. ¡Bienvenido a este primer paso!</p>
     <div style="background-color: #ff5a0015; border-left: 4px solid #ff5a00; padding: 15px; margin-bottom: 25px;">
       <p style="color: #ffffff; font-size: 14px; margin: 0; line-height: 1.5;">
-        <strong>Paso final requerido:</strong> Como elegiste operar junto a nuestro bróker asociado, tu acceso a las aulas se activará una vez que crees y fondees tu cuenta en <strong>${brokerCapitalized}</strong> con un mínimo de <strong>$50 USD</strong> utilizando nuestro enlace oficial.
+        <strong>Paso final requerido:</strong> Tu acceso a las aulas se activará una vez que crees tu cuenta en el bróker <strong>${brokerCapitalized}</strong> utilizando nuestro enlace oficial de referido.
       </p>
     </div>
-    <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">1. Haz clic en el botón de abajo para crear y fondear tu cuenta en ${brokerCapitalized}.<br/>2. Luego ingresa a <a href="${frontendUrl}/dashboard" style="color: #ff5a00; text-decoration: underline;">tu panel de la academia</a> y envía tu ID de cuenta para que habilitemos tu acceso.</p>
+    <p style="color: #9ca3af; font-size: 15px; line-height: 1.6; margin-bottom: 20px;">1. Haz clic en el botón de abajo para crear tu cuenta en ${brokerCapitalized}.<br/>2. Luego ingresa a <a href="${frontendUrl}/dashboard" style="color: #ff5a00; text-decoration: underline;">tu panel de la academia</a> y envía tu ID de cuenta para que habilitemos tu acceso.</p>
   `;
   return baseHtml('¡Pago Recibido! Paso final ⏳', content, brokerLink, `Crear cuenta en ${brokerCapitalized}`);
 };
