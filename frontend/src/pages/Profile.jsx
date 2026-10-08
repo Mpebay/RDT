@@ -161,9 +161,10 @@ export default function Profile() {
             
             <div>
               <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold mb-1 block ml-1">Email Registrado</label>
-              <div className="bg-darkBg border border-white/5 rounded-xl px-4 py-3 text-gray-300 text-sm flex items-center shadow-inner cursor-not-allowed">
-                <Mail size={16} className="mr-3 text-gray-500" />
-                {profile.email}
+              {/* 🎯 SOLUCIÓN: Agregado overflow-hidden y truncate para evitar desbordes */}
+              <div className="bg-darkBg border border-white/5 rounded-xl px-4 py-3 text-gray-300 text-sm flex items-center shadow-inner cursor-not-allowed overflow-hidden">
+                <Mail size={16} className="mr-3 text-gray-500 shrink-0" />
+                <span className="truncate flex-1" title={profile.email}>{profile.email}</span>
               </div>
             </div>
 
