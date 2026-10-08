@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { UserCog } from 'lucide-react';
 import Home from './pages/Home';
@@ -11,6 +11,48 @@ import ResetPassword from './pages/ResetPassword';
 import Profile from './pages/Profile';
 import LandingPromo from './pages/LandingPromo';
 import BackgroundWaves from './components/BackgroundWaves';
+
+// 🎯 NUEVO COMPONENTE: Vigilante de inactividad (15 minutos)
+function AutoLogout() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let timeoutId;
+    const AUTO_LOGOUT_TIME = 120 * 60 * 1000; // 15 minutos en milisegundos
+
+    const logoutUser = () => {
+      const userInfo = localStorage.getItem('userInfo');
+      if (userInfo) {
+        localStorage.removeItem('userInfo');
+        localStorage.removeItem('token');
+        alert('Tu sesión ha expirado por inactividad. Por favor, vuelve a iniciar sesión para continuar.');
+        navigate('/login', { replace: true });
+        window.location.reload(); // Recarga para limpiar cualquier caché residual
+      }
+    };
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      // Solo inicializa el contador si hay una sesión activa
+      if (localStorage.getItem('userInfo')) {
+        timeoutId = setTimeout(logoutUser, AUTO_LOGOUT_TIME);
+      }
+    };
+
+    // Eventos que reinician el contador (movimiento de mouse, clics, teclado, scroll, táctil)
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'];
+
+    events.forEach(event => window.addEventListener(event, resetTimer));
+    resetTimer(); // Primera inicialización
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+    };
+  }, [navigate]);
+
+  return null; // Este componente no renderiza nada visual, corre en segundo plano
+}
 
 function WhatsAppButton() {
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -37,13 +79,11 @@ function Navbar() {
   const location = useLocation();
   const userInfo = JSON.parse(localStorage.getItem('userInfo'));
 
-  // 🎯 AQUÍ APLICAMOS EL BLOQUEO TANTO PARA /promo COMO PARA /register
   if (location.pathname === '/promo' || location.pathname === '/register') {
     return (
       <nav className="border-b border-white/10 bg-darkBg/80 backdrop-blur-md fixed w-full z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16">
-            {/* Logo centrado, NO clickeable */}
             <span className="text-2xl font-black italic tracking-tighter text-white cursor-default select-none">
               EL RINCÓN <span className="text-brandOrange text-sm uppercase tracking-widest font-bold">del trading</span>
             </span>
@@ -53,7 +93,6 @@ function Navbar() {
     );
   }
 
-  // 👇 Navbar normal para el resto del sitio 👇
   const logoutHandler = () => {
     localStorage.removeItem('userInfo');
     localStorage.removeItem('token'); 
@@ -131,6 +170,7 @@ function Navbar() {
 function App() {
   return (
     <Router>
+      <AutoLogout /> {/* 🎯 SE MONTA DENTRO DEL ROUTER PARA QUE TENGA ACCESO A LA REDIRECCIÓN */}
       <div className="min-h-screen bg-darkBg text-white font-sans relative overflow-hidden">
         <BackgroundWaves />
         <Navbar />
