@@ -6,7 +6,7 @@ const { welcomeEmailTemplate, pendingBrokerEmailTemplate } = require('../utils/e
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
 // 💱 CONFIGURACIÓN DE PRECIOS Y TASA DE CAMBIO
-const PRICE_USD = 50;
+const PRICE_USD = 75;
 const USD_TO_ARS_RATE = 1560; // Puedes actualizar este valor según la cotización actual
 
 exports.createPreference = async (req, res) => {

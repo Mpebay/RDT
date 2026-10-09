@@ -19,7 +19,7 @@ export default function Home() {
   }, []);
 
   const USD_TO_ARS_RATE = 1560; 
-  const basePriceUsd = 50;
+  const basePriceUsd = 75;
   const priceInArs = basePriceUsd * USD_TO_ARS_RATE;
 
   const planData = {
